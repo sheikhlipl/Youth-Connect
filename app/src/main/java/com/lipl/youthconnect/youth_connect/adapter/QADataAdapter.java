@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lipl.youthconnect.youth_connect.R;
@@ -82,6 +83,28 @@ public class QADataAdapter extends BaseAdapter {
             String username = dataList.get(position).getQuestion().getAskedBy();
             tvQusByUserName.setText(username);
         }
+
+        /*ImageView imgStatus = (ImageView) view.findViewById(R.id.imgStatus);
+        if(isFromForum){
+            imgStatus.setImageResource(R.drawable.ic_done_white);
+        } else if(isFromAnswered){
+            if(dataList != null && dataList.size() > 0 && dataList.get(position) != null
+                    && dataList.get(position).getAnswerList() != null
+                    && dataList.get(position).getAnswerList().get(0) != null
+                    && dataList.get(position).getAnswerList().get(0).getIs_uploaded() == 1){
+                imgStatus.setImageResource(R.drawable.ic_done_white);
+            } else{
+                imgStatus.setImageResource(R.drawable.ic_watch_later);
+            }
+        } else {
+            if(dataList != null && dataList.size() > 0 && dataList.get(position) != null
+                    && dataList.get(position).getQuestion() != null
+                    && dataList.get(position).getQuestion().getIs_uploaded() == 1){
+                imgStatus.setImageResource(R.drawable.ic_done_white);
+            } else{
+                imgStatus.setImageResource(R.drawable.ic_watch_later);
+            }
+        }*/
 
         view.setOnClickListener(new View.OnClickListener() {
 

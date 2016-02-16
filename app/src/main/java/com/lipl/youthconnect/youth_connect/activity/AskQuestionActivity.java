@@ -22,6 +22,8 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.pojo.Answer;
+import com.lipl.youthconnect.youth_connect.pojo.Comment;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
@@ -30,6 +32,7 @@ import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -126,14 +129,6 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
                     return;
                 }
 
-                String qa_id = "";
-                if(isEdit && questionAndAnswer != null){
-                    qa_id = questionAndAnswer.getQid()+"";
-                }
-
-                String qa_title = title;
-                String qa_description = description;
-
                 if(isEdit){
                     if(questionAndAnswer == null
                             || questionAndAnswer.getQuestion() == null
@@ -216,7 +211,9 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         map.put(DatabaseUtil.QA_ASKED_BY_USER_NAME, user_name);
         map.put(DatabaseUtil.QA_IS_ANSWERED, is_answered);
         map.put(DatabaseUtil.QA_IS_PUBLISHED, is_published);
-        map.put(DatabaseUtil.QA_ANSWER, null);
+        map.put(DatabaseUtil.QA_IS_UPLOADED, 0);
+        map.put(DatabaseUtil.QA_ANSWER, new ArrayList<Answer>());
+        map.put(DatabaseUtil.QA_COMMENT, new ArrayList<Comment>());
         try {
             // Save the properties to the document
             document.putProperties(map);

@@ -22,9 +22,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.pojo.Answer;
 import com.lipl.youthconnect.youth_connect.pojo.Comment;
@@ -49,13 +54,16 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PostCommentActivity extends ActionBarActivity implements View.OnClickListener {
 
     private static Toolbar mToolbar = null;
     private QuestionAndAnswer questionAndAnswer = null;
     private SwipeRefreshLayout swipe_refresh_layout;
+    private static final String TAG = "PostCommentActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +116,37 @@ public class PostCommentActivity extends ActionBarActivity implements View.OnCli
                     builder.show();
                 }
 
+                if (questionAndAnswer == null || questionAndAnswer.getQid() == null || questionAndAnswer.getQid().length() <= 0) {
+                    return;
+                }
+
+                String answerId = "";
+                if (questionAndAnswer != null && questionAndAnswer.getAnswerList() != null &&
+                        questionAndAnswer.getAnswerList().size() > 0) {
+                    answerId = questionAndAnswer.getAnswerList().get(0).getQa_answer_id() + "";
+                    if (answerId == null) {
+                        answerId = "";
+                    }
+                }
+
+                if (questionAndAnswer != null && questionAndAnswer.getQuestion() != null) {
+                    String questionAndAnswerID = questionAndAnswer.getQid();
+                    try {
+                        List<Comment> previousData = questionAndAnswer.getCommentList();
+                        String answer_by_user_name = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_NAME, "");
+                        if (questionAndAnswerID != null && questionAndAnswerID.trim().length() > 0) {
+                            updateDoc(DatabaseUtil.getDatabaseInstance(PostCommentActivity.this, Constants.YOUTH_CONNECT_DATABASE),
+                                    questionAndAnswerID, answer, answer_by_user_name, previousData);
+                        }
+                    } catch (CouchbaseLiteException exception) {
+                        Log.e(TAG, "onClick()", exception);
+                    } catch (IOException exception) {
+                        Log.e(TAG, "onClick()", exception);
+                    } catch (Exception exception) {
+                        Log.e(TAG, "onClick()", exception);
+                    }
+                }
+
                 break;
             case R.id.btnReset:
                 tvAnswer.setText("");
@@ -117,221 +156,75 @@ public class PostCommentActivity extends ActionBarActivity implements View.OnCli
         }
     }
 
-    private String getCurrentDateAndTime(){
-        String year = Util.getCurrentYear()+"";
-        String month = Util.getCurrentMonth()+"";
-        String day = Util.getCurrentDay()+"";
-        String hour = Util.geCurrentHour()+"";
-        String minute = Util.geCurrentMinute()+"";
-        String second = Util.geCurrentSecond()+"";
+    private void updateDoc(Database database, String documentId,
+                           String answer_desc, String answer_by_username, List<Comment> previousData){
+        Document document = database.getDocument(documentId);
+        try {
+            // Update the document with more data
 
-        if(second != null && second.trim().length() == 1){
-            second = "0" + second;
+            ArrayList<Comment> commentJson = createDocument(previousData, answer_desc, answer_by_username);
+            if(commentJson != null) {
+                Map<String, Object> updatedProperties = new HashMap<String, Object>();
+                updatedProperties.putAll(document.getProperties());
+                updatedProperties.put(DatabaseUtil.QA_COMMENT, commentJson);
+                // Save to the Couchbase local Couchbase Lite DB
+                document.putProperties(updatedProperties);
+            }
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e(TAG, "Error putting", e);
+        } catch(Exception exception){
+            Log.e(TAG, "updateDocument()", exception);
         }
-
-        // Format : 2015-12-12 12:12:12
-        String dateTime = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
-        Log.i("Date Time", dateTime);
-
-        return dateTime;
     }
 
-    private String getJsonObjectData(String commentDescription, String userId, String date){
+    private ArrayList<Comment> createDocument(List<Comment> commentList, String comment_desc, String answer_by_username){
+        if(commentList == null) {
+            commentList = new ArrayList<Comment>();
+        }
 
-        /*
-        *
-        * {"qa_answer_id":"","user_id":"1","comment_description":"dfg hdfjhgkh","comment_date":"2015-12-12 12:12:12"}
-        * */
+        Comment comment = new Comment(Parcel.obtain());
+        comment.setComment_description(comment_desc);
+        comment.setComment_by_user_name(answer_by_username);
+        String timestamp = System.currentTimeMillis()+"";
+        comment.setCreated(timestamp);
+        commentList.add(comment);
+        return new ArrayList<Comment>(commentList);
+
+
+        /*String jsonData = null;
+        List<Comment> answers = QAUtil.getCommentListFromJson(previousData);
 
         try {
             JSONArray array = new JSONArray();
+            String timestamp = System.currentTimeMillis()+"";
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("qa_comment_id", "");
-            jsonObject.put("user_id", userId);
-            jsonObject.put("comment_description", commentDescription);
-            jsonObject.put("comment_date", date);
+            jsonObject.put(DatabaseUtil.COMMENT_BY_USER_NAME, answer_by_username);
+            jsonObject.put(DatabaseUtil.COMMENT_CONTENT, comment_desc);
+            jsonObject.put(DatabaseUtil.COMMENT_TIMESTAMP, timestamp);
+            jsonObject.put(DatabaseUtil.COMMENT_IS_UPLOADED, 0);
             array.put(jsonObject);
+            if(answers != null && answers.size() > 0){
+                for(int i = 0; i < answers.size(); i++){
+                    Comment answer = answers.get(i);
+                    if(answer.getComment_by_user_name() != null
+                            && answer.getComment_description() != null
+                            && answer.getCreated() != null) {
+                        JSONObject jsonObject1 = new JSONObject();
+                        jsonObject1.put(DatabaseUtil.COMMENT_BY_USER_NAME, answer.getComment_by_user_name());
+                        jsonObject1.put(DatabaseUtil.COMMENT_CONTENT, answer.getComment_description());
+                        jsonObject1.put(DatabaseUtil.COMMENT_TIMESTAMP, answer.getCreated());
+                        jsonObject1.put(DatabaseUtil.COMMENT_IS_UPLOADED, answer.getIs_uploaded());
+                        array.put(jsonObject1);
+                    }
+                }
+            }
 
             return array.toString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
-    }
 
-    /**
-     * Async task to get sync camp table from server
-     * */
-    private class PostAnswerAsync extends AsyncTask<String, Void, Boolean> {
-
-        private static final String TAG = "PostAnswerAsync";
-        private ProgressDialog progressDialog = null;
-        private boolean isChangePassword = false;
-        private ActivityIndicator activityIndicator = ActivityIndicator.ctor(PostCommentActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            swipe_refresh_layout.setRefreshing(true);
-            Button btnPostComment = (Button) findViewById(R.id.btnPost);
-            btnPostComment.setEnabled(false);
-            btnPostComment.setClickable(false);
-
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(PostCommentActivity.this);
-            }
-            activityIndicator.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            String api_key = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_API_KEY, null);
-
-            if(api_key == null){
-                return null;
-            }
-
-            try {
-
-                String qa_id = params[0];
-                String _user_id = params[1];
-                String answerJson = params[2];
-
-                InputStream in = null;
-                int resCode = -1;
-
-                String link = Constants.BASE_URL+Constants.QUESTION_ASK_FORUM;
-                URL url = new URL(link);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setAllowUserInteraction(false);
-                conn.setInstanceFollowRedirects(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Authorization", api_key);
-
-                Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("data[Qa][qa_id]", qa_id)
-                        .appendQueryParameter("data[Qa][user_id]", _user_id)
-                        .appendQueryParameter("response", "mobile")
-                        .appendQueryParameter("data[QaAnswer]", "")
-                        .appendQueryParameter("data[QaComment]", answerJson);
-
-                String query = builder.build().getEncodedQuery();
-
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(query);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                conn.connect();
-                resCode = conn.getResponseCode();
-                if (resCode == HttpURLConnection.HTTP_OK) {
-                    in = conn.getInputStream();
-                }
-                if(in == null){
-                    return null;
-                }
-                BufferedReader reader =new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                String response = "",data="";
-
-                while ((data = reader.readLine()) != null){
-                    response += data + "\n";
-                }
-
-                Log.i(TAG, "Response : " + response);
-
-                /**
-                 * {
-                 {
-                 "message": "successfully inserted"
-                 }
-                 * */
-
-                if(response != null && response.length() > 0 && response.charAt(0) == '{'){
-                    JSONObject jsonObject = new JSONObject(response);
-                    if (jsonObject != null && jsonObject.isNull("Apikey") == false) {
-                        String changePasswordDoneFromWebMsg = jsonObject.optString("Apikey");
-                        if(changePasswordDoneFromWebMsg.equalsIgnoreCase("Api key does not exit")){
-                            isChangePassword = true;
-                            return null;
-                        }
-                    }
-                }
-
-                if(response != null && response.length() > 0){
-
-                    JSONObject res = new JSONObject(response);
-                    String message = res.optString("message");
-                    if(message != null && message.trim().length() > 0 && message.equalsIgnoreCase("successfully inserted")){
-                        return true;
-                    }
-                }
-            } catch(SocketTimeoutException exception){
-                Log.e(TAG, "GetFeedbackListAsync : doInBackground", exception);
-            } catch(ConnectException exception){
-                Log.e(TAG, "GetFeedbackListAsync : doInBackground", exception);
-            } catch(MalformedURLException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch (IOException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch(Exception exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            super.onPostExecute(isSuccess);
-
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(PostCommentActivity.this);
-            }
-            activityIndicator.dismiss();
-
-            if(isChangePassword){
-                AlertDialog.Builder builder = new AlertDialog.Builder(PostCommentActivity.this, R.style.AppCompatAlertDialogStyle);
-                builder.setTitle(getResources().getString(R.string.password_changed_title));
-                builder.setMessage(getResources().getString(R.string.password_changed_description));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        Intent intent = new Intent(PostCommentActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("Exit me", true);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                builder.show();
-
-                return;
-            }
-
-            swipe_refresh_layout.setRefreshing(false);
-            Button btnPostComment = (Button) findViewById(R.id.btnPost);
-            btnPostComment.setEnabled(true);
-            btnPostComment.setClickable(true);
-            String dialogMessage = null;
-            if(isSuccess){
-                dialogMessage = "Posted successfully.";
-                showAlertDialog(dialogMessage, "Post Comment", "Ok", true);
-            } else{
-                dialogMessage = "Sorry, failed to post your comment.\nPlease try again";
-                showAlertDialog(dialogMessage, "Post Comment", "Ok", false);
-            }
-
-        }
+        return jsonData;*/
     }
 
     /**
@@ -403,26 +296,5 @@ public class PostCommentActivity extends ActionBarActivity implements View.OnCli
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public static class PostCommentSuccessReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constants.POST_COMMENT_SUCCESS_ACTION)) {
-                changeUIForSuccessPost();
-            }
-
-            if (intent.getAction().equals(Constants.POST_COMMENT_FAILURE_ACTION)) {
-                changeUIForFailurePost();
-            }
-        }
-    }
-
-    private static void changeUIForSuccessPost(){
-
-    }
-
-    private static void changeUIForFailurePost(){
-
     }
 }

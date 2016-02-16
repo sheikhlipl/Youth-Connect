@@ -15,8 +15,17 @@ public class Answer implements Parcelable {
     private String post_date;
     private String created;
     private String modified;
+    private int is_uploaded;
     private User user;
     private String answer_by_user_name;
+
+    public int getIs_uploaded() {
+        return is_uploaded;
+    }
+
+    public void setIs_uploaded(int is_uploaded) {
+        this.is_uploaded = is_uploaded;
+    }
 
     public String getAnswer_by_user_name() {
         return answer_by_user_name;
@@ -124,6 +133,7 @@ public class Answer implements Parcelable {
         dest.writeString(modified);
         dest.writeParcelable(user, flags);
         dest.writeString(answer_by_user_name);
+        dest.writeInt(is_uploaded);
     }
 
     private void readFromParcel(Parcel in){
@@ -136,5 +146,6 @@ public class Answer implements Parcelable {
         modified = in.readString();
         user = in.readParcelable(User.class.getClassLoader());
         answer_by_user_name = in.readString();
+        is_uploaded = in.readInt();
     }
 }

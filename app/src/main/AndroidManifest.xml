@@ -137,16 +137,5 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-
-        <receiver
-            android:name=".activity.PostCommentActivity$PostCommentSuccessReceiver"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="com.post.action.sent.success" />
-                <action android:name="com.post.action.sent.failure" />
-            </intent-filter>
-        </receiver>
-
     </application>
-
 </manifest>

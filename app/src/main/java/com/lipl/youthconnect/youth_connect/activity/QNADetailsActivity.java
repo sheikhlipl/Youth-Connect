@@ -97,8 +97,8 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
             LinearLayout layoutAnswerList = (LinearLayout) findViewById(R.id.layoutAnswerList);
             //LinearLayout layoutCommentLsit = (LinearLayout) findViewById(R.id.layoutCommentLsit);
 
-            String answerJosn = questionAndAnswer.getAnswerJson();
-            List<Answer> answerList = QAUtil.getAnswerListFromJson(answerJosn);
+            //String answerJosn = questionAndAnswer.getAnswerJson();
+            List<Answer> answerList = questionAndAnswer.getAnswerList();
             if(answerList != null && answerList.size() > 0) {
                 for (int i = 0; i < answerList.size(); i++) {
                     if (answerList != null && answerList.size() > 0) {

@@ -20,13 +20,21 @@ public class DatabaseUtil {
     public static final String QA_DESC = "description";
     public static final String QA_UPDATED_TIMESTAMP = "updated_timestamp";
     public static final String QA_ANSWER = "answer";
+    public static final String QA_COMMENT = "comment";
     public static final String QA_ASKED_BY_USER_NAME = "asked_by_user_name";
     public static final String QA_IS_ANSWERED = "is_answered";
     public static final String QA_IS_PUBLISHED = "is_published";
+    public static final String QA_IS_UPLOADED = "is_uploaded";
 
     public static final String ANSWER_CONTENT = "answer_content";
     public static final String ANSWER_BY_USER_NAME = "answer_by_user_name";
     public static final String ANSWER_TIMESTAMP = "answer_timestamp";
+    public static final String ANSWER_IS_UPLOADED = "is_uploaded";
+
+    public static final String COMMENT_CONTENT = "answer_content";
+    public static final String COMMENT_BY_USER_NAME = "answer_by_user_name";
+    public static final String COMMENT_TIMESTAMP = "answer_timestamp";
+    public static final String COMMENT_IS_UPLOADED = "is_uploaded";
 
 
     public static Database getDatabaseInstance(Context context, String database_name) throws CouchbaseLiteException, IOException {

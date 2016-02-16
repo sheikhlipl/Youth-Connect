@@ -19,7 +19,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.pojo.Answer;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.pojo.Comment;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
@@ -57,12 +60,24 @@ public class CommentListActivity extends ActionBarActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle("Comments");
+
+        if(questionAndAnswer != null){
+            if(questionAndAnswer.getQuestion() != null) {
+                TextView tvQuestionTitle = (TextView) findViewById(R.id.tvQuestionTitle);
+                tvQuestionTitle.setText(questionAndAnswer.getQuestion().getQa_title());
+                TextView tvQuestionDescription = (TextView) findViewById(R.id.tvQuestionDescription);
+                tvQuestionDescription.setText(questionAndAnswer.getQuestion().getQa_description());
+            }
+        }
+
+        setCommentsToList();
     }
 
     private List<Comment> getPublishedCommentList(){
         List<Comment> publishedCommentList = new ArrayList<Comment>();
         if(questionAndAnswer != null){
-            List<Comment> cList = questionAndAnswer.getCommentList();
+            //String commentJson = questionAndAnswer.getCommentJson();
+            List<Comment> cList = questionAndAnswer.getCommentList(); //QAUtil.getCommentListFromJson(commentJson);
             if(cList != null) {
                 for (Comment comment : cList) {
                     if(comment != null && comment.getIs_published() != null
@@ -181,32 +196,14 @@ public class CommentListActivity extends ActionBarActivity {
                     tvCommentDesc.setText(commentList.get(i).getComment_description().trim());
 
                     TextView tvAnswerBy = (TextView) itemLayout.findViewById(R.id.tvAnswerBy);
-                    tvAnswerBy.setText(commentList.get(i).getUser_name());
+                    tvAnswerBy.setText(commentList.get(i).getComment_by_user_name());
 
-                    String dateTime = commentList.get(i).getComment_date();
                     try {
-                        if (dateTime != null && dateTime.length() > 0) {
-                            //Format 2015-12-24 11:16:44
-                            if (dateTime.contains(" ")) {
-                                String[] dt = dateTime.split(" ");
-                                String date = dt[0];
-                                String time = dt[1];
-
-                                if (date != null && date.length() > 0 && date.contains("-")) {
-                                    String[] dd = date.split("-");
-                                    String year = dd[0];
-                                    String month = dd[1];
-                                    String day = dd[2];
-
-                                    TextView tvAnswerDateTime = (TextView) itemLayout.findViewById(R.id.tvAnswerDateTime);
-                                    String _date_time = day + "-" + month + "-" + year + " " + time;
-                                    tvAnswerDateTime.setText(_date_time);
-                                }
-                            } else {
-                                TextView tvAnswerDateTime = (TextView) itemLayout.findViewById(R.id.tvAnswerDateTime);
-                                tvAnswerDateTime.setText(dateTime);
-                            }
-                        }
+                        String updated_time_stamp = (String) commentList.get(i).getCreated();
+                        Long timeStamp = Long.parseLong(updated_time_stamp);
+                        String dateTime = Util.getDateAndTimeFromTimeStamp(timeStamp);
+                        TextView tvAnswerDateTime = (TextView) itemLayout.findViewById(R.id.tvAnswerDateTime);
+                        tvAnswerDateTime.setText(dateTime);
                     } catch(Exception e){
                         Log.e("DataAdapter", "onBindViewHolder()", e);
                     }

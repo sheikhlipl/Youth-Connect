@@ -127,25 +127,10 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
                     return;
                 }
 
-                int userId = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
-                String _user_id_of_question_asked = "";
-                if (userId == 0) {
-                    return;
-                }
-
-                String answerId = "";
-                if (questionAndAnswer != null && questionAndAnswer.getAnswerList() != null &&
-                        questionAndAnswer.getAnswerList().size() > 0) {
-                    answerId = questionAndAnswer.getAnswerList().get(0).getQa_answer_id() + "";
-                    if (answerId == null) {
-                        answerId = "";
-                    }
-                }
-
                 if (questionAndAnswer != null && questionAndAnswer.getQuestion() != null) {
                     String questionAndAnswerID = questionAndAnswer.getQid();
                     try {
-                        String previousData = questionAndAnswer.getAnswerJson();
+                        List<Answer> previousData = questionAndAnswer.getAnswerList();
                         String answer_by_user_name = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_NAME, "");
                         if (questionAndAnswerID != null && questionAndAnswerID.trim().length() > 0) {
                             updateDoc(DatabaseUtil.getDatabaseInstance(PostAnswerActivity.this, Constants.YOUTH_CONNECT_DATABASE),
@@ -178,28 +163,13 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
         }
     }
 
-    private String getCurrentDateAndTime(){
-        String year = Util.getCurrentYear()+"";
-        String month = Util.getCurrentMonth()+"";
-        String day = Util.getCurrentDay()+"";
-        String hour = Util.geCurrentHour()+"";
-        String minute = Util.geCurrentMinute()+"";
-        String second = Util.geCurrentSecond()+"";
-
-        // Format : 2015-12-12 12:12:12
-        String dateTime = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
-        Log.i("Date Time", dateTime);
-
-        return dateTime;
-    }
-
     private void updateDoc(Database database, String documentId,
-                           String answer_desc, String answer_by_username, String previousData){
+                           String answer_desc, String answer_by_username, List<Answer> previousAnswerList){
         Document document = database.getDocument(documentId);
         try {
             // Update the document with more data
 
-            String answerDocument = createDocument(previousData, answer_desc, answer_by_username);
+            List<Answer> answerDocument = createDocument(previousAnswerList, answer_desc, answer_by_username);
             if(answerDocument != null) {
                 Map<String, Object> updatedProperties = new HashMap<String, Object>();
                 updatedProperties.putAll(document.getProperties());
@@ -215,11 +185,21 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
         }
     }
 
-    private String createDocument(String previousData, String answer_desc, String answer_by_username){
+    private ArrayList<Answer> createDocument(List<Answer> answerList, String answer_desc, String answer_by_username){
         // Create a new document and add data
 
-        String jsonData = null;
+        if(answerList == null) {
+            answerList = new ArrayList<Answer>();
+        }
 
+        Answer answer = new Answer(Parcel.obtain());
+        answer.setQadmin_description(answer_desc);
+        answer.setAnswer_by_user_name(answer_by_username);
+        String timestamp = System.currentTimeMillis()+"";
+        answer.setCreated(timestamp);
+        answerList.add(answer);
+
+        /*String jsonData = null;
         List<Answer> answers = QAUtil.getAnswerListFromJson(previousData);
 
         try {
@@ -229,6 +209,7 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
             jsonObject.put(DatabaseUtil.ANSWER_BY_USER_NAME, answer_by_username);
             jsonObject.put(DatabaseUtil.ANSWER_CONTENT, answer_desc);
             jsonObject.put(DatabaseUtil.ANSWER_TIMESTAMP, timestamp);
+            jsonObject.put(DatabaseUtil.ANSWER_IS_UPLOADED, 0);
             array.put(jsonObject);
             if(answers != null && answers.size() > 0){
                 for(int i = 0; i < answers.size(); i++){
@@ -240,40 +221,12 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
                         jsonObject1.put(DatabaseUtil.ANSWER_BY_USER_NAME, answer.getAnswer_by_user_name());
                         jsonObject1.put(DatabaseUtil.ANSWER_CONTENT, answer.getQadmin_description());
                         jsonObject1.put(DatabaseUtil.ANSWER_TIMESTAMP, answer.getCreated());
+                        jsonObject1.put(DatabaseUtil.ANSWER_IS_UPLOADED, answer.getIs_uploaded());
                         array.put(jsonObject1);
                     }
                 }
-            }
-
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return jsonData;
-    }
-
-    private String getJsonObjectData(String answer, String userId, String date, String answerId){
-
-        /*
-        *
-        * {"qa_answer_id":"","user_id":"1","qadmin_description":"dfg hdfjhgkh","post_date":"2015-12-12 12:12:12"}
-        * */
-
-        try {
-            JSONArray array = new JSONArray();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("qa_answer_id", answerId);
-            jsonObject.put("user_id", userId);
-            jsonObject.put("qadmin_description", answer);
-            jsonObject.put("post_date", date);
-            array.put(jsonObject);
-
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+            }*/
+        return new ArrayList<Answer>(answerList);
     }
 
     /**
@@ -298,29 +251,6 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
             }
         }
         return super.dispatchTouchEvent(ev);
-    }
-
-    /**
-     * To Show Material Alert Dialog
-     *
-     * @param message
-     * @param title
-     * */
-    private void showAlertDialog(String message, String title, String positiveButtonText, final boolean isSuccess){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                if (isSuccess) {
-                    finish();
-                }
-            }
-        });
-        builder.show();
     }
 
     @Override

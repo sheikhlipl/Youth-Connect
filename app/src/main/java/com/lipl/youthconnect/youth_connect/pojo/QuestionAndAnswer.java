@@ -15,12 +15,21 @@ public class QuestionAndAnswer implements Parcelable {
     private String qid;
     private Question question;
     private User user;
-    private List<Answer> answerList;
-    private List<Comment> commentList;
+    private ArrayList<Answer> answerList;
+    private ArrayList<Comment> commentList;
     private int question_by_user_id;
     private int is_uploaded;
     private int is_id_generated_for_offline;
     private String answerJson;
+    private String commentJson;
+
+    public String getCommentJson() {
+        return commentJson;
+    }
+
+    public void setCommentJson(String commentJson) {
+        this.commentJson = commentJson;
+    }
 
     public String getAnswerJson() {
         return answerJson;
@@ -82,7 +91,7 @@ public class QuestionAndAnswer implements Parcelable {
         return answerList;
     }
 
-    public void setAnswerList(List<Answer> answerList) {
+    public void setAnswerList(ArrayList<Answer> answerList) {
         this.answerList = answerList;
     }
 
@@ -90,7 +99,7 @@ public class QuestionAndAnswer implements Parcelable {
         return commentList;
     }
 
-    public void setCommentList(List<Comment> commentList) {
+    public void setCommentList(ArrayList<Comment> commentList) {
         this.commentList = commentList;
     }
 
@@ -128,6 +137,7 @@ public class QuestionAndAnswer implements Parcelable {
         dest.writeInt(is_uploaded);
         dest.writeInt(is_id_generated_for_offline);
         dest.writeString(answerJson);
+        dest.writeString(commentJson);
     }
 
     private void readFromParcel(Parcel in){
@@ -148,5 +158,6 @@ public class QuestionAndAnswer implements Parcelable {
         is_uploaded = in.readInt();
         is_id_generated_for_offline = in.readInt();
         answerJson = in.readString();
+        commentJson = in.readString();
     }
 }

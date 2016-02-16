@@ -16,8 +16,17 @@ public class Comment implements Parcelable {
     private String comment_date;
     private String created;
     private String modified;
-    private int is_uploaded;
     public String is_published;
+    private String comment_by_user_name;
+    private int is_uploaded;
+
+    public String getComment_by_user_name() {
+        return comment_by_user_name;
+    }
+
+    public void setComment_by_user_name(String comment_by_user_name) {
+        this.comment_by_user_name = comment_by_user_name;
+    }
 
     public String getIs_published() {
         return is_published;
@@ -135,6 +144,8 @@ public class Comment implements Parcelable {
         dest.writeString(user_name);
         dest.writeInt(is_uploaded);
         dest.writeString(is_published);
+        dest.writeInt(is_uploaded);
+        dest.writeString(comment_by_user_name);
     }
 
     private void readFromParcel(Parcel in){
@@ -148,5 +159,7 @@ public class Comment implements Parcelable {
         user_name = in.readString();
         is_uploaded = in.readInt();
         is_published = in.readString();
+        is_uploaded = in.readInt();
+        comment_by_user_name = in.readString();
     }
 }

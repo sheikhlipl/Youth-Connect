@@ -1,7 +1,9 @@
 package com.lipl.youthconnect.youth_connect.fragment;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcel;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +27,7 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.activity.MainActivity;
+import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.QAUtil;
@@ -165,24 +168,64 @@ public class ForumFragment extends Fragment implements
             }
         });
 
-        try {
-            if(getQAList() != null && getQAList().size() > 0) {
-                if(mListItems == null){
-                    mListItems = new LinkedList<QuestionAndAnswer>();
+        final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
+            ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                if (isCancelled() == false && isVisible() == true
+                        && getActivity() != null && activityIndicator != null) {
+                    activityIndicator.show();
                 }
-                mListItems.addAll(getQAList());
-                adapter = new QADataAdapter(mListItems, getActivity(),true, false);
-                listView.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
             }
 
-        } catch(CouchbaseLiteException exception){
-            Log.e(TAG, "onViewCreated()", exception);
-        } catch(IOException exception){
-            Log.e(TAG, "onViewCreated()", exception);
-        } catch(Exception exception){
-            Log.e(TAG, "onViewCreated()", exception);
-        }
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    questionAndAnswerList = getQAList();
+                } catch (CouchbaseLiteException exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
+                } catch (IOException exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
+                } catch (Exception exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
+                } catch (OutOfMemoryError outOfMemoryError) {
+                    Log.e(TAG, "onViewCreated()", outOfMemoryError);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if (isCancelled() == false && isVisible() == true
+                        && getActivity() != null && activityIndicator != null) {
+                    activityIndicator.dismiss();
+                }
+                try {
+                    if (questionAndAnswerList != null && questionAndAnswerList.size() > 0) {
+                        if (mListItems == null) {
+                            mListItems = new LinkedList<QuestionAndAnswer>();
+                        }
+                        mListItems.addAll(questionAndAnswerList);
+                        adapter = new QADataAdapter(mListItems, getActivity(), true, false);
+                        listView.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+                    }
+                } catch (Exception exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
+                }
+            }
+        };
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                asyncTask.execute();
+            }
+        }, 2000);
 
     }
 

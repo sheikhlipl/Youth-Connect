@@ -18,6 +18,15 @@ public class Question implements Parcelable {
     private String created;
     private String modified;
     private String askedBy;
+    private int is_uploaded;
+
+    public int getIs_uploaded() {
+        return is_uploaded;
+    }
+
+    public void setIs_uploaded(int is_uploaded) {
+        this.is_uploaded = is_uploaded;
+    }
 
     public String getAskedBy() {
         return askedBy;
@@ -134,6 +143,7 @@ public class Question implements Parcelable {
         dest.writeString(created);
         dest.writeString(modified);
         dest.writeString(askedBy);
+        dest.writeInt(is_uploaded);
     }
 
     private void readFromParcel(Parcel in){
@@ -147,5 +157,6 @@ public class Question implements Parcelable {
         created = in.readString();
         modified = in.readString();
         askedBy = in.readString();
+        is_uploaded = in.readInt();
     }
 }
