@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/transparent_blue_square"
+    android:layout_marginBottom="12dp">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/layoutQusImg">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layoutDateTime"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:background="@color/colorPrimaryDark">
+
+            <TextView
+                android:id="@+id/tvNumberOfDocuments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:text="0"
+                android:layout_centerVertical="true"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/imgComment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_insert_drive_file"
+                android:adjustViewBounds="true"
+                android:layout_margin="12dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/tvNumberOfDocuments"
+                android:scaleType="fitCenter"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/imgComment"
+                android:id="@+id/layoutCard">
+                <TextView
+                    android:id="@+id/tvFileTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="File Title"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvFileTitle"
+                    android:layout_margin="5dp"
+                    android:text="Created By"
+                    android:gravity="left"
+                    android:textColor="@color/white"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvUserName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvFileTitle"
+                    android:layout_margin="5dp"
+                    android:text="User Name"
+                    android:layout_toRightOf="@+id/tvTime"
+                    android:textColor="@color/white"
+                    android:textSize="12sp" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

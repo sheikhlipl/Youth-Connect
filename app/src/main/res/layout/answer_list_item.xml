@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:layout_marginBottom="12dp"
+    android:id="@+id/layoutDonorItem">
+
+    <TextView
+        android:id="@+id/tvAnswerContent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:text="Blood Bank"
+        android:textColor="@color/textColorPrimary"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+</RelativeLayout>

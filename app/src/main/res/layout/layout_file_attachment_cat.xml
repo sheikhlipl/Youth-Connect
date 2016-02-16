@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <io.codetail.widget.RevealFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/reveal_items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/color_white_half_transparent">
+
+            <!-- Row 1  -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp">
+
+                <!-- Gallery -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:id="@+id/imgGallery"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:padding="14dp"
+                        android:src="@drawable/ic_photo_white"
+                        android:background="@drawable/circle_purple_for_gallery_icon_bg" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Gallery" />
+                </LinearLayout>
+
+                <!-- Photo -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:id="@+id/imgPhoto"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:padding="14dp"
+                        android:src="@drawable/ic_action_camera"
+                        android:background="@drawable/circle_purple_for_photo_icon_bg" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Photo" />
+                </LinearLayout>
+
+                <!-- Video -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:id="@+id/imgVideo"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:padding="14dp"
+                        android:src="@drawable/ic_videocam_white"
+                        android:background="@drawable/circle_purple_for_video_icon_bg" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Video" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Row 2  -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <!-- Audio -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:id="@+id/imgAudio"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:padding="14dp"
+                        android:src="@drawable/ic_music_video"
+                        android:background="@drawable/circle_purple_for_audio_icon_bg" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Audio" />
+                </LinearLayout>
+
+                <!-- Document -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:id="@+id/imgDoc"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:padding="14dp"
+                        android:src="@drawable/ic_insert_drive_file"
+                        android:background="@drawable/circle_purple_for_doc_icon_bg" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Document" />
+                </LinearLayout>
+
+                <!-- Record -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <ImageView
+                        android:id="@+id/imgMicrophone"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:padding="14dp"
+                        android:src="@drawable/ic_mic_white"
+                        android:background="@drawable/circle_purple_for_record_icon_bg" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Record" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+    </io.codetail.widget.RevealFrameLayout>
+
+</LinearLayout>

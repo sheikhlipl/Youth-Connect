@@ -1,0 +1,29 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.luminousinfoways.rtimissystem.testingapp.UITestActivity">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_feedback"
+            android:icon="@drawable/ic_feedback"
+            android:title="Feedback"/>
+        <item
+            android:id="@+id/action_file"
+            android:icon="@drawable/ic_file"
+            android:title="Documentation"/>
+        <item
+            android:id="@+id/action_settings"
+            android:checked="true"
+            android:icon="@drawable/ic_settings"
+            android:title="Settings"/>
+    </group>
+
+    <item android:title="Account">
+        <menu>
+            <item android:title="Logout"
+                android:id="@+id/action_logout"
+                android:icon="@drawable/ic_logout"/>
+        </menu>
+    </item>
+</menu>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:gravity="center"
+    android:id="@+id/layoutParent"
+    android:layout_marginBottom="@dimen/activity_vertical_margin">
+    
+    <RelativeLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/activity_vertical_margin">
+        
+       <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/submitsts"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:textColor="@color/textColorPrimary"
+            android:gravity="center"
+            android:padding="2dp"
+            android:textSize="12sp" />
+        
+        <LinearLayout 
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:orientation="vertical"
+	       android:layout_alignParentLeft="true">
+	       
+             <TextView
+                 android:id="@+id/tvReportTitle"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:textStyle="bold"
+                 android:textColor="@color/textColorPrimary"
+                 android:textAppearance="?android:attr/textAppearanceMedium"/>
+            
+            <TextView
+                android:id="@+id/tvReportType"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:textColor="@color/textColorPrimary"
+               android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+           <TextView
+			       android:id="@+id/tvReportCreatedBy"
+			       android:layout_width="wrap_content"
+			       android:layout_height="wrap_content"
+               android:textColor="@color/textColorPrimary"
+			       android:textStyle="italic"
+			       android:textAppearance="?android:attr/textAppearanceSmall"
+			       android:paddingRight="10dp"/>
+               
+                <TextView
+			       android:id="@+id/tvReportCreatedOn"
+			       android:layout_width="wrap_content"
+			       android:layout_height="wrap_content"
+                    android:textColor="@color/textColorPrimary"
+			       android:textAppearance="?android:attr/textAppearanceSmall"/>
+                </LinearLayout>
+        
+         <ImageView
+	       android:id="@+id/imgNext"
+	       android:layout_width="20dp"
+	       android:layout_height="20dp"
+             android:background="@drawable/circle_white"
+             android:padding="5dp"
+	       android:src="@drawable/ic_action_next_item"
+	       android:adjustViewBounds="true"
+	       android:scaleType="fitCenter"
+	       android:layout_alignParentRight="true"
+	       android:layout_centerVertical="true"/> 	       
+        
+    </RelativeLayout>
+    
+</LinearLayout>

@@ -1,0 +1,123 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.luminousinfoways.sportsnyouth.sportsyouth.activity.FileUploadDistrictActivity">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/coordinatorLayout">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:layout_margin="12dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="Maximum 3 files can be uploaded up to 4MB."-->
+                    <!--android:textColor="@color/textColorPrimary"-->
+                    <!--android:textStyle="bold"-->
+                    <!--android:layout_margin="12dp"-->
+                    <!--android:textAppearance="?android:textAppearanceLarge"-->
+                    <!--android:layout_centerHorizontal="true"-->
+                    <!--android:id="@+id/tvHint"/>-->
+
+                <!--
+                    android:layout_below="@+id/tvHint"-->
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Document/Events Title"
+                    android:textColorHint="@android:color/white"
+                    android:textColor="@android:color/white"
+                    android:id="@+id/eventTitle"
+                    android:singleLine="true"
+                    app:met_floatingLabelTextColor="@android:color/white"
+                    app:met_floatingLabel="highlight"
+                    app:met_errorColor="@color/red"
+                    app:met_typeface="font/roboto_light.ttf"
+                    app:met_iconPadding="0dp"
+                    android:inputType="text"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="12dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"/>
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Provide Document/Events Purpose"
+                    android:textColorHint="@android:color/white"
+                    android:textColor="@android:color/white"
+                    android:id="@+id/eventPurpose"
+                    android:singleLine="true"
+                    android:layout_below="@+id/eventTitle"
+                    app:met_floatingLabelTextColor="@android:color/white"
+                    app:met_floatingLabel="highlight"
+                    app:met_errorColor="@color/red"
+                    app:met_typeface="font/roboto_light.ttf"
+                    app:met_iconPadding="0dp"
+                    android:inputType="text"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"/>
+
+                <LinearLayout
+                    android:id="@+id/layoutFileDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/eventPurpose"
+                    android:orientation="vertical"/>
+
+                <LinearLayout
+                    android:id="@+id/layoutFileListToUpload"
+                    android:layout_below="@+id/layoutFileDetails"
+                    android:layout_above="@+id/layoutCircles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+
+            </RelativeLayout>
+        </ScrollView>
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fab"
+            android:layout_gravity="bottom|right"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:src="@drawable/ic_trending"
+            app:backgroundTint="@color/fab_icon_color"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

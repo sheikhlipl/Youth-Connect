@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/layoutParent"
+    android:background="@drawable/app_background"
+    tools:context="com.luminousinfoways.sportsnyouth.sportsyouth.activity.LoginActivity">
+
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="12dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/layoutLogin"
+        android:src="@drawable/logo"/>
+
+    <LinearLayout
+        android:id="@+id/layoutLogin"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:background="@color/white"
+        android:layout_margin="24dp"
+        android:orientation="vertical"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_horizontal"
+            android:text="@string/app_name"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/white"
+            android:layout_marginBottom="20dp"
+            android:padding="16dp"
+            android:textSize="24dp" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center_horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="Provide username and password!"
+            android:textColor="#9d9d9d"
+            android:textSize="16dp" />
+
+        <!--<android.support.design.widget.TextInputLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginLeft="40dp"-->
+            <!--android:layout_marginRight="40dp"-->
+            <!--android:paddingLeft="10dp"-->
+            <!--android:paddingRight="10dp"-->
+            <!--android:gravity="center_horizontal">-->
+
+            <!--<EditText-->
+                <!--android:id="@+id/email"-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:background="@android:color/white"-->
+                <!--android:hint="Your userFullName id"-->
+                <!--android:inputType="textEmailAddress"-->
+                <!--android:textColor="#444444"-->
+                <!--android:textColorHint="#888888"-->
+                <!--android:textSize="18dp" />-->
+
+            <com.rengwuxian.materialedittext.MaterialEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="User Name"
+                android:id="@+id/email"
+                android:singleLine="true"
+                app:met_floatingLabelTextColor="@android:color/black"
+                app:met_iconLeft="@drawable/ic_person"
+                app:met_floatingLabel="highlight"
+                app:met_errorColor="@color/red"
+                app:met_typeface="font/roboto_light.ttf"
+                app:met_iconPadding="0dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
+
+    <!--</android.support.design.widget.TextInputLayout>-->
+
+        <!--<android.support.design.widget.TextInputLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:gravity="center_horizontal"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="40dp"-->
+            <!--android:layout_marginRight="40dp"-->
+            <!--android:paddingLeft="10dp"-->
+            <!--android:paddingRight="10dp">-->
+
+            <!--<EditText-->
+                <!--android:id="@+id/password"-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:background="@android:color/white"-->
+                <!--android:hint="Your password"-->
+                <!--android:inputType="textPassword"-->
+                <!--android:textColor="#444444"-->
+                <!--android:textColorHint="#888888"-->
+                <!--android:textSize="18dp" />-->
+
+            <com.rengwuxian.materialedittext.MaterialEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:id="@+id/password"
+                android:singleLine="true"
+                app:met_floatingLabelTextColor="@android:color/black"
+                app:met_iconLeft="@drawable/ic_lock"
+                app:met_floatingLabel="highlight"
+                app:met_errorColor="@color/red"
+                app:met_typeface="font/roboto_light.ttf"
+                app:met_iconPadding="0dp"
+                android:inputType="textPassword"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
+
+    <!--</android.support.design.widget.TextInputLayout>-->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/button_selector"
+                android:text="Login"
+                android:textColor="@color/login_text_color" />
+
+            <Button
+                android:id="@+id/btnReset"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/button_selector"
+                android:text="Reset"
+                android:textColor="@color/login_text_color" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layoutLogin"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"/>
+
+    <!--<TextView-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:fontFamily="sans-serif-light"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:gravity="center"-->
+        <!--android:text="Set up is initializing..."-->
+        <!--android:textColor="@color/white"-->
+        <!--android:layout_marginBottom="20dp"-->
+        <!--android:padding="16dp"-->
+        <!--android:textSize="?android:textAppearanceLarge" />-->
+
+</RelativeLayout>

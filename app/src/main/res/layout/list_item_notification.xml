@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Text"
+        android:minLines="2"
+        android:layout_toLeftOf="@+id/imgNewRelease"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:textColor="@color/textColorPrimary"
+        android:layout_marginLeft="12dp"
+        android:layout_centerVertical="true"/>
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Text"
+        android:layout_below="@+id/imgNewRelease"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="12dp"
+        android:textAppearance="?android:textAppearanceSmall"
+        android:textColor="@color/secondary_text_color"/>
+
+    <!--<ImageView-->
+        <!--android:id="@+id/imgNewRelease"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:src="@drawable/ic_new_releases"-->
+        <!--android:padding="3dp"-->
+        <!--android:adjustViewBounds="true"-->
+        <!--android:background="@drawable/circle_blue"-->
+        <!--android:scaleType="fitCenter"-->
+        <!--android:layout_margin="12dp"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_centerVertical="true"/>-->
+
+</RelativeLayout>

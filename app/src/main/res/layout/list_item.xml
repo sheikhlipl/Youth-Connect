@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/layoutDonorItem">
+
+    <RelativeLayout
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:background="@color/red"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:visibility="gone"
+        android:id="@+id/audio_object_deleteview">
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_action_edit"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:id="@+id/mainLayout">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/layoutImg">
+
+        <TextView
+            android:id="@+id/tvDonorName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="Blood Bank"
+            android:textColor="@color/textColorPrimary"
+            android:textAppearance="?android:textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/tvDonorBloodGroup"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvDonorName"
+            android:layout_toRightOf="@+id/imgDonor"
+            android:fontFamily="sans-serif-light"
+            android:text="Blood Bank"
+            android:textColor="@color/secondary_text_color"
+            android:textAppearance="?android:textAppearanceMedium" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/layoutImg">
+
+        <com.luminousinfoways.sportsnyouth.sportsyouth.activity.Util.RoundedImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/imgDonor"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"/>
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerInParent="true"
+            android:id="@+id/progressBar"/>
+
+    </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

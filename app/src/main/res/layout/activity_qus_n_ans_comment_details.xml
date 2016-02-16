@@ -1,0 +1,113 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.luminousinfoways.sportsnyouth.sportsyouth.activity.FeedbackActivity">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/coordinatorLayout">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_marginBottom="?attr/actionBarSize">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/tvQuestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="Question Title"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:padding="12dp"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvQuestionTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvQuestion"
+                    android:layout_margin="5dp"
+                    android:paddingLeft="12dp"
+                    android:text="Question Title"
+                    android:textColor="@color/textColorPrimary"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvQuestionDesc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:padding="12dp"
+                    android:layout_below="@+id/tvQuestionTitle"
+                    android:text="Question Description"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvQuestionDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:paddingLeft="12dp"
+                    android:layout_below="@+id/tvQuestionDesc"
+                    android:text="Question Description"
+                    android:textColor="@color/textColorPrimary"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvCommentsTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="Comments"
+                    android:layout_below="@+id/tvQuestionDescription"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:padding="12dp"
+                    android:textSize="18sp" />
+
+                <LinearLayout
+                    android:id="@+id/layoutCommentLsit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:layout_below="@+id/tvCommentsTitle"/>
+
+            </RelativeLayout>
+        </ScrollView>
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>

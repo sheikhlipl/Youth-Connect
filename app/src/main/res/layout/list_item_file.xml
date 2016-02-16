@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingRight="12dp"
+    android:paddingLeft="12dp"
+    android:paddingBottom="12dp">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/layoutImage">
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_file_download"
+            android:id="@+id/imgFileDownload"
+            android:padding="12dp"
+            android:layout_centerInParent="true"
+            android:background="@color/blue"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:layout_centerInParent="true"/>
+
+        <!--<com.github.zeng1990java.widget.WaveProgressView-->
+            <!--android:id="@+id/wave_progress_view"-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="60dp"-->
+            <!--android:visibility="gone"-->
+            <!--android:layout_centerInParent="true"/>-->
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tvFileTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/layoutImage"
+        android:layout_marginLeft="12dp"
+        android:textColor="@color/textColorPrimary"
+        android:layout_centerVertical="true"
+        android:text="File Name"/>
+
+</RelativeLayout>

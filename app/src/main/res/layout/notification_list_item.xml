@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:elevation="@dimen/card_elevation"
+    android:background="@android:color/transparent">
+
+    <TextView
+        android:id="@+id/tvQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:paddingLeft="12dp"
+        android:textColor="@color/textColorPrimary"
+        android:layout_toLeftOf="@+id/imgNewRelease"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"/>
+
+    <LinearLayout
+        android:id="@+id/divider"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/light_gray"/>
+
+    <ImageView
+        android:id="@+id/imgNewRelease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_new_releases"
+        android:padding="3dp"
+        android:visibility="invisible"
+        android:adjustViewBounds="true"
+        android:background="@drawable/circle_blue"
+        android:scaleType="fitCenter"
+        android:layout_marginRight="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"/>
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:paddingLeft="12dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginRight="6dp"
+        android:textColor="@color/secondary_text_color"
+        android:layout_toLeftOf="@+id/imgNewRelease"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"/>
+</RelativeLayout>

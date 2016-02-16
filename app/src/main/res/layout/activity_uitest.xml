@@ -1,0 +1,70 @@
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/coordinatorLayout">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <SearchView
+            android:id="@+id/searchView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"/>
+
+        <EditText
+            android:id="@+id/etPostQuestion"
+            android:layout_below="@+id/searchView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:background="@drawable/white_square"
+            android:layout_margin="@dimen/help_post_question_edittext_margin"
+            android:padding="@dimen/help_post_question_edittext_margin"
+            android:hint="Post Question Title" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnAsk"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/etPostQuestion"
+            android:text="Ask"/>
+
+        <TextView
+            android:id="@+id/tvNoRecordFoundText"
+            android:layout_below="@+id/btnAsk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@android:color/black"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textStyle="bold"
+            android:layout_marginLeft="@dimen/help_post_q_and_a_margin_left"
+            android:layout_marginBottom="@dimen/help_post_q_and_a_margin_left"
+            android:text="Q &amp; A" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/qnaList"
+            android:layout_below="@+id/tvNoRecordFoundText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/fab"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        app:backgroundTint="@color/fab_icon_color"
+        android:src="@drawable/ic_menu"/>
+
+</android.support.design.widget.CoordinatorLayout>

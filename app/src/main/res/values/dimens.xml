@@ -2,5 +2,60 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="tabsHeight">48dp</dimen>
+    <dimen name="profile_pic">250dp</dimen>
+    <dimen name="profile_pic_in_list_item">60dp</dimen>
+
+    <dimen name="spacing_xsmall">2dp</dimen>
+    <dimen name="spacing_medium">8dp</dimen>
+    <dimen name="spacing_large">16dp</dimen>
+    <dimen name="spacing_xlarge">32dp</dimen>
+
+    <dimen name="elevation_low">9dp</dimen>
+    <dimen name="elevation_high">12dp</dimen>
+    <dimen name="status_bar_height">25dp</dimen>
+
+    <dimen name="dividerHeight">1dp</dimen>
+    <dimen name="splash_bottom_text_margin_bottom">12dp</dimen>
+
+    <dimen name="card_elevation">5dp</dimen>
+    <dimen name="submit_status_circle_elevation">5dp</dimen>
+    <dimen name="text_elevation">5dp</dimen>
+
+    <dimen name="showcase_item_card_margin">12dp</dimen>
+    <dimen name="showcase_item_card_padding">12dp</dimen>
+    <dimen name="showcase_item_delete_image_width_height">30dp</dimen>
+    <dimen name="showcase_item_share_image_width_height">30dp</dimen>
+    <dimen name="showcase_item_delete_image_margin_left">36dp</dimen>
+    
+    <dimen name="dashboard_nodal_officer_count_text_padding">30dp</dimen>
+    <dimen name="dashboard_nodal_officer_title_text_margin">12dp</dimen>
+    <dimen name="dashboard_count_text_layout_margin">20dp</dimen>
+
+    <dimen name="dashboard_count_text_width_height">100dp</dimen>
+    <dimen name="dashboard_spinner_margin_top_and_bottom">20dp</dimen>
+
+    <dimen name="settings_profile_name_margin_left">20dp</dimen>
+    <dimen name="settings_top_layout_profile_details_margin">12dp</dimen>
+    <dimen name="settings_change_password_layout_margin">12dp</dimen>
+
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="help_post_question_edittext_margin">12dp</dimen>
+    <dimen name="help_post_q_and_a_margin_left">12dp</dimen>
+
+    <dimen name="feedback_send_select_all_layout_margin">12dp</dimen>
+    <dimen name="feedback_send_count_margin_left_right">8dp</dimen>
+    <dimen name="view_feedback_list_margin_top">12dp</dimen>
+
+    <dimen name="dashboard_each_count_width_height">50dp</dimen>
+    <dimen name="dashboard_each_count_padding">20dp</dimen>
+    <dimen name="dashboard_count_padding_left">20dp</dimen>
+    <dimen name="dashboard_count_icon_margin">25dp</dimen>
+    <dimen name="dashboard_analytics_title_margin">12dp</dimen>
+    <dimen name="dashboard_count_margin">12dp</dimen>
+
+    <dimen name="red_circle_width_height">22dp</dimen>
+
+    <dimen name="dashboard_icon_circle_width_height">10dp</dimen>
 </resources>

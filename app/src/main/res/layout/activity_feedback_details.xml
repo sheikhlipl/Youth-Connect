@@ -1,0 +1,66 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:id="@+id/layoutParent"
+    tools:context="com.luminousinfoways.sportsnyouth.sportsyouth.activity.ReportFromDetailsActivity">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/coordinatorLayout">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/mainLayout"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:padding="@dimen/activity_vertical_margin">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_above="@+id/layoutNextReset"
+                android:background="@color/black_translucent"
+                android:id="@+id/scrollview">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/layoutFormParent"
+                    android:padding="@dimen/activity_vertical_margin"
+                    android:orientation="vertical"/>
+            </ScrollView>
+
+            <include
+                layout="@layout/next_reset_layout"
+                android:id="@+id/layoutNextReset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_alignParentBottom="true"/>
+
+        </RelativeLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>

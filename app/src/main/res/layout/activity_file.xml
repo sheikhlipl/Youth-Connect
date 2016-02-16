@@ -1,0 +1,93 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.luminousinfoways.sportsnyouth.sportsyouth.activity.FileActivity">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/coordinatorLayout">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <SearchView
+                android:id="@+id/searchView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"/>
+
+                <ProgressBar
+                    android:id="@+id/pBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"/>
+
+                <!--<android.support.v7.widget.RecyclerView-->
+                    <!--android:id="@+id/qnaList"-->
+                    <!--android:layout_below="@+id/searchView1"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_marginTop="12dp"-->
+                    <!--android:padding="12dp"/>-->
+
+                <com.lipl.youthconnect.youth_connect.util.PullAndLoadListView
+                    android:id="@+id/qnaList"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_marginTop="12dp"
+                    android:layout_below="@+id/searchView1"
+                    android:padding="12dp"
+                    android:divider="@android:color/transparent"
+                    android:dividerHeight="4dp"/>
+
+            <TextView
+                android:id="@+id/tvNoRecordFoundText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_centerInParent="true"
+                android:visibility="invisible"
+                android:textColor="@android:color/black"
+                android:text="No records found." />
+</RelativeLayout>
+        </RelativeLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fab"
+            android:layout_gravity="bottom|right"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            app:backgroundTint="@color/fab_icon_color"
+            android:src="@drawable/ic_file_upload"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>

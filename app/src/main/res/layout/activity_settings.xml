@@ -1,0 +1,203 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.luminousinfoways.sportsnyouth.sportsyouth.activity.SettingsActivity"
+    >
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/coordinatorLayout">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <TextView
+                android:id="@+id/tvTitleProfileDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/textColorPrimary"
+                android:layout_margin="@dimen/settings_top_layout_profile_details_margin"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:text="Profile Details"/>
+
+            <RelativeLayout
+                android:layout_below="@+id/tvTitleProfileDetails"
+                android:id="@+id/layoutProfileDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/settings_top_layout_profile_details_margin"
+                android:layout_marginRight="@dimen/settings_top_layout_profile_details_margin"
+                android:layout_marginBottom="@dimen/settings_top_layout_profile_details_margin"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/tvProfileTitle"
+                    android:textColor="@color/textColorPrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:text="Full Name"/>
+
+                <TextView
+                    android:id="@+id/tvProfileValue"
+                    android:textColor="@color/secondary_text_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/tvProfileTitle"
+                    android:textAlignment="center"
+                    android:layout_marginLeft="@dimen/settings_profile_name_margin_left"/>
+
+                <TextView
+                    android:id="@+id/tvNameTitle"
+                    android:textColor="@color/textColorPrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvProfileTitle"
+                    android:text="Mobile No."/>
+
+                <TextView
+                    android:id="@+id/tvNameValue"
+                    android:textColor="@color/secondary_text_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/tvNameTitle"
+                    android:textAlignment="center"
+                    android:layout_alignLeft="@+id/tvProfileValue"
+                    android:layout_alignBaseline="@+id/tvNameTitle"/>
+
+                <TextView
+                    android:id="@+id/tvNumberTitle"
+                    android:textColor="@color/textColorPrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tvNameTitle"
+                    android:text="Email"/>
+
+                <TextView
+                    android:id="@+id/tvNumberValue"
+                    android:textColor="@color/secondary_text_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/tvNumberTitle"
+                    android:textAlignment="center"
+                    android:layout_alignLeft="@+id/tvProfileValue"
+                    android:layout_alignBaseline="@+id/tvNumberTitle"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_below="@+id/layoutProfileDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/settings_change_password_layout_margin"
+                android:id="@+id/layout_change_password_fields"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/textColorPrimary"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:text="Change Password"/>
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Previous Password"
+                    android:id="@+id/etPrvPassword"
+                    android:singleLine="true"
+                    android:inputType="textPassword"
+                    app:met_floatingLabelTextColor="@android:color/black"
+                    app:met_floatingLabel="highlight"
+                    app:met_errorColor="@color/red"
+                    app:met_typeface="font/roboto_light.ttf"
+                    app:met_iconPadding="0dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"/>
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="New Password"
+                    android:id="@+id/etCrntPassword"
+                    android:singleLine="true"
+                    android:inputType="textPassword"
+                    app:met_floatingLabelTextColor="@android:color/black"
+                    app:met_floatingLabel="highlight"
+                    app:met_errorColor="@color/red"
+                    app:met_typeface="font/roboto_light.ttf"
+                    app:met_iconPadding="0dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"/>
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Confirm Password"
+                    android:id="@+id/etCrntConfirmPassword"
+                    android:singleLine="true"
+                    android:inputType="textPassword"
+                    app:met_floatingLabelTextColor="@android:color/black"
+                    app:met_floatingLabel="highlight"
+                    app:met_errorColor="@color/red"
+                    app:met_typeface="font/roboto_light.ttf"
+                    app:met_iconPadding="0dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"/>
+
+            </LinearLayout>
+
+            <Button
+                android:layout_centerHorizontal="true"
+                android:id="@+id/btnResetPassword"
+                android:background="@drawable/button_selector"
+                android:layout_below="@+id/layout_change_password_fields"
+                android:textColor="@color/white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:hint="Reset Password"/>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_centerInParent="true"/>
+
+        </RelativeLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>

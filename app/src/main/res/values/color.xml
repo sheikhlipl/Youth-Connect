@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="light_primary_color">#B2EBF2</color>
+    <color name="secondary_text_color">#727272</color>
+    <color name="text_icon_color">#FFFFFF</color>
+    <color name="divider_color">#B6B6B6</color>
+
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="textColorPrimary">#212121</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="navigationBarColor">#000000</color>
+    <color name="colorAccent">#9E9E9E</color>
+
+    <color name="blue">#218eed</color>
+
+    <color name="colorSecondary">@color/login_card_stroke</color>
+    <color name="colorSecondaryDark">@color/login_bg_color</color>
+    <color name="login_btn_color_pressed">#00897B</color>
+
+    <color name="windowBackgroundColor">#333333</color>
+    <color name="black_translucent">#4D000000</color>
+
+    <color name="green">#4DBD33</color>
+    <color name="cement">#BABABA</color>
+    <color name="bg_blue">#0e1a28</color>
+    <color name="orange">#FFCC80</color>
+    <color name="gray">#5d5d5d</color>
+    <color name="shadow">#5483a3</color>
+    <color name="actionbar_bg">#4885b0</color>
+    <color name="welcome_hdr_bg_color">#e8eff5</color>
+    <color name="light_gray">#e3e2dd</color>
+    <color name="semi_transparent_light_gray">#80e3e2dd</color>
+    <color name="semi_transparent_black">#80000000</color>
+    <color name="dark_blue">#194366</color>
+    <color name="yellow">#de9c2b</color>
+    <color name="widget_bg_color">#000000</color>
+
+    <color name="fab_icon_color">#FF5722</color>
+    
+    <color name="login_bg_color">#7D7D7D</color>
+    <color name="login_logo_bg_body">#979797</color>
+    <color name="login_logo_bg_strok">#FFFFFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="login_card_stroke">#E6E6E6</color>
+    <color name="login_btn_body_color">#E5E5E5</color>
+    <color name="login_btn_strok_color">#CBCBCB</color>
+    
+    <color name="dashboard_title_bg_color">#B2B2B2</color>
+    <color name="dashboard_present_Day_bg">#6A6767</color>
+    
+    <color name="text">#ffffff</color>
+    <color name="button_hey">#6eabb2</color>
+    <color name="button_pressed">#dbe1e7</color>
+    <color name="button_disabled">#dbe1e7</color>
+    <color name="button_default">#3c5e62</color>
+    <color name="app_background">#eaedf1</color>
+    <color name="actionbar">#1f3133</color>
+    
+    <color name="axis">#ffffff</color>
+    <color name="label">#ffffff</color>
+    
+    <color name="line1">#FFFFCC</color>
+    
+    <color name="line_bg">#00bba7</color>
+    <color name="line_grid">#00a694</color>
+    <color name="line">#ffffff</color>
+    <color name="line_fill">#30ffffff</color>
+    <color name="line_tooltip">#ffffff</color>
+    
+    <color name="red">#fff60d36</color>
+    <color name="bar_bgbar">#d96739</color>
+    <color name="bar_fill1">#fed4c2</color>
+    <color name="bar_fill2">#ffc2a9</color>
+    <color name="bar_highest">#ffffff</color>
+    <color name="bar_grid">#1Aaa3302</color>
+    <color name="bar_tooltip">#aa3302</color>
+    
+    <color name="stackbar_bg">#0091EA</color>
+    <color name="stackbar_line">#8002889a</color>
+    <color name="stackbar_fill1">#109bae</color>
+    <color name="stackbar_fill2">#33a3b3</color>
+    <color name="stackbar_fill3">#47b7c7</color>
+    <color name="stackbar_fill1_h">#05d6f1</color>
+    <color name="stackbar_fill2_h">#4fdcf0</color>
+    <color name="stackbar_fill3_h">#8fe5f1</color>
+    <color name="stackbar_tooltip">#ffffff</color>
+    
+    <color name="dashboard_nodal_officer">#FF5454</color>
+    <color name="dashboard_pending_questions">#67C2EF</color>
+    <color name="dashboard_feedbacks_received">#FABB3D</color>
+    <color name="dashboard_comments">#79C447</color>
+
+    <color name="dashboard_questions_answered">#FF5454</color>
+    <color name="dashboard_pending_feedbacks">#67C2EF</color>
+
+    <color name="safronn_transparent">#66f57c00</color>
+    <color name="safronn2">#fb8c00</color>
+    <color name="notification_bg">#6679C447</color>
+    <color name="dashboard_doc_bg">#7C4DFF</color>
+
+    <color name="half_black">#808080</color>
+    <color name="white_pressed">#f1f1f1</color>
+    <color name="color_yellow">#CDDC39</color>
+    <color name="color_orange">#FF9800</color>
+
+    <color name="color_white_half_transparent">#80FFFFFF</color>
+
+    <color name="dark_slate_gray">#2F4F4F</color>
+    <color name="gray_2">#AFAFAF</color>
+    <color name="gray_1">#C0C0C0</color>
+    <color name="black">#000000</color>
+
+</resources>

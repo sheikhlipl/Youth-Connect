@@ -2,6 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lipl.youthconnect.youth_connect">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,9 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.SplashActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,8 +32,121 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="8b3f9256eace7a2e044cfbff6365843f6bc1f834" />
+
+        <activity
+            android:name=".activity.LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FeedbackActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FileActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ShowcaseEventDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.CameraCaptureActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ReportFromDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".util.FileChooser"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.AskQuestionActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.QNADetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.PostAnswerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.PostCommentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FileDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FileUploadDistrictActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FileUploadNodalOfficerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FileUploadFinalActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FileChooserMultipleActivity"
+            android:screenOrientation="portrait" >
+
+            <intent-filter >
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*" />
+            </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".activity.FileUploadDetailFinalActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.CommentListActivity"
+            android:screenOrientation="portrait" />
+
+        <!--<service-->
+        <!--android:name=".activity.Util.NotificationService"-->
+        <!--android:enabled="true"-->
+        <!--android:exported="true" />-->
+
+        <service
+            android:name=".util.FileUploadService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name=".util.QAUploadService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver android:name=".util.ReceiverName"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".util.ReceiverName"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".activity.PostCommentActivity$PostCommentSuccessReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.post.action.sent.success" />
+                <action android:name="com.post.action.sent.failure" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>

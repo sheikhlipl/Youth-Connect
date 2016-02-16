@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:layout_gravity="center"
+    android:layout_margin="@dimen/showcase_item_card_margin"
+    android:elevation="@dimen/card_elevation"
+    android:background="?android:attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/tvQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:layout_margin="12dp"
+        android:textColor="@color/textColorPrimary"
+        android:textAppearance="?android:textAppearance"
+        android:text="Question"/>
+
+</RelativeLayout>
