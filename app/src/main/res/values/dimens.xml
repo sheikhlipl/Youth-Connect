@@ -58,4 +58,5 @@
     <dimen name="red_circle_width_height">22dp</dimen>
 
     <dimen name="dashboard_icon_circle_width_height">10dp</dimen>
+    <dimen name="comment_send_img_btn_width_height">40dp</dimen>
 </resources>

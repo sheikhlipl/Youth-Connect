@@ -130,6 +130,13 @@ public class QADataAdapter extends BaseAdapter {
             }
         });
 
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true;
+            }
+        });
+
         return view;
     }
 }

@@ -27,52 +27,50 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:layout_marginBottom="?attr/actionBarSize">
-
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:layout_marginBottom="?attr/actionBarSize">
 
-                <TextView
-                    android:id="@+id/tvQuestion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:text="Question Title"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:padding="12dp"
-                    android:textSize="18sp" />
+                <!--<TextView-->
+                    <!--android:id="@+id/tvQuestion"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="12dp"-->
+                    <!--android:layout_marginBottom="12dp"-->
+                    <!--android:text="Question Title"-->
+                    <!--android:textColor="@color/colorPrimary"-->
+                    <!--android:textStyle="bold"-->
+                    <!--android:textAppearance="?android:textAppearanceLarge"-->
+                    <!--android:padding="12dp"-->
+                    <!--android:textSize="18sp" />-->
 
                 <TextView
                     android:id="@+id/tvQuestionTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/tvQuestion"
+                    android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
+                    android:padding="12dp"
                     android:paddingLeft="12dp"
                     android:text="Question Title"
-                    android:textColor="@color/textColorPrimary"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary"
                     android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/tvQuestionDesc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:padding="12dp"
-                    android:layout_below="@+id/tvQuestionTitle"
-                    android:text="Question Description"
-                    android:textSize="18sp" />
+                <!--<TextView-->
+                    <!--android:id="@+id/tvQuestionDesc"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginBottom="12dp"-->
+                    <!--android:textColor="@color/colorPrimary"-->
+                    <!--android:textStyle="bold"-->
+                    <!--android:textAppearance="?android:textAppearanceLarge"-->
+                    <!--android:padding="12dp"-->
+                    <!--android:layout_below="@+id/tvQuestionTitle"-->
+                    <!--android:text="Question Description"-->
+                    <!--android:textSize="18sp" />-->
 
                 <TextView
                     android:id="@+id/tvQuestionDescription"
@@ -80,23 +78,31 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:paddingLeft="12dp"
-                    android:layout_below="@+id/tvQuestionDesc"
+                    android:layout_below="@+id/tvQuestionTitle"
                     android:text="Question Description"
                     android:textColor="@color/textColorPrimary"
                     android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/tvAnswersTitle"
+                <!--<TextView-->
+                    <!--android:id="@+id/tvAnswersTitle"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginBottom="12dp"-->
+                    <!--android:text="Answers"-->
+                    <!--android:layout_below="@+id/tvQuestionDescription"-->
+                    <!--android:textColor="@color/colorPrimary"-->
+                    <!--android:textStyle="bold"-->
+                    <!--android:textAppearance="?android:textAppearanceLarge"-->
+                    <!--android:padding="12dp"-->
+                    <!--android:textSize="18sp" />-->
+
+                <LinearLayout
+                    android:id="@+id/layoutDivider"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:text="Answers"
-                    android:layout_below="@+id/tvQuestionDescription"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:padding="12dp"
-                    android:textSize="18sp" />
+                    android:orientation="vertical"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray"
+                    android:layout_below="@+id/tvQuestionDescription"/>
 
                <LinearLayout
                    android:id="@+id/layoutAnswerList"
@@ -105,89 +111,131 @@
                    android:orientation="vertical"
                    android:padding="12dp"
                    android:layout_marginBottom="12dp"
-                   android:layout_below="@+id/tvAnswersTitle"/>
+                   android:layout_below="@+id/layoutDivider"/>
 
-                <Button
-                    android:id="@+id/tvCommentsTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="View Comments"
-                    android:gravity="center"
-                    android:layout_below="@+id/layoutAnswerList"
-                    android:background="@drawable/button_selector_qa"
-                    android:textColor="@color/qa_text_color"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:padding="12dp"
-                    android:textSize="18sp" />
-
-                <!--<LinearLayout-->
-                    <!--android:id="@+id/layoutCommentLsit"-->
+                <!--<Button-->
+                    <!--android:id="@+id/tvCommentsTitle"-->
                     <!--android:layout_width="match_parent"-->
                     <!--android:layout_height="wrap_content"-->
-                    <!--android:orientation="vertical"-->
+                    <!--android:text="View Comments"-->
+                    <!--android:gravity="center"-->
+                    <!--android:layout_below="@+id/layoutAnswerList"-->
+                    <!--android:background="@drawable/button_selector_qa"-->
+                    <!--android:textColor="@color/qa_text_color"-->
+                    <!--android:textAppearance="?android:textAppearanceLarge"-->
                     <!--android:padding="12dp"-->
-                    <!--android:layout_below="@+id/tvCommentsTitle"/>-->
+                    <!--android:textSize="18sp" />-->
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/layoutAnswerList"
+                    android:layout_above="@+id/layoutDivider2">
+                    <LinearLayout
+                        android:id="@+id/layoutCommentLsit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp"
+                        />
+                </ScrollView>
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/layoutButton"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_below="@+id/layoutAnswerList"-->
+                    <!--android:orientation="vertical">-->
+
+                    <!--<Button-->
+                        <!--android:id="@+id/btnPostAnswer"-->
+                        <!--android:layout_width="fill_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_marginTop="20dp"-->
+                        <!--android:background="@drawable/button_selector_qa"-->
+                        <!--android:text="Post your Answer"-->
+                        <!--android:textColor="@color/qa_text_color" />-->
+
+                    <!--<Button-->
+                        <!--android:id="@+id/btnPostComment"-->
+                        <!--android:layout_width="fill_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_marginTop="20dp"-->
+                        <!--android:background="@drawable/button_selector_qa"-->
+                        <!--android:text="Post your Comment"-->
+                        <!--android:textColor="@color/qa_text_color" />-->
+
+                    <!--<Button-->
+                        <!--android:id="@+id/btnEditQus"-->
+                        <!--android:layout_width="fill_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:visibility="gone"-->
+                        <!--android:paddingLeft="20dp"-->
+                        <!--android:paddingRight="20dp"-->
+                        <!--android:paddingTop="12dp"-->
+                        <!--android:paddingBottom="12dp"-->
+                        <!--android:layout_marginTop="20dp"-->
+                        <!--android:layout_below="@+id/btnPublish"-->
+                        <!--android:layout_centerHorizontal="true"-->
+                        <!--android:background="@drawable/button_selector_qa"-->
+                        <!--android:text="Edit Question"-->
+                        <!--android:textColor="@color/qa_text_color" />-->
+
+                <!--</LinearLayout>-->
+
+                <!--<Button-->
+                    <!--android:id="@+id/btnPublish"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:paddingLeft="20dp"-->
+                    <!--android:paddingRight="20dp"-->
+                    <!--android:paddingTop="12dp"-->
+                    <!--android:paddingBottom="12dp"-->
+                    <!--android:layout_marginTop="20dp"-->
+                    <!--android:layout_below="@+id/layoutButton"-->
+                    <!--android:layout_centerHorizontal="true"-->
+                    <!--android:background="@drawable/button_selector_qa"-->
+                    <!--android:text="Publish Answer"-->
+                    <!--android:textColor="@color/qa_text_color" />-->
 
                 <LinearLayout
-                    android:id="@+id/layoutButton"
+                    android:id="@+id/layoutDivider2"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray"
+                    android:layout_above="@+id/layoutPostComment"/>
+
+                <RelativeLayout
+                    android:id="@+id/layoutPostComment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/tvCommentsTitle"
-                    android:orientation="vertical">
-
-                    <Button
-                        android:id="@+id/btnPostAnswer"
-                        android:layout_width="fill_parent"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true">
+                    <EditText
+                        android:id="@+id/etComment"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:background="@drawable/button_selector_qa"
-                        android:text="Post your Answer"
-                        android:textColor="@color/qa_text_color" />
-
-                    <Button
-                        android:id="@+id/btnPostComment"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:background="@drawable/button_selector_qa"
-                        android:text="Post your Comment"
-                        android:textColor="@color/qa_text_color" />
-
-                    <Button
-                        android:id="@+id/btnEditQus"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:layout_marginTop="20dp"
-                        android:layout_below="@+id/btnPublish"
-                        android:layout_centerHorizontal="true"
-                        android:background="@drawable/button_selector_qa"
-                        android:text="Edit Question"
-                        android:textColor="@color/qa_text_color" />
-
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/btnPublish"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_below="@+id/layoutButton"
-                    android:layout_centerHorizontal="true"
-                    android:background="@drawable/button_selector_qa"
-                    android:text="Publish Answer"
-                    android:textColor="@color/qa_text_color" />
+                        android:layout_toLeftOf="@+id/imgSend"
+                        android:layout_marginLeft="12dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp"
+                        android:hint="Post comment here."
+                        android:background="@null"
+                        android:layout_centerVertical="true"
+                        android:textColor="@color/textColorPrimary" />
+                    <ImageView
+                        android:id="@+id/imgSend"
+                        android:padding="6dp"
+                        android:layout_margin="12dp"
+                        android:layout_width="@dimen/comment_send_img_btn_width_height"
+                        android:layout_height="@dimen/comment_send_img_btn_width_height"
+                        android:background="@drawable/circle_blue"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:src="@drawable/ic_send"/>
+                </RelativeLayout>
 
             </RelativeLayout>
-        </ScrollView>
     </android.support.design.widget.CoordinatorLayout>
 
 </RelativeLayout>

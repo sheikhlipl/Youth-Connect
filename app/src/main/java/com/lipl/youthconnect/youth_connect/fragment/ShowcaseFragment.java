@@ -55,7 +55,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interfaces
  * to handle interaction events.
  * Use the {@link ShowcaseFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -367,7 +367,7 @@ public class ShowcaseFragment extends Fragment {
     }
 
     /**
-     * This interface must be implemented by activities that contain this
+     * This interfaces must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.

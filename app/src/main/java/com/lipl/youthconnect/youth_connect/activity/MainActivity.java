@@ -24,12 +24,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.fragment.AnsweredFragment;
 import com.lipl.youthconnect.youth_connect.fragment.PendingFragment;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.fragment.DashboardFragment;
@@ -66,7 +70,8 @@ public class MainActivity extends ActionBarActivity implements
         ForumFragment.OnFragmentInteractionListener,
         PendingFragment.OnFragmentInteractionListener,
         AnsweredFragment.OnFragmentInteractionListener,
-        NotificationFragment.OnFragmentInteractionListener {
+        NotificationFragment.OnFragmentInteractionListener,
+        Replication.ChangeListener{
 
     private DrawerLayout mDrawerLayout = null;
     //private FrameLayout frameLayout;
@@ -74,6 +79,13 @@ public class MainActivity extends ActionBarActivity implements
     private static Toolbar mToolbar = null;
     private static final int LOGOUT = 10;
     public static ProgressDialog progressDialog = null;
+    private static final String TAG = "MainActivity";
+    public static final String BROADCAST_ACTION_ANSWERD_FRAGMENT_REPLICATION_CHANGE
+            = "com.lipl.youthconnect.youth_connect.activity.answeredfragment";
+    public static final String BROADCAST_ACTION_FORUM_FRAGMENT_REPLICATION_CHANGE
+            = "com.lipl.youthconnect.youth_connect.activity.forumfragment";
+    public static final String BROADCAST_ACTION_PENDING_FRAGMENT_REPLICATION_CHANGE
+            = "com.lipl.youthconnect.youth_connect.activity.pendingfragment";
 
     static RelativeLayout notifCount;
 
@@ -140,6 +152,16 @@ public class MainActivity extends ActionBarActivity implements
             ft.addToBackStack(Constants.FRAGMENT_NOTIFICATION_PAGE);
             ft.show(fragment);*/
             ft.commitAllowingStateLoss();
+        }
+
+        try {
+            DatabaseUtil.startReplications(MainActivity.this, this, TAG);
+        } catch(CouchbaseLiteException exception){
+            Log.e(TAG, "onCreate()", exception);
+        } catch(IOException exception){
+            Log.e(TAG, "onCreate()", exception);
+        } catch(Exception exception){
+            Log.e(TAG, "onCreate()", exception);
         }
     }
 
@@ -630,4 +652,49 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    @Override
+    public void changed(Replication.ChangeEvent event) {
+        Replication replication = event.getSource();
+        com.couchbase.lite.util.Log.i(TAG, "Replication : " + replication + "changed.");
+        if(!replication.isRunning()){
+            String msg = String.format("Replicator %s not running", replication);
+            com.couchbase.lite.util.Log.i(TAG, msg);
+        } else{
+            int processed = replication.getCompletedChangesCount();
+            int total = replication.getChangesCount();
+            String msg = String.format("Replicator processed %d / %d", processed, total);
+            com.couchbase.lite.util.Log.i(TAG, msg);
+        }
+
+        if(event.getError() != null){
+            showError("Sync error", event.getError());
+        }
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Intent intent_answered = new Intent(BROADCAST_ACTION_ANSWERD_FRAGMENT_REPLICATION_CHANGE);
+                    sendBroadcast(intent_answered);
+                    Intent intent_pending = new Intent(BROADCAST_ACTION_PENDING_FRAGMENT_REPLICATION_CHANGE);
+                    sendBroadcast(intent_pending);
+                    Intent intent_forum = new Intent(BROADCAST_ACTION_FORUM_FRAGMENT_REPLICATION_CHANGE);
+                    sendBroadcast(intent_forum);
+                } catch (Exception exception) {
+                    com.couchbase.lite.util.Log.e(TAG, "changed()", exception);
+                }
+            }
+        });
+    }
+
+    public void showError(final String errorMessage, final Throwable throwable){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String msg = String.format("%s: %s", errorMessage, throwable);
+                com.couchbase.lite.util.Log.e(TAG, msg, throwable);
+                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 }

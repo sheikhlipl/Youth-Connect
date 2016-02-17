@@ -22,64 +22,6 @@ import java.util.List;
  */
 public class QAUtil {
 
-    public static List<Answer> getAnswerListFromJson(String previousData){
-        List<Answer> answerList = new ArrayList<Answer>();
-
-        if(previousData != null && previousData.trim().length() > 0){
-            try {
-                JSONArray jsonArray = new JSONArray(previousData);
-                for (int i = 0; i < jsonArray.length(); i++){
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String answer_by_user_name = jsonObject.getString(DatabaseUtil.ANSWER_BY_USER_NAME);
-                    String content = jsonObject.getString(DatabaseUtil.ANSWER_CONTENT);
-                    String timeStamp = jsonObject.getString(DatabaseUtil.ANSWER_TIMESTAMP);
-                    int is_uploaded = jsonObject.getInt(DatabaseUtil.ANSWER_IS_UPLOADED);
-
-                    Answer answer = new Answer(Parcel.obtain());
-                    answer.setCreated(timeStamp);
-                    answer.setQadmin_description(content);
-                    answer.setAnswer_by_user_name(answer_by_user_name);
-                    answer.setIs_uploaded(is_uploaded);
-                    answerList.add(answer);
-                }
-                return answerList;
-            } catch(JSONException exception){
-                Log.e("QA Util", "getAnswerListFromPreviousData()", exception);
-            }
-        }
-
-        return answerList;
-    }
-
-    public static List<Comment> getCommentListFromJson(String previousData){
-        List<Comment> comments = new ArrayList<Comment>();
-
-        if(previousData != null && previousData.trim().length() > 0){
-            try {
-                JSONArray jsonArray = new JSONArray(previousData);
-                for (int i = 0; i < jsonArray.length(); i++){
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String answer_by_user_name = jsonObject.getString(DatabaseUtil.COMMENT_BY_USER_NAME);
-                    String content = jsonObject.getString(DatabaseUtil.COMMENT_CONTENT);
-                    String timeStamp = jsonObject.getString(DatabaseUtil.COMMENT_TIMESTAMP);
-                    int is_uploaded = jsonObject.getInt(DatabaseUtil.COMMENT_IS_UPLOADED);
-
-                    Comment comment = new Comment(Parcel.obtain());
-                    comment.setCreated(timeStamp);
-                    comment.setComment_description(content);
-                    comment.setComment_by_user_name(answer_by_user_name);
-                    comment.setIs_uploaded(is_uploaded);
-                    comments.add(comment);
-                }
-                return comments;
-            } catch(JSONException exception){
-                Log.e("QA Util", "getAnswerListFromPreviousData()", exception);
-            }
-        }
-
-        return comments;
-    }
-
     public static QuestionAndAnswer getQAFromDocument(Document document){
 
         try {

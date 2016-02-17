@@ -1,6 +1,10 @@
 package com.lipl.youthconnect.youth_connect.fragment;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,7 +51,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interfaces
  * to handle interaction events.
  * Use the {@link PendingFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -135,6 +139,14 @@ public class PendingFragment extends Fragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        setUp(view);
+
+    }
+
+    private void setUp(View view){
+        if(view == null){
+            return;
+        }
         listView = (ListView) view.findViewById(R.id.qnaList);
         search = (SearchView) view.findViewById(R.id.searchView1);
         search.setQueryHint("SearchView");
@@ -170,15 +182,15 @@ public class PendingFragment extends Fragment implements
 
         final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
-            ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
+            //ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                if (isCancelled() == false && isVisible() == true
+                /*if (isCancelled() == false && isVisible() == true
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.show();
-                }
+                }*/
             }
 
             @Override
@@ -200,15 +212,16 @@ public class PendingFragment extends Fragment implements
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                if (isCancelled() == false && isVisible() == true
+                /*if (isCancelled() == false && isVisible() == true
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.dismiss();
-                }
+                }*/
                 try {
                     if (questionAndAnswerList != null && questionAndAnswerList.size() > 0) {
                         if (mListItems == null) {
                             mListItems = new LinkedList<QuestionAndAnswer>();
                         }
+                        mListItems.clear();
                         mListItems.addAll(questionAndAnswerList);
                         adapter = new QADataAdapter(mListItems, getActivity(), false, false);
                         listView.setAdapter(adapter);
@@ -226,8 +239,27 @@ public class PendingFragment extends Fragment implements
                 asyncTask.execute();
             }
         }, 2000);
-
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getActivity().registerReceiver(broadcastReceiver,
+                new IntentFilter(MainActivity.BROADCAST_ACTION_PENDING_FRAGMENT_REPLICATION_CHANGE));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().unregisterReceiver(broadcastReceiver);
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setUp(getView());
+        }
+    };
 
     private List<QuestionAndAnswer> getQAList() throws CouchbaseLiteException, IOException {
 
@@ -321,7 +353,7 @@ public class PendingFragment extends Fragment implements
     }
 
     /**
-     * This interface must be implemented by activities that contain this
+     * This interfaces must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.

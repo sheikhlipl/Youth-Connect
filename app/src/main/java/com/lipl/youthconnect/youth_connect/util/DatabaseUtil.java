@@ -7,9 +7,12 @@ import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.android.AndroidContext;
+import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Created by Android Luminous on 2/15/2016.
@@ -22,19 +25,10 @@ public class DatabaseUtil {
     public static final String QA_ANSWER = "answer";
     public static final String QA_COMMENT = "comment";
     public static final String QA_ASKED_BY_USER_NAME = "asked_by_user_name";
+    public static final String QA_ASKED_BY_USER_ID = "asked_by_user_id";
     public static final String QA_IS_ANSWERED = "is_answered";
     public static final String QA_IS_PUBLISHED = "is_published";
     public static final String QA_IS_UPLOADED = "is_uploaded";
-
-    public static final String ANSWER_CONTENT = "answer_content";
-    public static final String ANSWER_BY_USER_NAME = "answer_by_user_name";
-    public static final String ANSWER_TIMESTAMP = "answer_timestamp";
-    public static final String ANSWER_IS_UPLOADED = "is_uploaded";
-
-    public static final String COMMENT_CONTENT = "answer_content";
-    public static final String COMMENT_BY_USER_NAME = "answer_by_user_name";
-    public static final String COMMENT_TIMESTAMP = "answer_timestamp";
-    public static final String COMMENT_IS_UPLOADED = "is_uploaded";
 
 
     public static Database getDatabaseInstance(Context context, String database_name) throws CouchbaseLiteException, IOException {
@@ -59,5 +53,34 @@ public class DatabaseUtil {
         // retrieve the document from the database
         Document retrievedDocument = database.getDocument(documentId);
         return  retrievedDocument;
+    }
+
+    public static void startReplications(Context context, Replication.ChangeListener changeListener, String TAG) throws CouchbaseLiteException, IOException {
+        Replication pull = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE)
+                .createPullReplication(createSyncURL(false));
+        Replication push = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE)
+                .createPushReplication(createSyncURL(false));
+        pull.setContinuous(true);
+        push.setContinuous(true);
+        pull.start();
+        push.start();
+
+        pull.addChangeListener(changeListener);
+        push.addChangeListener(changeListener);
+
+        com.couchbase.lite.util.Log.i(TAG, "startReplications()", "Replication start");
+    }
+
+    private static URL createSyncURL(boolean isEncrypted){
+        URL syncURL = null;
+        String host = "http://192.168.1.107";
+        String port = "4984";
+        String dbName = Constants.YOUTH_CONNECT_DATABASE;
+        try {
+            syncURL = new URL(host + ":" + port + "/" + dbName);
+        } catch (MalformedURLException me) {
+            me.printStackTrace();
+        }
+        return syncURL;
     }
 }

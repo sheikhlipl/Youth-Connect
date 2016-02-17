@@ -169,7 +169,8 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
         try {
             // Update the document with more data
 
-            List<Answer> answerDocument = createDocument(previousAnswerList, answer_desc, answer_by_username);
+            int answer_by_user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
+            List<Answer> answerDocument = createDocument(previousAnswerList, answer_desc, answer_by_username, answer_by_user_id);
             if(answerDocument != null) {
                 Map<String, Object> updatedProperties = new HashMap<String, Object>();
                 updatedProperties.putAll(document.getProperties());
@@ -185,7 +186,8 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
         }
     }
 
-    private ArrayList<Answer> createDocument(List<Answer> answerList, String answer_desc, String answer_by_username){
+    private ArrayList<Answer> createDocument(List<Answer> answerList, String answer_desc,
+                                             String answer_by_username, int answer_by_user_id){
         // Create a new document and add data
 
         if(answerList == null) {
@@ -195,6 +197,7 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
         Answer answer = new Answer(Parcel.obtain());
         answer.setQadmin_description(answer_desc);
         answer.setAnswer_by_user_name(answer_by_username);
+        answer.setAnswer_by_user_id(answer_by_user_id);
         String timestamp = System.currentTimeMillis()+"";
         answer.setCreated(timestamp);
         answerList.add(answer);

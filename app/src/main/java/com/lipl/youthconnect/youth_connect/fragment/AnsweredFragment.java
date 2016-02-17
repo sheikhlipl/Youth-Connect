@@ -1,6 +1,10 @@
 package com.lipl.youthconnect.youth_connect.fragment;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +39,7 @@ import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.FileUploadService;
 import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
@@ -50,13 +55,14 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interfaces
  * to handle interaction events.
  * Use the {@link AnsweredFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class AnsweredFragment extends Fragment implements
         HelpQusAndAnsAdapter.OnActivityItemClickListener {
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_CAMP_CODE = "campcode";
@@ -135,9 +141,35 @@ public class AnsweredFragment extends Fragment implements
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        getActivity().registerReceiver(broadcastReceiver,
+                new IntentFilter(MainActivity.BROADCAST_ACTION_ANSWERD_FRAGMENT_REPLICATION_CHANGE));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setUp(view);
+    }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setUp(getView());
+        }
+    };
+
+    public void setUp(View view){
+        if(view == null){
+            return;
+        }
         listView = (ListView) view.findViewById(R.id.qnaList);
         search = (SearchView) view.findViewById(R.id.searchView1);
         search.setQueryHint("SearchView");
@@ -173,15 +205,15 @@ public class AnsweredFragment extends Fragment implements
 
         final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
-            ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
+            //ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                if (isCancelled() == false && isVisible() == true
+                /*if (isCancelled() == false && isVisible() == true
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.show();
-                }
+                }*/
             }
 
             @Override
@@ -203,15 +235,16 @@ public class AnsweredFragment extends Fragment implements
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                if (isCancelled() == false && isVisible() == true
+                /*if (isCancelled() == false && isVisible() == true
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.dismiss();
-                }
+                }*/
                 try {
                     if (questionAndAnswerList != null && questionAndAnswerList.size() > 0) {
                         if (mListItems == null) {
                             mListItems = new LinkedList<QuestionAndAnswer>();
                         }
+                        mListItems.clear();
                         mListItems.addAll(questionAndAnswerList);
                         adapter = new QADataAdapter(mListItems, getActivity(), false, true);
                         listView.setAdapter(adapter);
@@ -320,7 +353,7 @@ public class AnsweredFragment extends Fragment implements
     }
 
     /**
-     * This interface must be implemented by activities that contain this
+     * This interfaces must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
@@ -335,7 +368,7 @@ public class AnsweredFragment extends Fragment implements
     }
 
     @Override
-    public void onCreateOptionsMenu (Menu menu, MenuInflater inflater){
+    public void onCreateOptionsMenu (Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
     }
 

@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
+import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.pojo.Answer;
 import com.lipl.youthconnect.youth_connect.pojo.Comment;
@@ -39,7 +40,8 @@ import java.util.Map;
 /**
  * Created by luminousinfoways on 18/12/15.
  */
-public class AskQuestionActivity extends ActionBarActivity implements View.OnClickListener {
+public class AskQuestionActivity extends ActionBarActivity implements View.OnClickListener,
+        Replication.ChangeListener {
 
     private static final String TAG = "AskQuestionActivity";
 
@@ -90,9 +92,9 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         int id = view.getId();
 
         MaterialEditText qusTitle = (MaterialEditText) findViewById(R.id.qusTitle);
-        String title = qusTitle.getText().toString().trim();
+        final String title = qusTitle.getText().toString().trim();
         MaterialEditText qusDesc = (MaterialEditText) findViewById(R.id.qusDesc);
-        String description = qusDesc.getText().toString().trim();
+        final String description = qusDesc.getText().toString().trim();
 
         switch (id){
             case R.id.btnAsk:
@@ -151,32 +153,67 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
                         snackbar.show();
                         return;
                     }
-
                 }
 
-                try {
-                    int is_answered = 0;
-                    int is_published = 0;
-                    if(questionAndAnswer != null
-                            && questionAndAnswer.getQuestion() != null
-                            && questionAndAnswer.getQuestion().getIs_publish() == 1){
-                        is_published = 1;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                builder.setTitle("Post Question");
+                builder.setMessage("Are you sure want to post this question?");
+                builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            int is_answered = 0;
+                            int is_published = 0;
+                            if(questionAndAnswer != null
+                                    && questionAndAnswer.getQuestion() != null
+                                    && questionAndAnswer.getQuestion().getIs_publish() == 1){
+                                is_published = 1;
+                            }
+                            if(questionAndAnswer != null
+                                    &&questionAndAnswer.getQuestion() != null
+                                    && questionAndAnswer.getQuestion().getIs_answer() == 1){
+                                is_answered = 1;
+                            }
+                            String user_name = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_NAME, null);
+                            int user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
+                            createDocument(DatabaseUtil.getDatabaseInstance(AskQuestionActivity.this, Constants.YOUTH_CONNECT_DATABASE),
+                                    description, title, user_name, is_answered, is_published, user_id);
+                            AlertDialog.Builder builder12 = new AlertDialog.Builder(AskQuestionActivity.this, R.style.AppCompatAlertDialogStyle);
+                            builder12.setTitle("Post Question");
+                            builder12.setMessage("Done.");
+                            builder12.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    try {
+                                        DatabaseUtil.startReplications(AskQuestionActivity.this, AskQuestionActivity.this, TAG);
+                                    } catch(CouchbaseLiteException exception){
+                                        Log.e(TAG, "onClick()", exception);
+                                    } catch(IOException exception){
+                                        Log.e(TAG, "onClick()", exception);
+                                    } catch (Exception exception){
+                                        Log.e(TAG, "onClick()", exception);
+                                    }
+                                    dialog.dismiss();
+                                    finish();
+                                }
+                            });
+                            builder12.show();
+                        } catch(CouchbaseLiteException exception){
+                            Log.e(TAG, "on Add Click", exception);
+                        } catch(IOException exception){
+                            Log.e(TAG, "on Add Click", exception);
+                        } catch(Exception exception){
+                            Log.e(TAG, "on Add Click", exception);
+                        }
                     }
-                    if(questionAndAnswer != null
-                            &&questionAndAnswer.getQuestion() != null
-                            && questionAndAnswer.getQuestion().getIs_answer() == 1){
-                        is_answered = 1;
+                });
+                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
                     }
-                    String user_name = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_NAME, null);
-                    createDocument(DatabaseUtil.getDatabaseInstance(this, Constants.YOUTH_CONNECT_DATABASE),
-                            description, title, user_name, is_answered, is_published);
-                } catch(CouchbaseLiteException exception){
-                    Log.e(TAG, "on Add Click", exception);
-                } catch(IOException exception){
-                    Log.e(TAG, "on Add Click", exception);
-                } catch(Exception exception){
-                    Log.e(TAG, "on Add Click", exception);
-                }
+                });
+                builder.show();
 
                 break;
             case R.id.btnReset:
@@ -196,9 +233,14 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         }
     }
 
+    @Override
+    public void changed(Replication.ChangeEvent event) {
+
+    }
+
     private String createDocument(Database database, String description,
                                   String title, String user_name,
-                                  int is_answered, int is_published) {
+                                  int is_answered, int is_published, int asked_by_user_id) {
         // Create a new document and add data
         Document document = database.createDocument();
         String documentId = document.getId();
@@ -209,6 +251,7 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         map.put(DatabaseUtil.QA_DESC, description);
         map.put(DatabaseUtil.QA_UPDATED_TIMESTAMP, currentTimestamp);
         map.put(DatabaseUtil.QA_ASKED_BY_USER_NAME, user_name);
+        map.put(DatabaseUtil.QA_ASKED_BY_USER_ID, asked_by_user_id);
         map.put(DatabaseUtil.QA_IS_ANSWERED, is_answered);
         map.put(DatabaseUtil.QA_IS_PUBLISHED, is_published);
         map.put(DatabaseUtil.QA_IS_UPLOADED, 0);
@@ -252,33 +295,6 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         return super.dispatchTouchEvent(ev);
     }
 
-    /**
-     * To Show Material Alert Dialog
-     *
-     * @param code Should be one of the global declared integer constants
-     * @param message
-     * @param title
-     * */
-    private void showAlertDialog(String message, String title, String positiveButtonText, String negativeButtonText, final int code){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        builder.setNegativeButton(negativeButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.show();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -301,29 +317,5 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * To Show Material Alert Dialog
-     *
-     * @param message
-     * @param title
-     * */
-    private void showAlertDialog(String message, String title, String positiveButtonText){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                Intent intent = new Intent();
-                intent.putExtra(Constants.QUESTION_RESULT, 1);
-                setResult(RESULT_OK, intent);
-                finish();
-            }
-        });
-        builder.show();
     }
 }
