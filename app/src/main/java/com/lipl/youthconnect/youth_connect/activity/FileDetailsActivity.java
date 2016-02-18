@@ -2,6 +2,7 @@ package com.lipl.youthconnect.youth_connect.activity;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -30,6 +31,8 @@ import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.pojo.Doc;
+import com.lipl.youthconnect.youth_connect.pojo.FileToUpload;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.Util;
@@ -65,7 +68,13 @@ import java.util.Set;
 public class FileDetailsActivity extends ActionBarActivity implements View.OnClickListener {
 
     private static Toolbar mToolbar = null;
-    private Document document = null;
+    private Doc document = null;
+    String host = "http://192.168.1.107";
+    String port = "4984";
+    String dbName = Constants.YOUTH_CONNECT_DATABASE;
+    /*
+    * url to download file : http://192.168.1.107:4984/youth_connect/{doc_id}/{file_name}
+    * */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +91,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
         actionBar.setTitle("File Details");
 
         if(getIntent().getExtras() != null){
-            document = getIntent().getExtras().getParcelable(Constants.INTENT_KEY_DOCUMENT);
+            document = (Doc) getIntent().getExtras().getSerializable(Constants.INTENT_KEY_DOCUMENT);
         }
 
         int user_type_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
@@ -103,54 +112,42 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
         fabSendToNodalOfficers.setOnClickListener(this);
 
         if(document != null){
-            String createdBy = document.getUserFullName();
+            String createdBy = document.getCreated_by_user_name();
             TextView tvCreatedBy =  (TextView) findViewById(R.id.tvCreatedBy);
             tvCreatedBy.setText(createdBy);
 
-            if(document.getDocumentMaster() != null
-                    && document.getDocumentMaster().getDocument_title() != null) {
+            if(document.getDoc_title() != null) {
                 TextView tvEventTitleValue = (TextView) findViewById(R.id.tvEventTitleValue);
-                tvEventTitleValue.setText(document.getDocumentMaster().getDocument_title());
+                tvEventTitleValue.setText(document.getDoc_title());
             }
 
-            if(document.getDocumentMaster() != null
-                    && document.getDocumentMaster().getDocument_purpose() != null) {
+            if(document.getDoc_purpose() != null) {
                 TextView tvEventPurpose = (TextView) findViewById(R.id.tvEventPurpose);
-                tvEventPurpose.setText(document.getDocumentMaster().getDocument_purpose());
+                tvEventPurpose.setText(document.getDoc_purpose());
             }
 
-            List<DocumentUpload> documentUploadList = document.getDocumentUploadList();
+            List<FileToUpload> fileToUploads = document.getFileToUploads();
 
-            if(documentUploadList != null && documentUploadList.size() > 0) {
+            if(fileToUploads != null && fileToUploads.size() > 0) {
 
                 LinearLayout layoutDoc = (LinearLayout) findViewById(R.id.layoutFileDetails);
-                for (int i = 0; i < documentUploadList.size(); i++) {
+                for (int i = 0; i < fileToUploads.size(); i++) {
                     final RelativeLayout layoutDocItem = (RelativeLayout) LayoutInflater.from(FileDetailsActivity.this).inflate(R.layout.list_item_file, null);
 
-                    DocumentUpload documentUpload = documentUploadList.get(i);
-                    String created = documentUpload.getCreated();
-                    String modified = documentUpload.getModified();
-                    int docId = documentUpload.getDocument_upload_id();
-                    String doc_master_id = documentUpload.getDocument_master_id();
-                    final String uploadFile = documentUpload.getUpload_file();
-
+                    final FileToUpload documentUpload = fileToUploads.get(i);
+                    final String uploadFile = documentUpload.getFile_name();
                     TextView tvFileTitle = (TextView) layoutDocItem.findViewById(R.id.tvFileTitle);
                     tvFileTitle.setText(uploadFile);
 
                     final RelativeLayout layoutImage = (RelativeLayout) layoutDocItem.findViewById(R.id.layoutImage);
                     final ImageView imgFileDownload = (ImageView) layoutDocItem.findViewById(R.id.imgFileDownload);
                     final ProgressBar progressBar = (ProgressBar) layoutDocItem.findViewById(R.id.progressBar);
-                    if (isFileExists(uploadFile)) {
-                        imgFileDownload.setTag(R.drawable.ic_insert_drive_file);
-                        imgFileDownload.setImageResource(R.drawable.ic_insert_drive_file);
-                        imgFileDownload.setBackgroundResource(R.drawable.circle_blue);
-                        progressBar.setVisibility(View.INVISIBLE);
-                    } else {
-                        imgFileDownload.setTag(R.drawable.ic_file_download);
-                        imgFileDownload.setImageResource(R.drawable.ic_file_download);
-                        imgFileDownload.setBackgroundResource(R.color.blue);
-                        progressBar.setVisibility(View.INVISIBLE);
-                    }
+
+                    imgFileDownload.setTag(R.drawable.ic_file_download);
+                    imgFileDownload.setImageResource(R.drawable.ic_file_download);
+                    imgFileDownload.setBackgroundResource(R.color.blue);
+                    progressBar.setVisibility(View.INVISIBLE);
+
 
                     layoutImage.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -159,17 +156,12 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                             integer = integer == null ? 0 : integer;
                             if (integer == R.drawable.ic_file_download) {
                                 if (Util.getNetworkConnectivityStatus(FileDetailsActivity.this)) {
-                                    DownloadFileFromURL downloadFileAsync = new DownloadFileFromURL(imgFileDownload, progressBar);
-                                    downloadFileAsync.execute(uploadFile);
-                                }
-                            } else if (integer == R.drawable.ic_insert_drive_file) {
-                                String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/youth_connect";
-                                openDocument(fullPath + "/" + uploadFile);
-                                progressBar.setVisibility(View.INVISIBLE);
-                            } else {
-                                if (Util.getNetworkConnectivityStatus(FileDetailsActivity.this)) {
-                                    DownloadFileFromURL downloadFileAsync = new DownloadFileFromURL(imgFileDownload, progressBar);
-                                    downloadFileAsync.execute(uploadFile);
+                                    //Download file from download link
+                                    String download_link = documentUpload.getDownload_link_url();
+                                    if(download_link != null && download_link.length() > 0){
+                                        DownloadFileFromURL downloadFileAsync = new DownloadFileFromURL(imgFileDownload, progressBar);
+                                        downloadFileAsync.execute(download_link);
+                                    }
                                 }
                             }
                         }
@@ -196,84 +188,11 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                 // condition : which are not published and not deleted you can delete
                 // Delete document
 
-                if(document != null
-                        && document.getDocumentMaster() != null
-                        && document.getDocumentMaster().getIs_published() != null
-                        && document.getDocumentMaster().getIs_published().equalsIgnoreCase("N")) {
-
-                    if(document.getDoc_master_id() > 0){
-
-                    }
-
-                    DeleteDocumentAsyncTask deleteDocumentAsyncTask = new DeleteDocumentAsyncTask();
-                    deleteDocumentAsyncTask.execute();
-                } else if(document != null
-                        && document.getDocumentMaster() != null
-                        && document.getDocumentMaster().getIs_published() != null
-                        && document.getDocumentMaster().getIs_published().equalsIgnoreCase("Y")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                    builder.setTitle("Doc Delete");
-                    builder.setMessage("Sorry, this document can not be deleted.\nBecause it is published.");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-                } else{
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                    builder.setTitle("Doc Delete");
-                    builder.setMessage("Sorry, this document can not be deleted.");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-                }
-
                 break;
             case R.id.fabPublish:
 
                 // Publish Document
                 // condition : which are not published and not deleted you can publish
-
-                if(document != null
-                        && document.getDocumentMaster() != null
-                        && document.getDocumentMaster().getIs_published() != null
-                        && document.getDocumentMaster().getIs_published().equalsIgnoreCase("N")) {
-                    PublishAndUnpublishDocumentAsyncTask publishAndUnpublishDocumentAsyncTask =
-                            new PublishAndUnpublishDocumentAsyncTask();
-                    publishAndUnpublishDocumentAsyncTask.execute("Y");
-
-                } else if(document != null
-                        && document.getDocumentMaster() != null
-                        && document.getDocumentMaster().getIs_published() != null
-                        && document.getDocumentMaster().getIs_published().equalsIgnoreCase("Y")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                    builder.setTitle("Doc Publish");
-                    builder.setMessage("Sorry, this document is already published.");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-                } else{
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                    builder.setTitle("Doc Publish");
-                    builder.setMessage("Sorry, this document is already published");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-                }
 
                 break;
             case R.id.fabUnpublish:
@@ -281,513 +200,9 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                 // Un publish Document
                 // condition : which are published and not deleted you can publish
 
-                if(document != null
-                        && document.getDocumentMaster() != null
-                        && document.getDocumentMaster().getIs_published() != null
-                        && document.getDocumentMaster().getIs_published().equalsIgnoreCase("Y")) {
-                    PublishAndUnpublishDocumentAsyncTask publishAndUnpublishDocumentAsyncTask =
-                            new PublishAndUnpublishDocumentAsyncTask();
-                    publishAndUnpublishDocumentAsyncTask.execute("N");
-
-                } else if(document != null
-                        && document.getDocumentMaster() != null
-                        && document.getDocumentMaster().getIs_published() != null
-                        && document.getDocumentMaster().getIs_published().equalsIgnoreCase("N")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                    builder.setTitle("Doc Unpublish");
-                    builder.setMessage("Sorry, this document is not published.");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-                } else{
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                    builder.setTitle("Doc Unpublish");
-                    builder.setMessage("Sorry, this document is not published.");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-                }
-
                 break;
             default:
                 break;
-        }
-    }
-
-    private String getFileIds(){
-        if(document == null || document.getDocumentUploadList() == null){
-            return null;
-        }
-
-        // Format : [2,3,4]
-        Set<Integer> docSet = new HashSet<Integer>();
-        for(int i = 0; i < document.getDocumentUploadList().size(); i++){
-            DocumentUpload documentUpload = document.getDocumentUploadList().get(i);
-            if(documentUpload != null) {
-                int document_upload_id = documentUpload.getDocument_upload_id();
-                docSet.add(document_upload_id);
-            }
-        }
-
-        try {
-            JSONArray array = new JSONArray();
-            for (Integer district_id : docSet) {
-                array.put(district_id);
-            }
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private String getDocumentIds(){
-        if(document == null || document.getDocumentUploadList() == null){
-            return null;
-        }
-
-        // Format : [2,3,4]
-        Set<Integer> docSet = new HashSet<Integer>();
-        if(document.getDoc_master_id() > 0){
-            docSet.add(document.getDoc_master_id());
-        } else if(document.getDocumentMaster() != null){
-            document.getDocumentMaster().getDocument_master_id();
-        } else{
-            docSet.add(document.getDoc_master_id());
-        }
-
-        try {
-            JSONArray array = new JSONArray();
-            for (Integer district_id : docSet) {
-                array.put(district_id);
-            }
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Async task to get sync camp table from server
-     * */
-    private class DeleteDocumentAsyncTask extends AsyncTask<String, Void, Boolean> {
-
-        private static final String TAG = "DeleteDocumentAsyncTask";
-        //private ProgressDialog progressDialog = null;
-        private boolean isChangePassword = false;
-        private String message;
-        private ActivityIndicator activityIndicator = ActivityIndicator.ctor(FileDetailsActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            /*if(progressDialog == null) {
-                progressDialog = ProgressDialog.show(FileDetailsActivity.this, "Deleting", "Please wait...");
-            }*/
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(FileDetailsActivity.this);
-            }
-            activityIndicator.show();
-
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            String api_key = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_API_KEY, null);
-
-            if(api_key == null){
-                return null;
-            }
-
-            try {
-
-                InputStream in = null;
-                int resCode = -1;
-
-                String link = Constants.BASE_URL+Constants.REQUEST_URL_ADMIN_DOCUMENT_DELETE;
-                URL url = new URL(link);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setAllowUserInteraction(false);
-                conn.setInstanceFollowRedirects(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Authorization", api_key);
-
-                String fileIds = getFileIds();
-                String docIds = getDocumentIds();
-
-                Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("document_upload_id", getFileIds())
-                        .appendQueryParameter("response", "mobile")
-                        .appendQueryParameter("document_id", getDocumentIds());
-
-                String query = builder.build().getEncodedQuery();
-
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(query);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                conn.connect();
-                resCode = conn.getResponseCode();
-                if (resCode == HttpURLConnection.HTTP_OK) {
-                    in = conn.getInputStream();
-                }
-                if(in == null){
-                    return null;
-                }
-                BufferedReader reader =new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                String response = "",data="";
-
-                while ((data = reader.readLine()) != null){
-                    response += data + "\n";
-                }
-
-                Log.i(TAG, "Response : " + response);
-
-                if(response != null && response.length() > 0 && response.charAt(0) == '{'){
-                    JSONObject jsonObject = new JSONObject(response);
-                    if (jsonObject != null && jsonObject.isNull("Apikey") == false) {
-                        String changePasswordDoneFromWebMsg = jsonObject.optString("Apikey");
-                        if(changePasswordDoneFromWebMsg.equalsIgnoreCase("Api key does not exit")){
-                            isChangePassword = true;
-                            return null;
-                        }
-                    }
-                }
-
-                /**
-                 * {
-                 {
-                 "message":"File sent successfully."
-                 }
-                 * */
-
-                if(response != null && response.length() > 0){
-
-                    JSONObject res = new JSONObject(response);
-                    message = res.optString("message");
-                    int status = res.optInt("status");
-                    if(status == 1){
-
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            } catch(SocketTimeoutException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch(ConnectException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch(MalformedURLException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch (IOException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch(Exception exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            super.onPostExecute(isSuccess);
-
-            //if(progressDialog != null) progressDialog.dismiss();
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(FileDetailsActivity.this);
-            }
-            activityIndicator.dismiss();
-
-            if(isChangePassword){
-                AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                builder.setTitle(getResources().getString(R.string.password_changed_title));
-                builder.setMessage(getResources().getString(R.string.password_changed_description));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        Intent intent = new Intent(FileDetailsActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("Exit me", true);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                builder.show();
-
-                return;
-            }
-
-            if(isSuccess){
-                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 1).commit();
-            } else{
-                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 0).commit();
-            }
-
-            String dialogMessage = "";
-            if(message != null && message.length() > 0){
-                dialogMessage = message;
-            }
-            AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-            builder.setTitle("Youth Connect");
-            builder.setMessage(dialogMessage);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finish();
-                }
-            });
-            builder.show();
-        }
-    }
-
-    /**
-     * Async task to get sync camp table from server
-     * */
-    private class PublishAndUnpublishDocumentAsyncTask extends AsyncTask<String, Void, Boolean> {
-
-        private static final String TAG = "DeleteDocumentAsyncTask";
-        //private ProgressDialog progressDialog = null;
-        private boolean isChangePassword = false;
-        private String message;
-        private ActivityIndicator activityIndicator = ActivityIndicator.ctor(FileDetailsActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            /*if(progressDialog == null) {
-                progressDialog = ProgressDialog.show(FileDetailsActivity.this, "Processing", "Please wait...");
-            }*/
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(FileDetailsActivity.this);
-            }
-            activityIndicator.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            String is_publish = params[0];
-
-            if(is_publish == null || is_publish.trim().length() <= 0){
-                return null;
-            }
-
-            String api_key = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_API_KEY, null);
-
-            if(api_key == null){
-                return null;
-            }
-
-            try {
-
-                InputStream in = null;
-                int resCode = -1;
-
-                String link = Constants.BASE_URL+Constants.REQUEST_URL_ADMIN_DOCUMENT_UPDATE;
-                URL url = new URL(link);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setAllowUserInteraction(false);
-                conn.setInstanceFollowRedirects(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Authorization", api_key);
-
-                String fileIds = getFileIds();
-                String docIds = getDocumentIds();
-
-                Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("response", "mobile")
-                        .appendQueryParameter("is_published", is_publish)
-                        .appendQueryParameter("document_id", getDocumentIds());
-
-                String query = builder.build().getEncodedQuery();
-
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(query);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                conn.connect();
-                resCode = conn.getResponseCode();
-                if (resCode == HttpURLConnection.HTTP_OK) {
-                    in = conn.getInputStream();
-                }
-                if(in == null){
-                    return null;
-                }
-                BufferedReader reader =new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                String response = "",data="";
-
-                while ((data = reader.readLine()) != null){
-                    response += data + "\n";
-                }
-
-                Log.i(TAG, "Response : " + response);
-
-                if(response != null && response.length() > 0 && response.charAt(0) == '{'){
-                    JSONObject jsonObject = new JSONObject(response);
-                    if (jsonObject != null && jsonObject.isNull("Apikey") == false) {
-                        String changePasswordDoneFromWebMsg = jsonObject.optString("Apikey");
-                        if(changePasswordDoneFromWebMsg.equalsIgnoreCase("Api key does not exit")){
-                            isChangePassword = true;
-                            return null;
-                        }
-                    }
-                }
-
-                /**
-                 * {
-                 {
-                 "message":"File sent successfully."
-                 }
-                 * */
-
-                if(response != null && response.length() > 0){
-
-                    JSONObject res = new JSONObject(response);
-                    message = res.optString("message");
-                    int status = res.optInt("status");
-                    if(status == 1){
-
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            } catch(SocketTimeoutException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch(ConnectException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch(MalformedURLException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch (IOException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch(Exception exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            super.onPostExecute(isSuccess);
-
-            //if(progressDialog != null) progressDialog.dismiss();
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(FileDetailsActivity.this);
-            }
-            activityIndicator.dismiss();
-
-            if(isChangePassword){
-                AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-                builder.setTitle(getResources().getString(R.string.password_changed_title));
-                builder.setMessage(getResources().getString(R.string.password_changed_description));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        Intent intent = new Intent(FileDetailsActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("Exit me", true);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                builder.show();
-
-                return;
-            }
-
-            if(isSuccess){
-                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 1).commit();
-            } else{
-                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 0).commit();
-            }
-
-            String dialogMessage = "";
-            if(message != null && message.length() > 0){
-                dialogMessage = message;
-            }
-            AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
-            builder.setTitle("Youth Connect");
-            builder.setMessage(dialogMessage);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finish();
-                }
-            });
-            builder.show();
-        }
-    }
-
-    private boolean isFileExists(String fileName){
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/youth_connect";
-        String fullPath = path + "/" + fileName;
-        File file = new File(fullPath);
-        if(file.exists()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void openDocument(String name) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        File file = new File(name);
-        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
-        String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-        if (extension.equalsIgnoreCase("") || mimetype == null) {
-            // if there is no extension or there is no definite mimetype, still try to open the file
-            intent.setDataAndType(Uri.fromFile(file), "text/*");
-        } else {
-            intent.setDataAndType(Uri.fromFile(file), mimetype);
-        }
-        // custom message for the intent
-        Intent appIntent = Intent.createChooser(intent, "Choose an Application:");
-        if(appIntent != null){
-            startActivity(appIntent);
-        } else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-            builder.setTitle(getResources().getString(R.string.no_app_found_title));
-            builder.setMessage(getResources().getString(R.string.no_app_found_message));
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            builder.show();
         }
     }
 
@@ -903,13 +318,13 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
             int count;
             try {
 
-                String fileName = f_url[0];
+                String download_link = f_url[0];
 
-                if(fileName == null || fileName.trim().length() <= 0){
+                if(download_link == null || download_link.trim().length() <= 0){
                     return null;
                 }
 
-                String req_url = Constants.BASE_URL + Constants.DOCUMENT_DOWNLOAD_REQUEST_URL + f_url[0];
+                String req_url = download_link;
 
                 URL url = new URL(req_url);
                 URLConnection conection = url.openConnection();
@@ -926,7 +341,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                     dir.mkdirs();
                 }
                 OutputStream fOut = null;
-                File file = new File(fullPath, fileName);
+                File file = new File(fullPath, download_link);
                 if(file.exists())
                     file.delete();
                 file.createNewFile();
@@ -968,13 +383,6 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
         }
 
         /**
-         * Updating progress bar
-         * */
-        protected void onProgressUpdate(String... progress) {
-            // setting progress percentage
-        }
-
-        /**
          * After completing background task
          * Dismiss the progress dialog
          * **/
@@ -999,31 +407,6 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                 }
             }, 2000);
 
-        }
-    }
-
-    public void saveImageToExternalStorage(Bitmap image) {
-        String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/youth_connect";
-        try
-        {
-            File dir = new File(fullPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            OutputStream fOut = null;
-            File file = new File(fullPath, "image.png");
-            if(file.exists())
-                file.delete();
-            file.createNewFile();
-            fOut = new FileOutputStream(file);
-            // 100 means no compression, the lower you go, the stronger the compression
-            image.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-            fOut.flush();
-            fOut.close();
-        }
-        catch (Exception e)
-        {
-            Log.e("saveToExternalStorage()", e.getMessage());
         }
     }
 }

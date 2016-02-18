@@ -5,6 +5,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,6 +40,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -48,17 +51,26 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
+import com.couchbase.lite.UnsavedRevision;
+import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
-import com.lipl.youthconnect.youth_connect.util.Constants;
-import com.lipl.youthconnect.youth_connect.util.FileOption;
-import com.lipl.youthconnect.youth_connect.util.FileUploadService;
-import com.lipl.youthconnect.youth_connect.util.Util;
+import com.lipl.youthconnect.youth_connect.pojo.AssignedToUSer;
 import com.lipl.youthconnect.youth_connect.pojo.FileChooseDetaiuls;
+import com.lipl.youthconnect.youth_connect.pojo.FileToUpload;
 import com.lipl.youthconnect.youth_connect.pojo.PendingFileToUpload;
+import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.FileOption;
+import com.lipl.youthconnect.youth_connect.util.Util;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -79,27 +91,22 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
 
-import org.apache.commons.codec.binary.Base64;
-
-public class FileChooserMultipleActivity extends ActionBarActivity  implements ListView.OnItemClickListener, View.OnClickListener {
+public class FileChooserMultipleActivity extends ActionBarActivity
+        implements ListView.OnItemClickListener, View.OnClickListener,
+        Replication.ChangeListener{
 
     private static Toolbar mToolbar = null;
-    //private ListView mListView = null;
-    private File currentDir;
-    //private MultipleFileArrayAdapter adapter = null;
     private String title = "";
     private String purpose = "";
     private String doc_id = "";
     private int is_doc_id_auto_generated = 0;
-    //private SwipeRefreshLayout swipeRefreshLayout;
-    private boolean isProcessing = false;
-    private boolean isMoreThanFourMB = false;
-    private static final int NUMBER_OF_FILES = 3;
 
     private LinearLayout mRevealView;
     private boolean hidden = true;
@@ -115,6 +122,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
     private static final int CAMERA_CAPTURE_VIDEO_REQUEST_CODE = 200;
 
     public static List<PendingFileToUpload> fileUploadList = null;
+    public static List<FileToUpload> fileToUploads = null;
     private boolean isFromActivityResult = false;
 
     @Override
@@ -135,23 +143,16 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
             fileUploadList = new ArrayList<PendingFileToUpload>();
         }
 
+        if(fileToUploads == null){
+            fileToUploads = new ArrayList<FileToUpload>();
+        }
+
         if(getIntent().getExtras() != null){
             title = getIntent().getExtras().getString(Constants.DOC_TITLE);
             purpose = getIntent().getExtras().getString(Constants.DOC_PURPOSE);
             doc_id = getIntent().getExtras().getString(Constants.DOC_ID);
             is_doc_id_auto_generated = getIntent().getExtras().getInt(Constants.IS_DOC_ID_AUTO_GENERATED);
         }
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            if (isProcessing == false) {
-
-            }
-            }
-        });*/
 
         mRevealView = (LinearLayout) findViewById(R.id.reveal_items);
         mRevealView.setVisibility(View.INVISIBLE);
@@ -176,89 +177,13 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
         if(isFromActivityResult == false){
             setPreviousDataToList();
         }
-        registerReceiver(broadcastReceiver, new IntentFilter(FileUploadService.BROADCAST_ACTION));
+        registerReceiver(broadcastReceiver, new IntentFilter(Constants.BROADCAST_ACTION_REPLICATION_CHANGE));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(broadcastReceiver);
-    }
-
-    private void updateUI(Intent intent) {
-        String counter = intent.getStringExtra("counter");
-        String time = intent.getStringExtra("time");
-        PendingFileToUpload pendingFileToBeUpload = intent.getParcelableExtra("pendingFileToUpload");
-        int status = intent.getIntExtra("status", 0);
-        Log.d(TAG, counter);
-        Log.d(TAG, time);
-
-        String file_path = pendingFileToBeUpload.getFilePath();
-        String uri_path = pendingFileToBeUpload.getFileUri();
-
-        //TODO update UI
-        LinearLayout layoutDoc = (LinearLayout) findViewById(R.id.layoutDoc);
-        for(int i= 0; i < layoutDoc.getChildCount(); i++){
-            RelativeLayout relativeLayout = (RelativeLayout) ((ViewGroup)layoutDoc.getChildAt(i));
-            // new background because something has changed
-            // check if it's not the imageView you just clicked because you don't want to change its background
-            int file_type = pendingFileToBeUpload.getFileType();
-
-            String file_path_tag = (String) relativeLayout.getTag();
-            if(pendingFileToBeUpload != null){
-                String filePath =  pendingFileToBeUpload.getFilePath();
-                if(filePath != null && file_path.equalsIgnoreCase(file_path_tag)){
-                    ((ProgressBar) relativeLayout.findViewById(R.id.pBar)).setVisibility(View.INVISIBLE);
-                    if(status == 1){
-                        //Sent failure
-                        ImageView imgSent = (ImageView) relativeLayout.findViewById(R.id.imgSent);
-                        imgSent.setVisibility(View.VISIBLE);
-                        ImageView imgPending = (ImageView) relativeLayout.findViewById(R.id.imgPending);
-                        imgPending.setVisibility(View.GONE);
-                    } else {
-                        //Sent successfully
-                        ImageView imgSent = (ImageView) relativeLayout.findViewById(R.id.imgSent);
-                        imgSent.setVisibility(View.GONE);
-                        ImageView imgPending = (ImageView) relativeLayout.findViewById(R.id.imgPending);
-                        imgPending.setVisibility(View.VISIBLE);
-                    }
-
-                    for(int k = 0; k < fileUploadList.size(); k++){
-                        String filepath = fileUploadList.get(k).getFilePath();
-                        if(filepath != null && filePath.equalsIgnoreCase(filepath)){
-                            fileUploadList.get(k).setIs_uploaded(1);
-                        }
-                    }
-
-                }  else{
-                    String file_uri =  pendingFileToBeUpload.getFilePath();
-                    if(file_uri != null && file_path.equalsIgnoreCase(file_path_tag)){
-                        ((ProgressBar) relativeLayout.findViewById(R.id.pBar)).setVisibility(View.INVISIBLE);
-                        if(status == 1){
-                            //Sent failure
-                            ImageView imgSent = (ImageView) relativeLayout.findViewById(R.id.imgSent);
-                            imgSent.setVisibility(View.VISIBLE);
-                            ImageView imgPending = (ImageView) relativeLayout.findViewById(R.id.imgPending);
-                            imgPending.setVisibility(View.GONE);
-                        } else {
-                            //Sent successfully
-                            ImageView imgSent = (ImageView) relativeLayout.findViewById(R.id.imgSent);
-                            imgSent.setVisibility(View.GONE);
-                            ImageView imgPending = (ImageView) relativeLayout.findViewById(R.id.imgPending);
-                            imgPending.setVisibility(View.VISIBLE);
-                        }
-
-                        for(int k = 0; k < fileUploadList.size(); k++){
-                            String fileuri = fileUploadList.get(k).getFileUri();
-                            if(fileuri != null && file_uri.equalsIgnoreCase(fileuri)){
-                                fileUploadList.get(k).setIs_uploaded(1);
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
     }
 
     private void setPreviousDataToList(){
@@ -652,19 +577,10 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
         pendingFileToUpload.setM_desg_id(m_desg_id);
         pendingFileToUpload.setTitle(title);
         pendingFileToUpload.setPurpose(purpose);
-        String assignData = null;
-        //if(user_type_id == 2){
-            assignData = getJsonObjectDataForAssignForNodalOfficer();
-        //} else{
-          //  assignData = "";
-        //}
-
         pendingFileToUpload.setFileUri(uri_path);
         pendingFileToUpload.setFileType(file_type);
         pendingFileToUpload.setIs_uploaded(is_uploaded);
         pendingFileToUpload.setFilePath(file_path);
-        int docid = Integer.parseInt(doc_id);
-        pendingFileToUpload.setDoc_id(docid);
 
         if(is_doc_id_auto_generated == 1){
             pendingFileToUpload.setIsDocIdFromServer(0);
@@ -674,13 +590,14 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
 
         List<String> fileList =  new ArrayList<String>();
         fileList.add(file_path);
-        //List<FileChooseDetaiuls> fileChooseDetaiulses = getFileDetailsList(fileList);
-        //String jsonData = getJsonObjectData(fileChooseDetaiulses);
-
-        //pendingFileToUpload.setJsonData(jsonData);
-        pendingFileToUpload.setAssignData(assignData);
 
         return pendingFileToUpload;
+    }
+
+    private String getMimeTypeFromUri(Uri uri){
+        ContentResolver cR = getContentResolver();
+        String type = cR.getType(uri);
+        return type;
     }
 
     @Override
@@ -695,35 +612,59 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
         builder.setTitle("File Upload");
         builder.setMessage("Are you sure want to upload this file?");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
                 PendingFileToUpload pendingFileToUpload = new PendingFileToUpload(Parcel.obtain());
+                FileToUpload fileToUpload = new FileToUpload();
 
                 if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
                     Uri selectedImageUri = data.getData();
                     String filePathForImage = getRealPathFromURI(selectedImageUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(filePathForImage, selectedImageUri.toString(), Constants.IMAGE, 0);
+                    fileToUpload.setInputStream(selectedImageUri);
+                    String filename = filePathForImage.substring(filePathForImage.lastIndexOf("/")+1);
+                    fileToUpload.setFile_name(filename);
+                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedImageUri));
 
                 } else if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
                     Uri selectedVideoUri = data.getData();
                     String selectedImagePath = getPathForVideo(selectedVideoUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
+                    fileToUpload.setInputStream(selectedVideoUri);
+                    String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/")+1);
+                    fileToUpload.setFile_name(filename);
+                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedVideoUri));
 
                 } else if (requestCode == PICK_AUDIO_REQUEST && resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
                     Uri selectedAudioUri = data.getData();
                     String selectedAudioPath = getPathForAudio(selectedAudioUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
+                    fileToUpload.setInputStream(selectedAudioUri);
+                    String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/")+1);
+                    fileToUpload.setFile_name(filename);
+                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedAudioUri));
 
                 } else if (requestCode == PICK_DOC_REQUEST && resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
 
                     String FilePath = data.getData().getPath();
+                    Uri geturi = data.getData();
                     pendingFileToUpload = getPendingFileToBeUploadFromData(FilePath, "", Constants.DOC, 0);
+                    fileToUpload.setInputStream(geturi);
+                    String filename = FilePath.substring(FilePath.lastIndexOf("/")+1);
+                    fileToUpload.setFile_name(filename);
+                    String type = null;
+                    String extension = MimeTypeMap.getFileExtensionFromUrl(filename);
+                    if (extension != null) {
+                        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                    }
+                    fileToUpload.setMime_type(type);
+                    Log.i("asdfsdf","asdfsadf");
 
                 } else if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK
                         && data != null && data.getExtras() != null) {
@@ -736,29 +677,43 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
                     }
                     String filePathForImage = getRealPathFromURI(tempUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(filePathForImage, tempUri.toString(), Constants.IMAGE, 0);
+                    fileToUpload.setInputStream(tempUri);
+                    String filename = filePathForImage.substring(filePathForImage.lastIndexOf("/")+1);
+                    fileToUpload.setFile_name(filename);
+                    fileToUpload.setMime_type(getMimeTypeFromUri(tempUri));
                 } else if (requestCode == CAMERA_CAPTURE_VIDEO_REQUEST_CODE && resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
                     Uri selectedVideoUri = data.getData();
                     String selectedImagePath = getPathForVideo(selectedVideoUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
-
+                    fileToUpload.setInputStream(selectedVideoUri);
+                    String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/")+1);
+                    fileToUpload.setFile_name(filename);
+                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedVideoUri));
                 } else if (requestCode == RQS_RECORDING && resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
                     Uri selectedAudioUri = data.getData();
                     String selectedAudioPath = getPathForAudio(selectedAudioUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
+                    fileToUpload.setInputStream(selectedAudioUri);
+                    String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/")+1);
+                    fileToUpload.setFile_name(filename);
+                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedAudioUri));
                 }
 
                 addViewToList(pendingFileToUpload, 1);
-
                 fileUploadList.add(pendingFileToUpload);
+                fileToUploads.add(fileToUpload);
 
+                /*
                 Log.i(TAG, "File path call service");
                 Intent intent = new Intent(FileChooserMultipleActivity.this, FileUploadService.class);
                 intent.putExtra("FileUpload", pendingFileToUpload);
                 Log.i(TAG, "File Details before start service " + pendingFileToUpload.getFilePath());
                 startService(intent);
-                registerReceiver(broadcastReceiver, new IntentFilter(FileUploadService.BROADCAST_ACTION));
+                registerReceiver(broadcastReceiver, new IntentFilter(FileUploadService.BROADCAST_ACTION));*/
+
+
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -773,6 +728,67 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
         }
     }
 
+    private String createDocument(Database database, String doc_title,
+                String doc_purpose, String doc_created_by_user_name,
+                List<String> fileToUploads,List<FileToUpload> fileToUploadList, int doc_created_by_user_id,
+                                  List<AssignedToUSer> assigned_to_user_ids) {
+        // Create a new document and add data
+        Document document = database.createDocument();
+        String documentId = document.getId();
+        String currentTimestamp = System.currentTimeMillis()+"";
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(DatabaseUtil.DOC_TITLE, doc_title);
+        map.put(DatabaseUtil.DOC_PURPOSE, doc_purpose);
+        map.put(DatabaseUtil.DOC_CREATED_BY_USER_NAME, doc_created_by_user_name);
+        map.put(DatabaseUtil.DOC_CREATED_BY_USER_ID, doc_created_by_user_id);
+        map.put(DatabaseUtil.DOC_FILES, fileToUploads);
+        map.put(DatabaseUtil.DOC_IS_UPLOADED, 0);
+        map.put(DatabaseUtil.DOC_CREATED, currentTimestamp);
+        map.put(DatabaseUtil.DOC_ASSIGNED_TO_USER_IDS, assigned_to_user_ids);
+        try {
+            // Save the properties to the document
+            document.putProperties(map);
+            Log.i(TAG, "Document created.");
+        } catch (CouchbaseLiteException e) {
+            Log.e(TAG, "Error putting", e);
+        }
+        try {
+            DatabaseUtil.getDocumentFromDocumentId(DatabaseUtil.getDatabaseInstance(FileChooserMultipleActivity.this, Constants.YOUTH_CONNECT_DATABASE), documentId);
+        } catch(CouchbaseLiteException exception){
+            Log.e(TAG, "gdsfg", exception);
+        } catch(IOException exception){
+            Log.e(TAG, "gdsfg", exception);
+        } catch(Exception exception){
+            Log.e(TAG, "gdsfg", exception);
+        }
+        Log.i(TAG, "Doc Id" + documentId);
+
+        try {
+            // Add or update an image to a document as a JPEG attachment:
+            UnsavedRevision newRev = document.getCurrentRevision().createRevision();
+            if(fileToUploadList != null && fileToUploadList.size() > 0){
+                for(int i = 0; i < fileToUploadList.size(); i++){
+                    FileToUpload fileToUpload = fileToUploadList.get(i);
+                    Uri uri = fileToUpload.getInputStream();
+                    String file_name = fileToUpload.getFile_name();
+                    String mime_type = fileToUpload.getMime_type();
+                    InputStream stream = getContentResolver().openInputStream(uri);
+                    newRev.setAttachment(file_name, mime_type, stream);
+                }
+            }
+            newRev.save();
+        } catch(FileNotFoundException exception){
+            Log.e("FileChooserMultiple", "onActivityResult", exception);
+        } catch (CouchbaseLiteException exception){
+            Log.e("FileChooserMultiple", "onActivityResult", exception);
+        } catch(Exception exception){
+            Log.e("FileChooserMultiple", "onActivityResult", exception);
+        }
+
+        return documentId;
+    }
+
     public Uri getImageUri(Context inContext, Bitmap inImage) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
@@ -780,7 +796,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
         return Uri.parse(path);
     }
 
-    public String getRealPathFromURI(Uri uri) {
+    /*public String getRealPathFromURI(Uri uri) {
 
         int currentapiVersion = Build.VERSION.SDK_INT;
         if(currentapiVersion >= Build.VERSION_CODES.LOLLIPOP){
@@ -816,6 +832,135 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
             int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
             return cursor.getString(idx);
         }
+    }*/
+
+    public String getRealPathFromURI(final Uri uri) {
+
+        Context context = FileChooserMultipleActivity.this;
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/"
+                            + split[1];
+                }
+
+                // TODO handle non-primary volumes
+            }
+            // DownloadsProvider
+            else if (isDownloadsDocument(uri)) {
+
+                final String id = DocumentsContract.getDocumentId(uri);
+                final Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"),
+                        Long.valueOf(id));
+
+                return getDataColumn(context, contentUri, null, null);
+            }
+            // MediaProvider
+            else if (isMediaDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                } else if ("video".equals(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                } else if ("audio".equals(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[] { split[1] };
+
+                return getDataColumn(context, contentUri, selection,
+                        selectionArgs);
+            }
+        }
+        // MediaStore (and general)
+        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            return getDataColumn(context, uri, null, null);
+        }
+        // File
+        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the value of the data column for this Uri. This is useful for
+     * MediaStore Uris, and other file-based ContentProviders.
+     *
+     * @param context
+     *            The context.
+     * @param uri
+     *            The Uri to query.
+     * @param selection
+     *            (Optional) Filter used in the query.
+     * @param selectionArgs
+     *            (Optional) Selection arguments used in the query.
+     * @return The value of the _data column, which is typically a file path.
+     */
+    public static String getDataColumn(Context context, Uri uri,
+                                       String selection, String[] selectionArgs) {
+
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = { column };
+
+        try {
+            cursor = context.getContentResolver().query(uri, projection,
+                    selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+    /**
+     * @param uri
+     *            The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public static boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri
+                .getAuthority());
+    }
+
+    /**
+     * @param uri
+     *            The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    public static boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri
+                .getAuthority());
+    }
+
+    /**
+     * @param uri
+     *            The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public static boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri
+                .getAuthority());
     }
 
     private String getBase64EcodedString(String picturePath) {
@@ -831,7 +976,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
         bm.compress(Bitmap.CompressFormat.JPEG, 90, bao);
         byte[] ba = bao.toByteArray();
-        String ba1 = Base64.encodeBase64String(ba);
+        //String ba1 = Base64.encodeBase64String(ba);
+        String ba1 = android.util.Base64.encodeToString(ba, android.util.Base64.DEFAULT);
         Log.e("base64", "-----" + ba1);
 
         return ba1;
@@ -1005,198 +1151,9 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateUI(intent);
+
         }
     };
-
-    /**
-     * Async task to get sync camp table from server
-     * */
-    private class FileUploadAsync extends AsyncTask<String, Void, Boolean> {
-
-        private static final String TAG = "CreateDocAsync";
-        private ProgressDialog progressDialog = null;
-        private List<FileChooseDetaiuls> fileDetails = null;
-        private boolean isChangePassword = false;
-
-        public FileUploadAsync(List<FileChooseDetaiuls> fileDetails){
-            this.fileDetails = fileDetails;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if(progressDialog == null) {
-                progressDialog = ProgressDialog.show(FileChooserMultipleActivity.this, "Uploading", "Please wait...");
-            }
-            isProcessing = true;
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            String title = params[0];
-            String purpose = params[1];
-
-            String api_key = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_API_KEY, null);
-            int user_type_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_TYPE, 0);
-            int user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
-            String desg_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_DESG_ID, null);
-
-            String assignData = null;
-            //if(user_type_id == 2){
-                assignData = getJsonObjectDataForAssignForNodalOfficer();
-            //} else{
-                //TODO
-            //}
-
-            String jsonData = getJsonObjectData(fileDetails);
-
-            if(api_key == null){
-                return null;
-            }
-
-            try {
-
-                InputStream in = null;
-                int resCode = -1;
-
-                String link = Constants.BASE_URL+Constants.REQUEST_DOC_UPLOAD;
-                URL url = new URL(link);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setAllowUserInteraction(false);
-                conn.setInstanceFollowRedirects(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Authorization", api_key);
-
-                Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("data[DocumentMaster][user_id]", user_id+"")
-                        .appendQueryParameter("response", "mobile")
-                        .appendQueryParameter("data[DocumentMaster][m_desg_id]", desg_id)
-                        .appendQueryParameter("data[DocumentMaster][m_user_type_id]", user_type_id+"")
-                        .appendQueryParameter("data[DocumentMaster][document_title]", title)
-                        .appendQueryParameter("data[DocumentMaster][document_purpose]", purpose)
-                        .appendQueryParameter("data[DocumentAssign]", assignData)
-                        .appendQueryParameter("data[DocumentUpload]", jsonData);
-
-                Log.i("FileChooserMultiple", "assigndata" + assignData + " \n jsondata" + jsonData);
-
-                String query = builder.build().getEncodedQuery();
-
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(query);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                conn.connect();
-                resCode = conn.getResponseCode();
-                if (resCode == HttpURLConnection.HTTP_OK) {
-                    in = conn.getInputStream();
-                }
-
-                if(in == null){
-                    return false;
-                }
-
-                BufferedReader reader =new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                String response = "",data="";
-
-                while ((data = reader.readLine()) != null){
-                    response += data + "\n";
-                }
-
-                Log.i(TAG, "Response : " + response);
-
-                /**
-                 * {
-                 {
-                 "message": 0
-                 }
-                 * */
-
-                if(response != null && response.length() > 0 && response.charAt(0) == '{'){
-                    JSONObject jsonObject = new JSONObject(response);
-                    if (jsonObject != null && jsonObject.isNull("Apikey") == false) {
-                        String changePasswordDoneFromWebMsg = jsonObject.optString("Apikey");
-                        if(changePasswordDoneFromWebMsg.equalsIgnoreCase("Api key does not exit")){
-                            isChangePassword = true;
-                            return null;
-                        }
-                    }
-                }
-
-                if(response != null && response.trim().length() > 0 && TextUtils.isDigitsOnly(response.trim())){
-
-//                    if(response.trim().contains("\n")){
-//                        response = response.replace("\n", "");
-//                    }
-
-                    int res = Integer.parseInt(response.trim());
-                    if(res == 1){
-                        return true;
-                    } else{
-                        return false;
-                    }
-                }
-            } catch(SocketTimeoutException exception){
-                Log.e(TAG, "GetFeedbackListAsync : doInBackground", exception);
-            } catch(ConnectException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch(MalformedURLException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch (IOException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch(Exception exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            super.onPostExecute(isSuccess);
-
-            if(isChangePassword){
-                AlertDialog.Builder builder = new AlertDialog.Builder(FileChooserMultipleActivity.this, R.style.AppCompatAlertDialogStyle);
-                builder.setTitle(getResources().getString(R.string.password_changed_title));
-                builder.setMessage(getResources().getString(R.string.password_changed_description));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        Intent intent = new Intent(FileChooserMultipleActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("Exit me", true);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                builder.show();
-
-                return;
-            }
-
-            if(progressDialog != null) progressDialog.dismiss();
-            isProcessing = false;
-            String dialogMessage = null;
-            if(isSuccess){
-                dialogMessage = "Uploaded successfully.";
-                showAlertDialog(dialogMessage, "Upload Document", "Ok", true);
-            } else{
-                dialogMessage = "Sorry, failed to upload your document.\nPlease try again";
-                showAlertDialog(dialogMessage, "Upload Document", "Ok", false);
-            }
-        }
-    }
 
     /**
      * To Show Material Alert Dialog
@@ -1247,157 +1204,12 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
 //        }
     }
 
-    private List<FileChooseDetaiuls> getFileDetailsList(List<String> filename) {
-
-        int total_kb = 0;
-
-        if(filename != null && filename.size() > 0){
-            for(int i = 0; i < filename.size(); i++){
-                String pathname = filename.get(i);
-                File originalFile = new File(pathname);
-                int file_size_in_kb = Integer.parseInt(String.valueOf(originalFile.length() / 1024));
-                total_kb = total_kb + file_size_in_kb;
-            }
-        }
-
-        if(total_kb > 4000){
-
-            isMoreThanFourMB = true;
-            return null;
-        } else{
-            isMoreThanFourMB = false;
-        }
-
-        try {
-
-            List<FileChooseDetaiuls> fileChooseDetaiulses = new ArrayList<FileChooseDetaiuls>();
-            for (int i = 0; i < filename.size(); i++) {
-
-                File originalFile = new File(filename.get(i));
-                String path = originalFile.getPath();
-                String extension = path.substring(path.lastIndexOf(".") + 1);
-                //String extension = MimeTypeMap.getFileExtensionFromUrl(originalFile.toURL().toString());
-                String fileType = "";
-                /*if (extension != null) {
-                    fileType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                }*/
-                String encodedBase64 = null;
-                try {
-                    FileInputStream fileInputStreamReader = new FileInputStream(originalFile);
-                    byte[] bytes = new byte[(int) originalFile.length()];
-                    fileInputStreamReader.read(bytes);
-                    encodedBase64 = new String(Base64.encodeBase64(bytes));
-
-                    FileChooseDetaiuls fileChooseDetaiuls = new FileChooseDetaiuls(Parcel.obtain());
-                    fileChooseDetaiuls.setFileType(fileType);
-                    fileChooseDetaiuls.setExtension(extension);
-                    fileChooseDetaiuls.setBase64Data(encodedBase64);
-                    fileChooseDetaiuls.setFileName(originalFile.getPath());
-
-                    fileChooseDetaiulses.add(fileChooseDetaiuls);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return fileChooseDetaiulses;
-        } catch(Exception exp){
-            return null;
-        }
-    }
-
-    private String getJsonObjectData(List<FileChooseDetaiuls> detailsList){
-
-        /*
-        * {"qa_answer_id":"","user_id":"1","qadmin_description":"dfg hdfjhgkh","post_date":"2015-12-12 12:12:12"}
-        * */
-
-        try {
-            JSONArray array = new JSONArray();
-
-            for(int i = 0; i < detailsList.size(); i++){
-                String fileType = detailsList.get(i).getFileType();
-                String extension = detailsList.get(i).getExtension();
-                String base64 = detailsList.get(i).getBase64Data();
-
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("upload_file", base64);
-                jsonObject.put("upload_file_ext", extension);
-                array.put(jsonObject);
-            }
-
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private String getJsonObjectDataForAssignForNodalOfficer(){
-
-        /*
-        * {"qa_answer_id":"","user_id":"1","qadmin_description":"dfg hdfjhgkh","post_date":"2015-12-12 12:12:12"}
-        * */
-
-        try {
-            JSONArray array = new JSONArray();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("m_district_id", "0");
-            jsonObject.put("user_id", "1");
-            array.put(jsonObject);
-
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void onFileClick(FileOption o)
-    {
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra(Constants.INTENT_KEY_FILE_PATH, o.getPath());
-        setResult(RESULT_OK, returnIntent);
-        finish();
-    }
-
     @Override
     public void onBackPressed() {
         Intent returnIntent = new Intent();
         returnIntent.putExtra(Constants.INTENT_KEY_FILE_PATH, "");
         setResult(RESULT_OK, returnIntent);
         finish();
-    }
-
-    private void fill(File f)
-    {
-        File[]dirs = f.listFiles();
-        this.setTitle("Current Dir: " + f.getName());
-        List<FileOption>dir = new ArrayList<FileOption>();
-        List<FileOption>fls = new ArrayList<FileOption>();
-        try{
-            for(File ff: dirs)
-            {
-                if(ff.isDirectory())
-                    dir.add(new FileOption(ff.getName(),"Folder",ff.getAbsolutePath(), false));
-                else
-                {
-                    fls.add(new FileOption(ff.getName(),"File Size: "+ff.length(),ff.getAbsolutePath(), false));
-                }
-            }
-        }catch(Exception e)
-        {
-
-        }
-        Collections.sort(dir);
-        Collections.sort(fls);
-        dir.addAll(fls);
-        if(!f.getName().equalsIgnoreCase("sdcard"))
-            dir.add(0,new FileOption("..","Parent Directory",f.getParent(), false));
-
-//        adapter = new MultipleFileArrayAdapter(FileChooserMultipleActivity.this, R.layout.file_view,dir);
-//        mListView.setAdapter(adapter);
     }
 
     /**
@@ -1422,33 +1234,6 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
             }
         }
         return super.dispatchTouchEvent(ev);
-    }
-
-    /**
-     * To Show Material Alert Dialog
-     *
-     * @param code Should be one of the global declared integer constants
-     * @param message
-     * @param title
-     * */
-    private void showAlertDialog(String message, String title, String positiveButtonText, String negativeButtonText, final int code){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        builder.setNegativeButton(negativeButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.show();
     }
 
     @Override
@@ -1538,8 +1323,68 @@ public class FileChooserMultipleActivity extends ActionBarActivity  implements L
             return true;
         } else if(id == android.R.id.home){
             onBackPressed();
+        } else if(id == R.id.action_done){
+            String doc_created_by_user_name = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getString(Constants.SP_USER_NAME, "");
+            int doc_created_by_user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_ID, 0);
+            List<AssignedToUSer> assigned_to_user_list = new ArrayList<AssignedToUSer>();
+
+            int userid = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_ID, 0);
+            String username = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getString(Constants.SP_USER_NAME, "");
+
+            AssignedToUSer assignedToUSer = new AssignedToUSer();
+            assignedToUSer.setUser_id(userid);
+            assignedToUSer.setUser_name(username);
+            assigned_to_user_list.add(assignedToUSer);
+
+            List<String> fileNames = new ArrayList<String>();
+            if(fileToUploads != null && fileToUploads.size() > 0) {
+                for (FileToUpload fileToUpload : fileToUploads) {
+                    if (fileToUpload.getFile_name() != null) {
+                        fileNames.add(fileToUpload.getFile_name());
+                    }
+                }
+            }
+
+            try {
+                createDocument(DatabaseUtil.getDatabaseInstance(FileChooserMultipleActivity.this, Constants.YOUTH_CONNECT_DATABASE),
+                        title, purpose, doc_created_by_user_name, fileNames, fileToUploads, doc_created_by_user_id, assigned_to_user_list);
+            } catch(CouchbaseLiteException exception){
+                Log.e(TAG, "onActivityResult()", exception);
+            } catch(IOException exception){
+                Log.e(TAG, "onActivityResult()", exception);
+            } catch(Exception exception){
+                Log.e(TAG, "onActivityResult()", exception);
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(FileChooserMultipleActivity.this, R.style.AppCompatAlertDialogStyle);
+            builder.setTitle("Doc upload");
+            builder.setMessage("Done");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    try {
+                        DatabaseUtil.startReplications(FileChooserMultipleActivity.this, FileChooserMultipleActivity.this, TAG);
+                    } catch(CouchbaseLiteException exception){
+                        Log.e(TAG, "onClick()", exception);
+                    } catch(IOException exception){
+                        Log.e(TAG, "onClick()", exception);
+                    } catch (Exception exception){
+                        Log.e(TAG, "onClick()", exception);
+                    }
+                    dialog.dismiss();
+                    finish();
+                }
+            });
+            builder.show();
+
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void changed(Replication.ChangeEvent event) {
+
     }
 }

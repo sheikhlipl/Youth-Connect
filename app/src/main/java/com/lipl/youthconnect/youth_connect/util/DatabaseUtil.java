@@ -30,6 +30,14 @@ public class DatabaseUtil {
     public static final String QA_IS_PUBLISHED = "is_published";
     public static final String QA_IS_UPLOADED = "is_uploaded";
 
+    public static final String DOC_TITLE = "doc_title";
+    public static final String DOC_PURPOSE = "doc_purpose";
+    public static final String DOC_FILES = "files";
+    public static final String DOC_CREATED = "created";
+    public static final String DOC_CREATED_BY_USER_NAME = "created_by_user_name";
+    public static final String DOC_CREATED_BY_USER_ID = "created_by_user_id";
+    public static final String DOC_ASSIGNED_TO_USER_IDS = "doc_assigned_to_user_ids";
+    public static final String DOC_IS_UPLOADED = "is_uploaded";
 
     public static Database getDatabaseInstance(Context context, String database_name) throws CouchbaseLiteException, IOException {
         Manager manager = null;

@@ -198,8 +198,9 @@ public class QADataAdapter extends BaseAdapter {
                     currentDate.trim().length() > 0 &&
                     date.trim().equalsIgnoreCase(currentDate.trim())){
                     return arr[1] + " " + arr[2];
-                } else{
-                    String[] crdate = currentDate.split("-");
+                } else if(date != null &&
+                        date.length() > 0){
+                    String[] crdate = date.split("-");
                     String mon = crdate[1];
                     String dd = crdate[0];
                     String monName = Util.getMonInWord(mon);

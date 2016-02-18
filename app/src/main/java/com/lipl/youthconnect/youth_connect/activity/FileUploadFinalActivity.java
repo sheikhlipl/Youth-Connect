@@ -105,20 +105,20 @@ public class FileUploadFinalActivity extends ActionBarActivity {
                 // and if there is no connection then create a random 4 digit number to create a doc id for offline.
                 // when internet will available then create the doc first then send the files against that document.
 
-                if(Util.getNetworkConnectivityStatus(FileUploadFinalActivity.this)) {
+                /*if(Util.getNetworkConnectivityStatus(FileUploadFinalActivity.this)) {
                     CreateDocAsync createDocAsync = new CreateDocAsync();
                     createDocAsync.execute(title, purpose);
                 } else{
                     //TODO for ofline
                     //Generate alphanumeric id for doc id
 
-                    String doc_id = Util.getRandomAlphaNumericString();
+                    String doc_id = Util.getRandomAlphaNumericString();*/
 
                     Intent intent = new Intent(FileUploadFinalActivity.this, FileChooserMultipleActivity.class);
                     intent.putExtra(Constants.DOC_TITLE, title);
                     intent.putExtra(Constants.DOC_PURPOSE, purpose);
-                    intent.putExtra(Constants.DOC_ID, doc_id);
-                    intent.putExtra(Constants.IS_DOC_ID_AUTO_GENERATED, 1);
+                    /*intent.putExtra(Constants.DOC_ID, doc_id);
+                    intent.putExtra(Constants.IS_DOC_ID_AUTO_GENERATED, 1);*/
                     startActivityForResult(intent, FILE_REQ);
                     if (FileChooserMultipleActivity.fileUploadList != null) {
                         FileChooserMultipleActivity.fileUploadList.clear();
@@ -127,7 +127,7 @@ public class FileUploadFinalActivity extends ActionBarActivity {
                     }
                     finish();
 
-                }
+                //}
             }
         });
     }

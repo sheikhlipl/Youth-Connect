@@ -1,5 +1,7 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -18,13 +20,26 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.pojo.AssignedToUSer;
+import com.lipl.youthconnect.youth_connect.pojo.Doc;
+import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.DocUtil;
 import com.lipl.youthconnect.youth_connect.util.PullAndLoadListView;
 import com.lipl.youthconnect.youth_connect.util.PullToRefreshListView;
+import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.adapter.DocDataAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Document;
@@ -53,6 +68,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -61,8 +77,8 @@ public class FileActivity extends ActionBarActivity {
 
     private static Toolbar mToolbar = null;
 
-    private LinkedList<Document> mListItems;
-    private PullAndLoadListView listView;
+    private LinkedList<Doc> mListItems;
+    private ListView listView;
     private DocDataAdapter adapter;
     private static final String TAG = "FileActivity";
     private int doc_last_id = 0;
@@ -122,10 +138,10 @@ public class FileActivity extends ActionBarActivity {
         });
 
         if(mListItems == null) {
-            mListItems = new LinkedList<Document>();
+            mListItems = new LinkedList<Doc>();
         }
 
-        listView = (PullAndLoadListView) findViewById(R.id.qnaList);
+        listView = (ListView) findViewById(R.id.qnaList);
         adapter = new DocDataAdapter(mListItems, this);
         listView.setAdapter(adapter);
     }
@@ -135,97 +151,37 @@ public class FileActivity extends ActionBarActivity {
         super.onResume();
 
         if(mListItems == null) {
-            mListItems = new LinkedList<Document>();
+            mListItems = new LinkedList<Doc>();
         }
 
-        mListItems = new LinkedList<Document>();
-        listView = (PullAndLoadListView) findViewById(R.id.qnaList);
+        mListItems = new LinkedList<Doc>();
+        try {
+            List<Doc> docs = getDocList();
+            if (docs != null && docs.size() > 0) {
+                mListItems.addAll(docs);
+            }
+        } catch(CouchbaseLiteException exception){
+            Log.e(TAG, "onResume()", exception);
+        } catch(IOException exception){
+            Log.e(TAG, "onResume()", exception);
+        } catch(Exception exception){
+            Log.e(TAG, "onResume()", exception);
+        }
+
+        listView = (ListView) findViewById(R.id.qnaList);
         adapter = new DocDataAdapter(mListItems, FileActivity.this);
-
-        //TODO if any user took action then refresh otherwise not to refresh,
-        // simply show data from local db
-
-        int is_action_taken = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 0);
-        if(is_action_taken == 1 && Util.getNetworkConnectivityStatus(FileActivity.this)) {
-            getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 0).commit();
-            doc_last_id = 0;
-        }
-
-        new AsyncTask<Void, Void, Void>(){
-
-            //private ActivityIndicator activityIndicator = ActivityIndicator.ctor(FileActivity.this);
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                if(isFinishing() == false){
-                    if (pBar == null) {
-                        pBar = (ProgressBar) findViewById(R.id.pBar);
-                    }
-                    pBar.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-
-                if(isFinishing() == false) {
-                    if (pBar == null) {
-                        pBar = (ProgressBar) findViewById(R.id.pBar);
-                    }
-                    pBar.setVisibility(View.GONE);
-                }
-
-                if(FileActivity.this.isFinishing() == false ){
-                    adapter = new DocDataAdapter(mListItems, FileActivity.this);
-                    listView.setAdapter(adapter);
-
-                    if ((mListItems == null || mListItems.size() <= 0)
-                            && (Util.getNetworkConnectivityStatus(FileActivity.this))) {
-                        doc_last_id = 0;
-
-                    }
-
-                    // Set a listener to be invoked when the list should be refreshed.
-                    listView.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
-
-                        public void onRefresh() {
-                            // Do work to refresh the list here.
-                            if(Util.getNetworkConnectivityStatus(FileActivity.this)) {
-                                doc_last_id = 0;
-
-                            }
-                        }
-                    });
-
-                    // set a listener to be invoked when the list reaches the end
-                    listView.setOnLoadMoreListener(new PullAndLoadListView.OnLoadMoreListener() {
-
-                        public void onLoadMore() {
-                            // Do the work to load more items at the end of list
-                            // here
-                        }
-                    });
-                }
-            }
-        }.execute();
+        listView.setAdapter(adapter);
     }
 
     private void setFileList(String filterText){
         if(mListItems == null){
-            mListItems = new LinkedList<Document>();
+            mListItems = new LinkedList<Doc>();
         }
 
-        final List<Document> _documentList = new ArrayList<Document>();
+        final List<Doc> _documentList = new ArrayList<Doc>();
         if(filterText != null && filterText.trim().length() > 0){
             for(int i = 0; i < mListItems.size(); i++){
-                String report_title = mListItems.get(i).getDocumentMaster().getDocument_title();
+                String report_title = mListItems.get(i).getDoc_title();
                 if(report_title.contains(filterText)){
                     _documentList.add(mListItems.get(i));
                 }
@@ -267,33 +223,6 @@ public class FileActivity extends ActionBarActivity {
         return super.dispatchTouchEvent(ev);
     }
 
-    /**
-     * To Show Material Alert Dialog
-     *
-     * @param code Should be one of the global declared integer constants
-     * @param message
-     * @param title
-     * */
-    private void showAlertDialog(String message, String title, String positiveButtonText, String negativeButtonText, final int code){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        builder.setNegativeButton(negativeButtonText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.show();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -316,5 +245,79 @@ public class FileActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onResume();
+        }
+    };
+
+    private List<Doc> getDocList() throws CouchbaseLiteException, IOException {
+
+        List<Doc> docList = new ArrayList<Doc>();
+        List<String> ids = getAllDocumentIds();
+        if(ids != null && ids.size() > 0) {
+            for (String id : ids) {
+                com.couchbase.lite.Document document = DatabaseUtil.getDocumentFromDocumentId(DatabaseUtil.getDatabaseInstance(FileActivity.this,
+                        Constants.YOUTH_CONNECT_DATABASE), id);
+                Doc doc = DocUtil.getDocFromDocument(document);
+                int user_type_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
+                if(user_type_id == 1) {
+                    // for admin show all pending questions which are not answer
+                    if(doc != null) {
+                        docList.add(doc);
+                    }
+                } else if(user_type_id == 2){
+                    // for nodal officers show all pending questions which are not answered
+                    // and asked by logged in user only
+                    int curently_logged_in_user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_ID, 0);
+                    if(doc != null) {
+                        int currently_logged_in_user_id =
+                                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0)
+                                        .getInt(Constants.SP_USER_ID, 0);
+                        if(doc.getCreated_by_user_id() == curently_logged_in_user_id){
+                            docList.add(doc);
+                        } else{
+                            int count = 0;
+                            List<AssignedToUSer> assignedToUSers = doc.getDoc_assigned_to_user_ids();
+                            if(assignedToUSers != null){
+                                for(AssignedToUSer assignedToUSer : assignedToUSers){
+                                    if(assignedToUSer.getUser_id() == curently_logged_in_user_id){
+                                        count++;
+                                    }
+                                }
+                                if(count > 0){
+                                    docList.add(doc);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return docList;
+    }
+
+    private List<String> getAllDocumentIds(){
+
+        List<String> docIds = new ArrayList<String>();
+        try {
+            Database database = DatabaseUtil.getDatabaseInstance(FileActivity.this, Constants.YOUTH_CONNECT_DATABASE);
+            Query query = database.createAllDocumentsQuery();
+            query.setAllDocsMode(Query.AllDocsMode.BY_SEQUENCE);
+            QueryEnumerator result = query.run();
+            for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+                QueryRow row = it.next();
+                docIds.add(row.getDocumentId());
+            }
+        } catch(CouchbaseLiteException exception){
+            Log.e(TAG, "Error", exception);
+        } catch (IOException exception){
+            com.couchbase.lite.util.Log.e(TAG, "onDeleteClick()", exception);
+        }
+
+        return docIds;
     }
 }

@@ -7,4 +7,10 @@
         android:icon="@drawable/ic_attach_file"
         android:title="Attach"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_done"
+        android:icon="@drawable/ic_done_white"
+        android:title="Done"
+        app:showAsAction="ifRoom" />
 </menu>

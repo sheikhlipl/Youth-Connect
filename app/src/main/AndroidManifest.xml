@@ -86,23 +86,16 @@
             android:name=".activity.FileUploadFinalActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.FileChooserMultipleActivity"
-            android:screenOrientation="portrait" >
-
-            <intent-filter >
-                <action android:name="android.intent.action.SEND_MULTIPLE"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*" />
-            </intent-filter>
-
-        </activity>
-        <activity
             android:name=".activity.FileUploadDetailFinalActivity"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".activity.CommentListActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.FileChooserMultipleActivity"
+            android:screenOrientation="portrait"/>
 
         <!--<service-->
         <!--android:name=".activity.Util.NotificationService"-->
