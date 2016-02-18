@@ -137,4 +137,7 @@ public class Constants {
     public static final String CURRENT_FRAGMENT_OF_QA = "current_qa_page";
     public static final String IS_ACTION_TAKEN_FOR_DOC = "is_action_taken_for_doc";
     public static final String IS_ACTION_TAKEN_FOR_QA = "is_action_taken_for_qa";
+
+    public static final String BROADCAST_ACTION_REPLICATION_CHANGE
+            = "com.lipl.youthconnect.youth_connect.replication.change";
 }

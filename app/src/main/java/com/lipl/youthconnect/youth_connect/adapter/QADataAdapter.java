@@ -3,6 +3,7 @@ package com.lipl.youthconnect.youth_connect.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +14,13 @@ import android.widget.TextView;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.activity.QNADetailsActivity;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by luminousinfoways on 29/01/16.
@@ -63,6 +67,43 @@ public class QADataAdapter extends BaseAdapter {
         TextView tvQusByUserName = (TextView) view.findViewById(R.id.tvQusByUserName);
         TextView tvNumberOfComments = (TextView) view.findViewById(R.id.tvNumberOfComments);
 
+        int min = 1;
+        int max = 5;
+        Random r = new Random();
+        int i1 = r.nextInt(max - min + 1) + min;
+        switch (i1){
+            case 1:
+                tvNumberOfComments.setBackgroundResource(R.drawable.circle_blue);
+                break;
+            case 2:
+                tvNumberOfComments.setBackgroundResource(R.drawable.circle_green);
+                break;
+            case 3:
+                tvNumberOfComments.setBackgroundResource(R.drawable.circle_red);
+                break;
+            case 4:
+                tvNumberOfComments.setBackgroundResource(R.drawable.circle_purple);
+                break;
+            case 5:
+                tvNumberOfComments.setBackgroundResource(R.drawable.circle_yellow);
+                break;
+            default:
+                tvNumberOfComments.setBackgroundResource(R.drawable.circle_purple);
+                break;
+        }
+
+        if(dataList != null &&
+                dataList.get(position) != null &&
+                dataList.get(position).getQuestion() != null &&
+                dataList.get(position).getQuestion().getAskedBy() != null
+                && dataList.get(position).getQuestion().getAskedBy().trim().length() > 0) {
+            String user_name = dataList.get(position).getQuestion().getAskedBy();
+            String first_two_characters_of_name = user_name.substring(0, 2).toUpperCase();
+            tvNumberOfComments.setText(first_two_characters_of_name);
+        } else{
+            tvNumberOfComments.setVisibility(View.GONE);
+        }
+
         if(dataList.get(position).getQuestion() != null
                 && dataList.get(position).getQuestion().getQa_title() != null
                 && dataList.get(position).getQuestion().getQa_title().length() > 0){
@@ -74,7 +115,12 @@ public class QADataAdapter extends BaseAdapter {
                 && dataList.get(position).getQuestion().getPost_date() != null
                 && dataList.get(position).getQuestion().getPost_date().length() > 0){
             String time = dataList.get(position).getQuestion().getPost_date();
-            tvTime.setText(time);
+            String time_to_show = getTimeToShow(time);
+            if(time_to_show != null){
+                tvTime.setText(time_to_show);
+            } else{
+                tvTime.setText(time);
+            }
         }
 
         if(dataList.get(position) != null
@@ -84,7 +130,7 @@ public class QADataAdapter extends BaseAdapter {
             tvQusByUserName.setText(username);
         }
 
-        /*ImageView imgStatus = (ImageView) view.findViewById(R.id.imgStatus);
+        ImageView imgStatus = (ImageView) view.findViewById(R.id.imgStatus);
         if(isFromForum){
             imgStatus.setImageResource(R.drawable.ic_done_white);
         } else if(isFromAnswered){
@@ -104,7 +150,7 @@ public class QADataAdapter extends BaseAdapter {
             } else{
                 imgStatus.setImageResource(R.drawable.ic_watch_later);
             }
-        }*/
+        }
 
         view.setOnClickListener(new View.OnClickListener() {
 
@@ -138,5 +184,30 @@ public class QADataAdapter extends BaseAdapter {
         });
 
         return view;
+    }
+
+    private String getTimeToShow(String time){
+        String currentDate = Util.getCurrentDateTime();
+        if(time != null && time.trim().length() > 0 && time.trim().contains(" ")){
+            String[] arr = time.trim().split(" ");
+            for(int i = 0; i < arr.length; i++){
+                String date = arr[0];
+                if(date != null &&
+                    date.length() > 0 &&
+                    currentDate != null &&
+                    currentDate.trim().length() > 0 &&
+                    date.trim().equalsIgnoreCase(currentDate.trim())){
+                    return arr[1] + " " + arr[2];
+                } else{
+                    String[] crdate = currentDate.split("-");
+                    String mon = crdate[1];
+                    String dd = crdate[0];
+                    String monName = Util.getMonInWord(mon);
+                    String to_return = monName + " " + dd;
+                    return to_return;
+                }
+            }
+        }
+        return null;
     }
 }

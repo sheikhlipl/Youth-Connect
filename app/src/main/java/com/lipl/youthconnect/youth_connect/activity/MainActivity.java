@@ -80,12 +80,6 @@ public class MainActivity extends ActionBarActivity implements
     private static final int LOGOUT = 10;
     public static ProgressDialog progressDialog = null;
     private static final String TAG = "MainActivity";
-    public static final String BROADCAST_ACTION_ANSWERD_FRAGMENT_REPLICATION_CHANGE
-            = "com.lipl.youthconnect.youth_connect.activity.answeredfragment";
-    public static final String BROADCAST_ACTION_FORUM_FRAGMENT_REPLICATION_CHANGE
-            = "com.lipl.youthconnect.youth_connect.activity.forumfragment";
-    public static final String BROADCAST_ACTION_PENDING_FRAGMENT_REPLICATION_CHANGE
-            = "com.lipl.youthconnect.youth_connect.activity.pendingfragment";
 
     static RelativeLayout notifCount;
 
@@ -133,10 +127,7 @@ public class MainActivity extends ActionBarActivity implements
             finish();
         }
 
-        int user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
-
-        String userFullName = "";
-
+        //String userFullName = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_NAME, "");
         //TextView drawerHeaderText = (TextView) findViewById(R.id.tvDrawerHeaderText);
         //drawerHeaderText.setText(userFullName);
 
@@ -674,12 +665,8 @@ public class MainActivity extends ActionBarActivity implements
             @Override
             public void run() {
                 try {
-                    Intent intent_answered = new Intent(BROADCAST_ACTION_ANSWERD_FRAGMENT_REPLICATION_CHANGE);
+                    Intent intent_answered = new Intent(Constants.BROADCAST_ACTION_REPLICATION_CHANGE);
                     sendBroadcast(intent_answered);
-                    Intent intent_pending = new Intent(BROADCAST_ACTION_PENDING_FRAGMENT_REPLICATION_CHANGE);
-                    sendBroadcast(intent_pending);
-                    Intent intent_forum = new Intent(BROADCAST_ACTION_FORUM_FRAGMENT_REPLICATION_CHANGE);
-                    sendBroadcast(intent_forum);
                 } catch (Exception exception) {
                     com.couchbase.lite.util.Log.e(TAG, "changed()", exception);
                 }
@@ -693,7 +680,7 @@ public class MainActivity extends ActionBarActivity implements
             public void run() {
                 String msg = String.format("%s: %s", errorMessage, throwable);
                 com.couchbase.lite.util.Log.e(TAG, msg, throwable);
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
             }
         });
     }

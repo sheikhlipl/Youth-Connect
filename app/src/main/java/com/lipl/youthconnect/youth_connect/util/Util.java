@@ -744,6 +744,19 @@ public class Util {
         return "";
     }
 
+    public static String getCurrentDateTime(){
+        try{
+            Calendar calendar = Calendar.getInstance();
+            TimeZone tz = TimeZone.getTimeZone("IST");
+            calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.getTimeInMillis()));
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            Date currenTimeZone = (Date) calendar.getTime();
+            return sdf.format(currenTimeZone);
+        }catch (Exception e) {
+        }
+        return "";
+    }
+
     public static boolean isJSONValid(String test) {
         try {
             new JSONObject(test);

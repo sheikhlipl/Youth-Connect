@@ -35,6 +35,7 @@ public class QAUtil {
             int is_answered = (Integer) document.getProperty(DatabaseUtil.QA_IS_ANSWERED);
             int is_published = (Integer) document.getProperty(DatabaseUtil.QA_IS_PUBLISHED);
             int is_uploaded = (Integer) document.getProperty(DatabaseUtil.QA_IS_UPLOADED);
+            int asked_by_user_id = (Integer) document.getProperty(DatabaseUtil.QA_ASKED_BY_USER_ID);
 
             ArrayList<LinkedHashMap<String, String>> answerJson = (ArrayList<LinkedHashMap<String, String>>) document.getProperty(DatabaseUtil.QA_ANSWER);
             ArrayList<LinkedHashMap<String, String>> commentJson = (ArrayList<LinkedHashMap<String, String>>) document.getProperty(DatabaseUtil.QA_COMMENT);
@@ -81,6 +82,7 @@ public class QAUtil {
             question.setIs_answer(is_answered);
             question.setIs_publish(is_published);
             question.setPost_date(postDate);
+            question.setQus_asked_by_user_id(asked_by_user_id);
             question.setIs_uploaded(is_uploaded);
 
             QuestionAndAnswer questionAndAnswer = new QuestionAndAnswer(Parcel.obtain());

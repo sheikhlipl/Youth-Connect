@@ -1,8 +1,11 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -34,6 +37,7 @@ import com.lipl.youthconnect.youth_connect.pojo.Comment;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.FileUploadService;
 import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.pojo.Answer;
@@ -227,7 +231,9 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
         if(isFromForum){
             commentList = getPublishedCommentList();
         } else {
-            commentList = questionAndAnswer.getCommentList();
+            if(questionAndAnswer != null) {
+                commentList = questionAndAnswer.getCommentList();
+            }
         }
 
         Collections.reverse(commentList);
@@ -682,16 +688,6 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
             if(res == 1){
                 finish();
             }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        int isToFinish = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.IS_ACTION_TAKEN_FOR_QA, 0);
-        if(isToFinish == 1){
-            YouthConnectSingleTone.getInstance().CURRENT_FRAGMENT_IN_QA = Constants.FRAGMENT_QA_SUB_FRAGMENT_ANSWERED;
-            finish();
         }
     }
 
@@ -1167,4 +1163,33 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
             }
         });
     }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try{
+                setCommentsToList();
+            } catch(Exception exception){
+                Log.e(TAG, "OnReceive()", exception);
+            }
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(broadcastReceiver, new IntentFilter(FileUploadService.BROADCAST_ACTION));
+        int isToFinish = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.IS_ACTION_TAKEN_FOR_QA, 0);
+        if(isToFinish == 1){
+            YouthConnectSingleTone.getInstance().CURRENT_FRAGMENT_IN_QA = Constants.FRAGMENT_QA_SUB_FRAGMENT_ANSWERED;
+            finish();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
 }

@@ -4,4 +4,8 @@
         android:state_pressed="true"/>
     <item android:drawable="@drawable/white_body_blue_border_square"
         android:state_pressed="false"/>
+    <item android:drawable="@drawable/white_body_blue_border_square"
+        android:state_enabled="true"/>
+    <item android:drawable="@drawable/white_body_light_gray_border_square"
+        android:state_enabled="false"/>
 </selector>

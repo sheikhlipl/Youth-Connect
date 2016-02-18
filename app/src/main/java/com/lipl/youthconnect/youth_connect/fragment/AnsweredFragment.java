@@ -144,7 +144,7 @@ public class AnsweredFragment extends Fragment implements
     public void onStart() {
         super.onStart();
         getActivity().registerReceiver(broadcastReceiver,
-                new IntentFilter(MainActivity.BROADCAST_ACTION_ANSWERD_FRAGMENT_REPLICATION_CHANGE));
+                new IntentFilter(Constants.BROADCAST_ACTION_REPLICATION_CHANGE));
     }
 
     @Override
@@ -273,10 +273,24 @@ public class AnsweredFragment extends Fragment implements
                 Document document = DatabaseUtil.getDocumentFromDocumentId(DatabaseUtil.getDatabaseInstance(getActivity(),
                         Constants.YOUTH_CONNECT_DATABASE), id);
                 QuestionAndAnswer questionAndAnswer = QAUtil.getQAFromDocument(document);
-                if(questionAndAnswer != null
-                        && questionAndAnswer.getQuestion() != null
-                        && questionAndAnswer.getQuestion().getIs_answer() == 1) {
-                    questionAndAnswerArrayList.add(questionAndAnswer);
+                int user_type_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
+                if(user_type_id == 1) {
+                    // for admin show all pending questions which are not answer
+                    if(questionAndAnswer != null
+                            && questionAndAnswer.getQuestion() != null
+                            && questionAndAnswer.getQuestion().getIs_answer() == 1) {
+                        questionAndAnswerArrayList.add(questionAndAnswer);
+                    }
+                } else if(user_type_id == 2){
+                    // for nodal officers show all pending questions which are not answered
+                    // and asked by logged in user only
+                    int curently_logged_in_user_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_ID, 0);
+                    if(questionAndAnswer != null
+                            && questionAndAnswer.getQuestion() != null
+                            && questionAndAnswer.getQuestion().getIs_answer() == 1
+                            && questionAndAnswer.getQuestion().getQus_asked_by_user_id() == curently_logged_in_user_id) {
+                        questionAndAnswerArrayList.add(questionAndAnswer);
+                    }
                 }
             }
         }

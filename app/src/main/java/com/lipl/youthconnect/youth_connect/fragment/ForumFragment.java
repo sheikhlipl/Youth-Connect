@@ -245,7 +245,7 @@ public class ForumFragment extends Fragment implements
     public void onStart() {
         super.onStart();
         getActivity().registerReceiver(broadcastReceiver,
-                new IntentFilter(MainActivity.BROADCAST_ACTION_FORUM_FRAGMENT_REPLICATION_CHANGE));
+                new IntentFilter(Constants.BROADCAST_ACTION_REPLICATION_CHANGE));
     }
 
     @Override

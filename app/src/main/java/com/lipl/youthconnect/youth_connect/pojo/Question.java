@@ -11,7 +11,7 @@ public class Question implements Parcelable {
     private String qa_id;
     private String qa_title;
     private String qa_description;
-    private String user_id;
+    private int qus_asked_by_user_id;
     private int is_answer;
     private int is_publish;
     private String post_date;
@@ -60,12 +60,12 @@ public class Question implements Parcelable {
         this.qa_description = qa_description;
     }
 
-    public String getUser_id() {
-        return user_id;
+    public int getQus_asked_by_user_id() {
+        return qus_asked_by_user_id;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setQus_asked_by_user_id(int qus_asked_by_user_id) {
+        this.qus_asked_by_user_id = qus_asked_by_user_id;
     }
 
     public int getIs_answer() {
@@ -136,7 +136,7 @@ public class Question implements Parcelable {
         dest.writeString(qa_id);
         dest.writeString(qa_title);
         dest.writeString(qa_description);
-        dest.writeString(user_id);
+        dest.writeInt(qus_asked_by_user_id);
         dest.writeInt(is_answer);
         dest.writeInt(is_publish);
         dest.writeString(post_date);
@@ -150,7 +150,7 @@ public class Question implements Parcelable {
         qa_id = in.readString();
         qa_title = in.readString();
         qa_description = in.readString();
-        user_id = in.readString();
+        qus_asked_by_user_id = in.readInt();
         is_answer = in.readInt();
         is_publish = in.readInt();
         post_date = in.readString();

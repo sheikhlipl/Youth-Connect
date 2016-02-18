@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/transparent_blue_square"
     android:layout_marginBottom="12dp">
 
     <RelativeLayout
@@ -16,35 +15,36 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/layoutDateTime"
             android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:background="@color/colorPrimaryDark">
+            android:paddingBottom="12dp">
 
             <TextView
                 android:id="@+id/tvNumberOfComments"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="12dp"
-                android:text="0"
-                android:visibility="invisible"
+                android:layout_marginRight="12dp"
+                android:text="AB"
+                android:background="@drawable/circle_blue"
                 android:layout_centerVertical="true"
-                android:textColor="@android:color/white"
+                android:textColor="@color/white"
+                android:padding="12dp"
                 android:textSize="18sp" />
 
-            <ImageView
-                android:id="@+id/imgComment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_comment_white"
-                android:adjustViewBounds="true"
-                android:layout_margin="12dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/tvNumberOfComments"
-                android:scaleType="fitCenter"/>
+            <!--<ImageView-->
+                <!--android:id="@+id/imgComment"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:src="@drawable/ic_comment_white"-->
+                <!--android:adjustViewBounds="true"-->
+                <!--android:layout_margin="12dp"-->
+                <!--android:layout_centerVertical="true"-->
+                <!--android:layout_toRightOf="@+id/tvNumberOfComments"-->
+                <!--android:scaleType="fitCenter"/>-->
 
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/imgComment"
+                android:layout_toRightOf="@+id/tvNumberOfComments"
                 android:layout_toLeftOf="@+id/imgStatus"
                 android:id="@+id/layoutCard">
                 <TextView
@@ -52,17 +52,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:textColor="@android:color/white"
+                    android:text="Title"
+                    android:textStyle="bold"
+                    android:layout_toLeftOf="@+id/tvTime"
+                    android:textColor="@color/textColorPrimary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/tvTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/tvFileTitle"
+                    android:layout_alignParentRight="true"
                     android:layout_margin="5dp"
+                    android:textStyle="bold"
                     android:gravity="left"
-                    android:textColor="@color/white"
+                    android:text="12:12 PM"
+                    android:textColor="@color/colorPrimary"
                     android:textSize="12sp" />
 
                 <TextView
@@ -71,8 +76,8 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/tvFileTitle"
                     android:layout_margin="5dp"
-                    android:layout_toRightOf="@+id/tvTime"
-                    android:textColor="@color/white"
+                    android:text="User Name"
+                    android:textColor="@color/secondary_text_color"
                     android:textSize="12sp" />
 
             </RelativeLayout>
@@ -82,6 +87,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_watch_later"
+                android:padding="6dp"
+                android:background="@drawable/circle_blue"
                 android:adjustViewBounds="true"
                 android:layout_margin="12dp"
                 android:layout_centerVertical="true"
