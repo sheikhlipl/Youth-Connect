@@ -15,6 +15,7 @@ import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.newrelic.agent.android.NewRelic;
+import com.pushbots.push.Pushbots;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -25,6 +26,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Pushbots.sharedInstance().init(this);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
 
