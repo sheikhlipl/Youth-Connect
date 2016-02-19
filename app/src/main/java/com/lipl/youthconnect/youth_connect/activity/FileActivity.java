@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -49,6 +50,7 @@ import com.lipl.youthconnect.youth_connect.pojo.DocumentMaster;
 import com.lipl.youthconnect.youth_connect.pojo.DocumentUpload;
 import com.lipl.youthconnect.youth_connect.pojo.PendingFileToUpload;
 import com.lipl.youthconnect.youth_connect.pojo.User;
+import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,7 +85,6 @@ public class FileActivity extends ActionBarActivity implements SearchView.OnQuer
     private DocDataAdapter adapter;
     private static final String TAG = "FileActivity";
     private int doc_last_id = 0;
-    private ProgressBar pBar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +99,6 @@ public class FileActivity extends ActionBarActivity implements SearchView.OnQuer
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle("Documentation");
-
-        pBar = (ProgressBar) findViewById(R.id.pBar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -148,6 +147,7 @@ public class FileActivity extends ActionBarActivity implements SearchView.OnQuer
     @Override
     protected void onResume() {
         super.onResume();
+        registerReceiver(broadcastReceiver, new IntentFilter(Constants.BROADCAST_ACTION_REPLICATION_CHANGE));
 
         if(mListItems == null) {
             mListItems = new LinkedList<Doc>();
@@ -329,5 +329,11 @@ public class FileActivity extends ActionBarActivity implements SearchView.OnQuer
         }
 
         return docIds;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
     }
 }

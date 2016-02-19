@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -133,7 +134,6 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
             }
 
             List<FileToUpload> fileToUploads = document.getFileToUploads();
-
             if(fileToUploads != null && fileToUploads.size() > 0) {
 
                 LinearLayout layoutDoc = (LinearLayout) findViewById(R.id.layoutFileDetails);
@@ -154,22 +154,40 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                     imgFileDownload.setBackgroundResource(R.color.blue);
                     progressBar.setVisibility(View.INVISIBLE);
 
+                    String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/youth_connect";
+                    File dir = new File(fullPath);
+                    if (!dir.exists()) {
+                        dir.mkdirs();
+                    }
+                    OutputStream fOut = null;
+                    String filename = documentUpload.getFile_name();
+                    final File _file = new File(fullPath, filename);
+                    if (_file.exists()) {
+                        imgFileDownload.setTag(R.drawable.ic_insert_drive_file);
+                        imgFileDownload.setImageResource(R.drawable.ic_insert_drive_file);
+                        imgFileDownload.setBackgroundResource(R.drawable.circle_blue);
+                    }
 
                     layoutImage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Integer integer = (Integer) imgFileDownload.getTag();
-                            integer = integer == null ? 0 : integer;
-                            if (integer == R.drawable.ic_file_download) {
-                                if (Util.getNetworkConnectivityStatus(FileDetailsActivity.this)) {
-                                    //Download file from download link
-                                    String download_link = documentUpload.getDownload_link_url();
-                                    if(download_link != null && download_link.length() > 0){
-                                        DownloadFileFromURL downloadFileAsync = new DownloadFileFromURL(imgFileDownload, progressBar);
-                                        downloadFileAsync.execute(download_link);
-                                    }
+                        Integer integer = (Integer) imgFileDownload.getTag();
+                        integer = integer == null ? 0 : integer;
+                        if (integer == R.drawable.ic_file_download) {
+                            if (Util.getNetworkConnectivityStatus(FileDetailsActivity.this)) {
+                                //Download file from download link
+                                String download_link = documentUpload.getDownload_link_url();
+                                String fileName = documentUpload.getFile_name();
+                                if(download_link != null && download_link.length() > 0){
+                                    Log.i(TAG, "Download link : "+ download_link);
+                                    DownloadFileFromURL downloadFileAsync = new DownloadFileFromURL(imgFileDownload,
+                                            progressBar, fileName);
+                                    downloadFileAsync.execute(download_link);
                                 }
                             }
+                        } else{
+                            openDocument(_file);
+                        }
                         }
                     });
 
@@ -177,6 +195,115 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                 }
             }
         }
+    }
+
+    private void openDocument(File file) {
+        if (file == null || file.getAbsolutePath() == null) {
+            return;
+        }
+
+        final String filePath = file.getAbsolutePath();
+        if (filePath != null && filePath.length() > 0
+                && ((filePath.contains("jpg")) ||
+                (filePath.contains("jpeg")) ||
+                (filePath.contains("bmp")) ||
+                (filePath.contains("png")))) {
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
+
+            //Open Image
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+            String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            if (extension.equalsIgnoreCase("") || mimetype == null) {
+                // if there is no extension or there is no definite mimetype, still try to open the file
+                intent.setDataAndType(Uri.fromFile(file), "image/*");
+            } else {
+                intent.setDataAndType(Uri.fromFile(file), mimetype);
+            }
+
+            // custom message for the intent
+            Intent appIntent = Intent.createChooser(intent, "Choose an Application:");
+            if (appIntent != null) {
+                startActivity(appIntent);
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
+                builder.setTitle(getResources().getString(R.string.no_app_found_title));
+                builder.setMessage(getResources().getString(R.string.no_app_found_message));
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+            }
+        } else if (filePath != null && filePath.length() > 0
+                && ((filePath.contains("mp4")) ||
+                (filePath.contains("flv")) ||
+                (filePath.contains("3gp")) ||
+                (filePath.contains("avi")))) {
+
+            //Open Video
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+            String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            if (extension.equalsIgnoreCase("") || mimetype == null) {
+                // if there is no extension or there is no definite mimetype, still try to open the file
+                intent.setDataAndType(Uri.fromFile(file), "video/*");
+            } else {
+                intent.setDataAndType(Uri.fromFile(file), mimetype);
+            }
+
+            // custom message for the intent
+            Intent appIntent = Intent.createChooser(intent, "Choose an Application:");
+            if (appIntent != null) {
+                startActivity(appIntent);
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
+                builder.setTitle(getResources().getString(R.string.no_app_found_title));
+                builder.setMessage(getResources().getString(R.string.no_app_found_message));
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+            }
+
+        } else {
+
+                    //Open Document
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+                    String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                    if (extension.equalsIgnoreCase("") || mimetype == null) {
+                        // if there is no extension or there is no definite mimetype, still try to open the file
+                        intent.setDataAndType(Uri.fromFile(file), "text/*");
+                    } else {
+                        intent.setDataAndType(Uri.fromFile(file), mimetype);
+                    }
+
+                    // custom message for the intent
+                    Intent appIntent = Intent.createChooser(intent, "Choose an Application:");
+                    if (appIntent != null) {
+                        startActivity(appIntent);
+                    } else {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(FileDetailsActivity.this, R.style.AppCompatAlertDialogStyle);
+                            builder.setTitle(getResources().getString(R.string.no_app_found_title));
+                            builder.setMessage(getResources().getString(R.string.no_app_found_message));
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            builder.show();
+                        }
+                    }
     }
 
     @Override
@@ -196,7 +323,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                 if(document != null && document.getIs_published() == 0){
                     String doc_id = document.getDoc_id();
                     try {
-                        DocUtil.deleteDoc(DatabaseUtil.getDatabaseInstance(FileDetailsActivity.this,
+                        DatabaseUtil.deleteDoc(DatabaseUtil.getDatabaseInstance(FileDetailsActivity.this,
                                 Constants.YOUTH_CONNECT_DATABASE), doc_id);
                         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
                         builder.setTitle("Doc Publish");
@@ -396,10 +523,12 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
 
         private ImageView imgFileDownload = null;
         private ProgressBar progressBar = null;
+        private String fileName = null;
 
-        public DownloadFileFromURL(ImageView imgFileDownload, ProgressBar progressBar){
+        public DownloadFileFromURL(ImageView imgFileDownload, ProgressBar progressBar, String fileName){
             this.imgFileDownload = imgFileDownload;
             this.progressBar = progressBar;
+            this.fileName = fileName;
         }
 
         /**
@@ -445,8 +574,13 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                     dir.mkdirs();
                 }
                 OutputStream fOut = null;
-                File file = new File(fullPath, download_link);
-                if(file.exists())
+
+                if(fileName == null || fileName.length() <= 0){
+                    fileName = "abcd";
+                }
+
+                File file = new File(fullPath, fileName);
+                if (file.exists())
                     file.delete();
                 file.createNewFile();
 
@@ -461,7 +595,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                     total += count;
                     // publishing the progress....
                     // After this onProgressUpdate will be called
-                    publishProgress(""+(int)((total*100)/lenghtOfFile));
+                    //publishProgress("" + (int) ((total * 100) / lenghtOfFile));
 
                     // writing data to file
                     output.write(data, 0, count);
@@ -473,6 +607,8 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                 // closing streams
                 output.close();
                 input.close();
+
+                File f = file;
 
                 return file.getPath();
             } catch(SocketTimeoutException exception){
@@ -503,13 +639,13 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                 @Override
                 public void run() {
 
-                    if (file_url != null && file_url.trim().length() > 0) {
-                        imgFileDownload.setTag(R.drawable.ic_insert_drive_file);
-                        imgFileDownload.setImageResource(R.drawable.ic_insert_drive_file);
-                        imgFileDownload.setBackgroundResource(R.drawable.circle_blue);
-                    }
+                if (file_url != null && file_url.trim().length() > 0) {
+                    imgFileDownload.setTag(R.drawable.ic_insert_drive_file);
+                    imgFileDownload.setImageResource(R.drawable.ic_insert_drive_file);
+                    imgFileDownload.setBackgroundResource(R.drawable.circle_blue);
                 }
-            }, 2000);
+                }
+            }, 1000);
 
         }
     }

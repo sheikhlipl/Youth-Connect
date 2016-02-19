@@ -13,6 +13,7 @@ import com.crashlytics.android.Crashlytics;
 import com.lipl.youthconnect.youth_connect.LogExActivity;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.CustomHandler;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.newrelic.agent.android.NewRelic;
 import com.pushbots.push.Pushbots;
@@ -37,6 +38,11 @@ public class SplashActivity extends AppCompatActivity {
                 "AAd15196cb115e4343bd34c0675c6760a250a773ad"
         ).start(this.getApplication());
 
+        int loginStatus = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_LOGIN_STATUS, 0);
+        if(loginStatus == 1){
+            Pushbots.sharedInstance().setCustomHandler(CustomHandler.class);
+        }
+
         TextView textview = (TextView) findViewById(R.id.tvBottomText);
         textview.setSelected(true);
         textview.setMovementMethod(new ScrollingMovementMethod());
@@ -47,7 +53,6 @@ public class SplashActivity extends AppCompatActivity {
          * 3. if user is admin then sync district with user details
          * 4. otherwise if user is nodal officer then just navigate to main screen
          * */
-        int loginStatus = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_LOGIN_STATUS, 0);
         //if(loginStatus == 1){
         if(Util.getNetworkConnectivityStatus(SplashActivity.this)){
             //syncDistrictList();

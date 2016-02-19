@@ -158,8 +158,16 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
         RelativeLayout layoutPostComment = (RelativeLayout) findViewById(R.id.layoutPostComment);
         if(isFromForum){
             layoutPostComment.setVisibility(View.GONE);
-        } else{
+        } else if(isFromAnswered){
             layoutPostComment.setVisibility(View.VISIBLE);
+        } else{
+            if(user_type == 1){
+                // visible for admin to answer
+                layoutPostComment.setVisibility(View.VISIBLE);
+            } else{
+                // invisible for nodal
+                layoutPostComment.setVisibility(View.GONE);
+            }
         }
 
         EditText etComment = (EditText) findViewById(R.id.etComment);
@@ -388,6 +396,7 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
                                         Log.e(TAG, "onClick()", exception);
                                     }
                                     dialog.dismiss();
+                                    finish();
                                 }
                             });
                             builder12.show();
@@ -455,6 +464,7 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
                                                 Log.e(TAG, "onClick()", exception);
                                             }
                                             dialog.dismiss();
+                                            finish();
                                         }
                                     });
                                     builder12.show();
@@ -1168,6 +1178,16 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
         @Override
         public void onReceive(Context context, Intent intent) {
             try{
+                if(questionAndAnswer != null) {
+                    String doc_id = questionAndAnswer.getQid();
+                    if(doc_id != null) {
+                        Document doc = DatabaseUtil.getDocumentFromDocumentId(DatabaseUtil
+                                .getDatabaseInstance(QNADetailsActivity.this, Constants.YOUTH_CONNECT_DATABASE), doc_id);
+                        if(doc != null) {
+                            questionAndAnswer = QAUtil.getQAFromDocument(doc);
+                        }
+                    }
+                }
                 setCommentsToList();
             } catch(Exception exception){
                 Log.e(TAG, "OnReceive()", exception);
@@ -1178,7 +1198,7 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(broadcastReceiver, new IntentFilter(FileUploadService.BROADCAST_ACTION));
+        registerReceiver(broadcastReceiver, new IntentFilter(Constants.BROADCAST_ACTION_REPLICATION_CHANGE));
         int isToFinish = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.IS_ACTION_TAKEN_FOR_QA, 0);
         if(isToFinish == 1){
             YouthConnectSingleTone.getInstance().CURRENT_FRAGMENT_IN_QA = Constants.FRAGMENT_QA_SUB_FRAGMENT_ANSWERED;

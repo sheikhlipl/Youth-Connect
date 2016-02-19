@@ -92,4 +92,15 @@ public class DatabaseUtil {
         }
         return syncURL;
     }
+
+    public static void deleteDoc(Database database, String documentId){
+        Document document = database.getDocument(documentId);
+        try {
+            document.delete();
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e("DocUtil", "Error putting", e);
+        } catch(Exception exception){
+            android.util.Log.e("DocUtil", "updateDocument()", exception);
+        }
+    }
 }

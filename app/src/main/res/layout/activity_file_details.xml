@@ -56,7 +56,6 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-                    android:text="Created By"
                     android:layout_margin="5dp"
                     android:paddingLeft="12dp"
                     android:gravity="right"
@@ -81,7 +80,6 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-                    android:text="Event Title Value"
                     android:textStyle="bold"
                     android:padding="12dp"
                     android:layout_below="@+id/tvCreatedBy"
@@ -93,12 +91,19 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-                    android:text="Purpose"
                     android:layout_below="@+id/tvEventTitleValue"
                     android:textColor="@color/textColorPrimary"
                     android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
+                    android:textAppearance="?android:textAppearance"
                     android:padding="12dp" />
+
+                <LinearLayout
+                    android:id="@+id/layoutDivider"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray"
+                    android:layout_below="@+id/tvEventPurpose"/>
 
                 <TextView
                     android:id="@+id/tvUploadDoc"
@@ -106,11 +111,11 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
                     android:text="Uploaded Documents"
-                    android:layout_below="@+id/tvEventPurpose"
+                    android:layout_below="@+id/layoutDivider"
                     android:layout_marginBottom="12dp"
                     android:textColor="@color/colorPrimary"
                     android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
+                    android:textAppearance="?android:textAppearance"
                     android:padding="12dp"/>
 
                 <LinearLayout

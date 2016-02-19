@@ -37,6 +37,7 @@ import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.adapter.NodalOfficerListViewAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Document;
 import com.lipl.youthconnect.youth_connect.pojo.User;
+import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -119,6 +120,12 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
         listView = (ListView) findViewById(R.id.distList);
         if(nodalOfficers == null) {
             nodalOfficers = new ArrayList<User>();
+        }
+
+        if(YouthConnectSingleTone.getInstance().nodalOfficerUsers != null
+                && YouthConnectSingleTone.getInstance().nodalOfficerUsers.size() > 0){
+            nodalOfficers.clear();
+            nodalOfficers.addAll(YouthConnectSingleTone.getInstance().nodalOfficerUsers);
         }
         handler = new Handler();
 

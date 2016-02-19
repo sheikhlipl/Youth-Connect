@@ -42,11 +42,11 @@
                 <!--android:layout_alignParentRight="true"-->
                 <!--android:layout_alignParentTop="true"/>-->
 
-                <ProgressBar
-                    android:id="@+id/pBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"/>
+                <!--<ProgressBar-->
+                    <!--android:id="@+id/pBar"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_centerInParent="true"/>-->
 
                 <!--<android.support.v7.widget.RecyclerView-->
                     <!--android:id="@+id/qnaList"-->

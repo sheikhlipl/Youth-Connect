@@ -140,4 +140,6 @@ public class Constants {
 
     public static final String BROADCAST_ACTION_REPLICATION_CHANGE
             = "com.lipl.youthconnect.youth_connect.replication.change";
+
+    public static final String NEXT_ACTIVITY = "nextActivity";
 }

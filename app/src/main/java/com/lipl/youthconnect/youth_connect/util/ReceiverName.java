@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ReceiverName extends BroadcastReceiver implements Replication.ChangeListener {
     private static final String TAG = "ReceiverName";
@@ -57,6 +58,9 @@ public class ReceiverName extends BroadcastReceiver implements Replication.Chang
             String msg = String.format("Replicator %s not running", replication);
             com.couchbase.lite.util.Log.i(TAG, msg);
         } else {
+            Set<String> pending_docIds = replication.getPendingDocumentIDs();
+            List<String> doc_ids = replication.getDocIds();
+
             int processed = replication.getCompletedChangesCount();
             int total = replication.getChangesCount();
             String msg = String.format("Replicator processed %d / %d", processed, total);

@@ -31,8 +31,10 @@ import com.lipl.youthconnect.youth_connect.pojo.User;
 import com.lipl.youthconnect.youth_connect.pojo.UserType;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.Util;
+import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -47,6 +49,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by luminousinfoways on 08/12/15.
@@ -478,7 +482,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         }
 
                         //getNotification();
-                        //syncDistrictList();
+                        syncDistrictList();
 
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
@@ -525,6 +529,218 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             MaterialEditText password = (MaterialEditText) findViewById(R.id.password);
             password.setEnabled(true);
             password.setClickable(true);
+        }
+    }
+
+    /**
+     * Execute asynctask to sync camp table
+     * */
+    private void syncDistrictList(){
+        if(Util.getNetworkConnectivityStatus(LoginActivity.this)) {
+            SyncDetails asyncTask = new SyncDetails();
+            asyncTask.execute();
+        }
+    }
+
+    /**
+     * Async task to get sync camp table from server
+     * */
+    private class SyncDetails extends AsyncTask<String, Void, Void> {
+
+        private static final String TAG = "SyncDetails";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            onPreExecuteTask();
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+
+            try {
+
+                InputStream in = null;
+                int resCode = -1;
+
+                String link = Constants.BASE_URL+Constants.REQUEST_URL_DIST_LIST;
+                URL url = new URL(link);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.setAllowUserInteraction(false);
+                conn.setInstanceFollowRedirects(true);
+                conn.setRequestMethod("POST");
+
+                Uri.Builder builder = new Uri.Builder()
+                        .appendQueryParameter("modified_date", "");
+                String query = builder.build().getEncodedQuery();
+
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(query);
+                writer.flush();
+                writer.close();
+                os.close();
+
+                conn.connect();
+                resCode = conn.getResponseCode();
+                if (resCode == HttpURLConnection.HTTP_OK) {
+                    in = conn.getInputStream();
+                }
+                if(in == null){
+                    return null;
+                }
+                BufferedReader reader =new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                String response = "",data="";
+
+                while ((data = reader.readLine()) != null){
+                    response += data + "\n";
+                }
+
+                Log.i(TAG, "Response : "+response);
+
+                /**
+                 * {
+                 "DISTRICT": {
+                 "1": "Angul",
+                 "2": "Boudh",
+                 "3": "Bhadrak",
+                 "4": "Balangir",
+                 "5": "Bargarh",
+                 "6": "Balasore",
+                 "7": "Cuttack",
+                 "8": "Debagarh",
+                 "9": "Dhenkanal",
+                 "10": "Ganjam",
+                 "11": "Gajapati",
+                 "12": "Jharsuguda",
+                 "13": "Jajapur",
+                 "14": "Jagatsinghapur",
+                 "15": "Khordha",
+                 "16": "Kendujhar",
+                 "17": "Kalahandi",
+                 "18": "Kandhamal",
+                 "19": "Koraput",
+                 "20": "Kendrapara",
+                 "21": "Malkangiri",
+                 "22": "Mayurbhanj",
+                 "23": "Nabarangapur",
+                 "24": "Nuapada",
+                 "25": "Nayagarh",
+                 "26": "Puri",
+                 "27": "Rayagada",
+                 "28": "Sambalpur",
+                 "29": "Subarnapur",
+                 "30": "Sundargarh"
+                 },
+                 "NODAL": [
+                 {
+                 "User": {
+                 "user_id": "2",
+                 "m_district_id": "1",
+                 "full_name": "Angul Nodal1"
+                 }
+                 },
+                 {
+                 "User": {
+                 "user_id": "3",
+                 "m_district_id": "1",
+                 "full_name": "Angul Nodal2"
+                 }
+                 }
+                 ]
+                 }
+                 * */
+
+                if(response != null && response.length() > 0){
+
+                    JSONObject res = new JSONObject(response);
+                    JSONArray district = res.optJSONArray("DISTRICT");
+
+                    if(district == null){
+                        return null;
+                    }
+
+                    List<District> districtList = new ArrayList<District>();
+
+                    for(int i = 0; i < district.length(); i++){
+
+                        JSONObject distObj = district.optJSONObject(i).optJSONObject("MDistrict");
+                        String dist_id = distObj.optString("m_district_id");
+                        String m_district = distObj.optString("m_district");
+                        String modifiedDate = Util.getCurentDate();
+
+                        if(dist_id != null && dist_id.trim().length() > 0 && TextUtils.isDigitsOnly(dist_id)) {
+                            District district1 = new District(Parcel.obtain());
+                            district1.setM_district(m_district);
+                            district1.setM_district_id(Integer.parseInt(dist_id));
+                            district1.setModifiedDate(modifiedDate);
+                            districtList.add(district1);
+                        }
+                    }
+
+                    JSONArray nodal = res.optJSONArray("NODAL");
+
+                    if(nodal == null){
+                        return null;
+                    }
+
+                    List<User> nodalUserList = new ArrayList<User>();
+
+                    for(int i = 0; i < nodal.length(); i++){
+
+                        JSONObject userObj = nodal.optJSONObject(i).optJSONObject("User");
+                        String user_id = userObj.optString("user_id");
+                        String m_district_id = userObj.optString("m_district_id");
+                        String full_name = userObj.optString("full_name");
+
+                        if(user_id != null && user_id.trim().length() > 0 && TextUtils.isDigitsOnly(user_id)) {
+                            User user = new User(Parcel.obtain());
+                            user.setUser_id(Integer.parseInt(user_id));
+                            user.setM_district_id(m_district_id);
+                            user.setFull_name(full_name);
+                            user.setM_user_type_id("2");
+                            nodalUserList.add(user);
+                        }
+                    }
+
+                    if(nodalUserList != null && nodalUserList.size() > 0){
+                        YouthConnectSingleTone.getInstance().nodalOfficerUsers.addAll(nodalUserList);
+                    }
+                    return null;
+                }
+            } catch(SocketTimeoutException exception){
+                Log.e(TAG, "LoginAsync : doInBackground", exception);
+            } catch(ConnectException exception){
+                Log.e(TAG, "LoginAsync : doInBackground", exception);
+            } catch(MalformedURLException exception){
+                Log.e(TAG, "LoginAsync : doInBackground", exception);
+            } catch (IOException exception){
+                Log.e(TAG, "LoginAsync : doInBackground", exception);
+            } catch(Exception exception){
+                Log.e(TAG, "LoginAsync : doInBackground", exception);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void user) {
+            super.onPostExecute(user);
+
+            onPostExecuteTask();
+
+            int loginStatus = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_LOGIN_STATUS, 0);
+            if(loginStatus == 1){
+                //getNotificationCount();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
+            }
         }
     }
 }

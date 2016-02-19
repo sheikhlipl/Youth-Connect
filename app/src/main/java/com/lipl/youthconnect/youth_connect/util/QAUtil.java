@@ -3,6 +3,8 @@ package com.lipl.youthconnect.youth_connect.util;
 import android.os.Parcel;
 import android.util.Log;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.lipl.youthconnect.youth_connect.pojo.Answer;
 import com.lipl.youthconnect.youth_connect.pojo.Comment;
@@ -14,8 +16,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Android Luminous on 2/16/2016.
@@ -96,5 +100,42 @@ public class QAUtil {
             Log.e("QAUtil", "getQAFromDocument()", exception);
         }
         return null;
+    }
+
+    public static void updateDocForEditQuestion(Database database, String documentId,
+                           String qus_title, String qus_desc, int asked_by_user_id){
+        Document document = database.getDocument(documentId);
+        try {
+            // Update the document with more data
+            Map<String, Object> updatedProperties = new HashMap<String, Object>();
+            updatedProperties.putAll(document.getProperties());
+            updatedProperties.put(DatabaseUtil.QA_TITLE, qus_title);
+            updatedProperties.put(DatabaseUtil.QA_ASKED_BY_USER_ID, asked_by_user_id);
+            updatedProperties.put(DatabaseUtil.QA_DESC, qus_desc);
+            // Save to the Couchbase local Couchbase Lite DB
+            document.putProperties(updatedProperties);
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e("QAUtil", "Error putting", e);
+        } catch(Exception exception){
+            Log.e("QAUtil", "updateDocument()", exception);
+        }
+    }
+
+    public static void updateDocForEditAnswer(Database database, String documentId,
+                                          List<Answer> answerList, int asked_by_user_id){
+        Document document = database.getDocument(documentId);
+        try {
+            // Update the document with more data
+            Map<String, Object> updatedProperties = new HashMap<String, Object>();
+            updatedProperties.putAll(document.getProperties());
+            updatedProperties.put(DatabaseUtil.QA_ANSWER, answerList);
+            updatedProperties.put(DatabaseUtil.QA_ASKED_BY_USER_ID, asked_by_user_id);
+            // Save to the Couchbase local Couchbase Lite DB
+            document.putProperties(updatedProperties);
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e("QAUtil", "Error putting", e);
+        } catch(Exception exception){
+            Log.e("QAUtil", "updateDocument()", exception);
+        }
     }
 }

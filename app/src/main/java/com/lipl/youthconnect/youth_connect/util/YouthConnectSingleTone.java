@@ -9,6 +9,7 @@ import com.lipl.youthconnect.youth_connect.pojo.Document;
 import com.lipl.youthconnect.youth_connect.pojo.Feedback;
 import com.lipl.youthconnect.youth_connect.pojo.Notification;
 import com.lipl.youthconnect.youth_connect.pojo.ReportForm;
+import com.lipl.youthconnect.youth_connect.pojo.User;
 
 public class YouthConnectSingleTone {
 
@@ -23,6 +24,7 @@ public class YouthConnectSingleTone {
 	public List<FileOption> fileOptionList = null;
 	public List<Document> documentList = null;
 	public List<Document> showcaseDocumentList = null;
+	public List<User> nodalOfficerUsers = null;
 
 	public Context context = null;
 
@@ -56,6 +58,7 @@ public class YouthConnectSingleTone {
 		fileOptionList = new ArrayList<FileOption>();
 		documentList = new ArrayList<Document>();
 		showcaseDocumentList = new ArrayList<Document>();
+		nodalOfficerUsers = new ArrayList<User>();
 	}
 	
 	public static YouthConnectSingleTone getInstance(){

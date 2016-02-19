@@ -114,6 +114,13 @@
             android:name=".activity.FileChooserMultipleActivity"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".activity.EditAnswerActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".activity.EditQuestionActivity"
+            android:screenOrientation="portrait"/>
+
+
         <!--<service-->
         <!--android:name=".activity.Util.NotificationService"-->
         <!--android:enabled="true"-->
@@ -159,7 +166,10 @@
                 <category android:name="com.lipl.youthconnect.youth_connect" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.pushbots.push.DefaultPushHandler" />
+        <receiver android:name="com.pushbots.push.DefaultPushHandler" android:enabled="true"
+            android:exported="true"/>
         <service android:name="com.pushbots.push.GCMIntentService" />
+        <receiver android:name=".util.CustomHandler" android:enabled="true"
+            android:exported="true"/>
     </application>
 </manifest>
