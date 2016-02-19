@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -23,9 +24,15 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.pojo.AssignedToUSer;
+import com.lipl.youthconnect.youth_connect.pojo.Doc;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.DocUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.adapter.NodalOfficerListViewAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Document;
@@ -51,7 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FileUploadNodalOfficerActivity extends ActionBarActivity {
+public class FileUploadNodalOfficerActivity extends ActionBarActivity implements Replication.ChangeListener {
 
     private static Toolbar mToolbar = null;
     private TextView tvEmptyView;
@@ -65,7 +72,8 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity {
     private SearchView search;
     protected Handler handler;
 
-    private Document document = null;
+    private Doc document = null;
+    private static final String TAG = "FUNodalOActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,7 +141,7 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity {
         selectedNodalOfficers = new ArrayList<User>();
 
         if(getIntent().getExtras() != null){
-            document = getIntent().getExtras().getParcelable(Constants.INTENT_KEY_DOCUMENT);
+            document = (Doc) getIntent().getExtras().getSerializable(Constants.INTENT_KEY_DOCUMENT);
         }
 
     }
@@ -247,7 +255,24 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity {
             onBackPressed();
         } else if(id == R.id.action_send) {
 
-            sendDocumnetToNodalOfficers();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+            builder.setMessage("Are you sure want to send document to selected nodal officers?");
+            builder.setTitle("Document assign");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    sendDocumnetToNodalOfficers();
+                    dialog.dismiss();
+                }
+            });
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            builder.show();
 
             return true;
         }
@@ -256,281 +281,61 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity {
     }
 
     private void sendDocumnetToNodalOfficers(){
-        if(Util.getNetworkConnectivityStatus(FileUploadNodalOfficerActivity.this)) {
-            SendToNodalOfficerAsyncTask sendToNodalOfficerAsyncTask = new SendToNodalOfficerAsyncTask();
-            sendToNodalOfficerAsyncTask.execute();
-        } else{
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.coordinatorLayout), "No internet connection.", Snackbar.LENGTH_LONG).setAction("OK", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-            View snackbarView = snackbar.getView();
-            TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-            tv.setTextColor(Color.WHITE);
-            TextView tvAction = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_action);
-            tvAction.setTextColor(Color.CYAN);
-            snackbar.show();
-        }
-    }
-
-    private String getJsonDataForAssignUser() {
-        // Format : [{"m_district_id":"2","user_id":"4"}]
-        try {
-            JSONArray array = new JSONArray();
+        if(selectedNodalOfficers != null && selectedNodalOfficers.size() > 0){
+            List<AssignedToUSer> assignedToUSers = document.getDoc_assigned_to_user_ids();
+            if(assignedToUSers == null){
+                assignedToUSers = new ArrayList<AssignedToUSer>();
+            }
             for(int i = 0; i < selectedNodalOfficers.size(); i++){
-                String district_id = selectedNodalOfficers.get(i).getM_district_id();
-                String user_id = selectedNodalOfficers.get(i).getUser_id()+"";
+                User user = selectedNodalOfficers.get(i);
+                String user_name = user.getFull_name();
+                int user_id = user.getUser_id();
 
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("m_district_id", district_id);
-                jsonObject.put("user_id", user_id);
-                array.put(jsonObject);
-            }
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+                AssignedToUSer assignedToUSer = new AssignedToUSer();
+                assignedToUSer.setUser_name(user_name);
+                assignedToUSer.setUser_id(user_id);
 
-    private String getJsonDataForDistrictList() {
-        // Format : [2,3,4]
-        Set<Integer> districtSet = new HashSet<Integer>();
-        for(int i = 0; i < selectedNodalOfficers.size(); i++){
-            String districtId = selectedNodalOfficers.get(i).getM_district_id();
-            if(districtId != null && districtId.length() > 0
-                    && TextUtils.isDigitsOnly(districtId)) {
-                int districtID = Integer.parseInt(districtId);
-                districtSet.add(districtID);
-            }
-        }
-
-        try {
-            JSONArray array = new JSONArray();
-            for (Integer district_id : districtSet) {
-                array.put(district_id);
-            }
-            return array.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private String getJsonDataForDocIds() {
-        // Format : [2,3,4]
-
-        if(document == null){
-            return null;
-        }
-
-        if(document.getDoc_master_id() <= 0 && document.getDocumentMaster() != null){
-            String docIds = document.getDocumentMaster().getDocument_master_id()+"";
-            return docIds;
-        } else {
-            String docIds = document.getDoc_master_id() + "";
-            return docIds;
-        }
-    }
-
-    /**
-     * Async task to get sync camp table from server
-     * */
-    private class SendToNodalOfficerAsyncTask extends AsyncTask<String, Void, Boolean> {
-
-        private static final String TAG = "SendToNodalOfficerATask";
-        //private ProgressDialog progressDialog = null;
-        private boolean isChangePassword = false;
-        private String message;
-        private ActivityIndicator activityIndicator = ActivityIndicator.ctor(FileUploadNodalOfficerActivity.this);
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            /*if(progressDialog == null) {
-                progressDialog = ProgressDialog.show(FileUploadNodalOfficerActivity.this, "Sending", "Please wait...");
-            }*/
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(FileUploadNodalOfficerActivity.this);
-            }
-            activityIndicator.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            String api_key = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_API_KEY, null);
-
-            if(api_key == null){
-                return null;
+                assignedToUSers.add(assignedToUSer);
             }
 
-            if(getJsonDataForDocIds() == null || getJsonDataForDocIds().length() <= 0 ||
-                getJsonDataForDistrictList() == null || getJsonDataForDistrictList().length() <= 0 ||
-                    getJsonDataForAssignUser() == null || getJsonDataForAssignUser().length() <= 0) {
-                return null;
-            }
-
-            try {
-
-                String user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_ID, 0)+"";
-                String desg_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getString(Constants.SP_USER_DESG_ID, null);
-                String user_type_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0)+"";
-
-                InputStream in = null;
-                int resCode = -1;
-
-                String link = Constants.BASE_URL+Constants.REQUEST_URL_ADMIN_SEND_TO_NODAL_OFFICER;
-                URL url = new URL(link);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setAllowUserInteraction(false);
-                conn.setInstanceFollowRedirects(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Authorization", api_key);
-
-                String docIds = getJsonDataForDocIds();
-                String districtIds = getJsonDataForDistrictList();
-                String users = getJsonDataForAssignUser();
-
-
-                Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("data[DocumentMaster][user_id]", user_id)
-                        .appendQueryParameter("data[DocumentMaster][m_desg_id]", desg_id)
-                        .appendQueryParameter("data[DocumentMaster][m_user_type_id]", user_type_id)
-                        .appendQueryParameter("data[DocumentMaster][docIds]", getJsonDataForDocIds())
-                        .appendQueryParameter("response", "mobile")
-                        .appendQueryParameter("data[DocumentMaster][m_district_id]", getJsonDataForDistrictList())
-                        .appendQueryParameter("data[DocumentAssign]", getJsonDataForAssignUser());
-
-                String query = builder.build().getEncodedQuery();
-
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(query);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                conn.connect();
-                resCode = conn.getResponseCode();
-                if (resCode == HttpURLConnection.HTTP_OK) {
-                    in = conn.getInputStream();
-                }
-                if(in == null){
-                    return null;
-                }
-                BufferedReader reader =new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                String response = "",data="";
-
-                while ((data = reader.readLine()) != null){
-                    response += data + "\n";
-                }
-
-                Log.i(TAG, "Response : " + response);
-
-                if(response != null && response.length() > 0 && response.charAt(0) == '{'){
-                    JSONObject jsonObject = new JSONObject(response);
-                    if (jsonObject != null && jsonObject.isNull("Apikey") == false) {
-                        String changePasswordDoneFromWebMsg = jsonObject.optString("Apikey");
-                        if(changePasswordDoneFromWebMsg.equalsIgnoreCase("Api key does not exit")){
-                            isChangePassword = true;
-                            return null;
+            if(document != null){
+                String doc_id = document.getDoc_id();
+                try {
+                    DocUtil.updateDocForAssignedUsers(DatabaseUtil.getDatabaseInstance(FileUploadNodalOfficerActivity.this,
+                            Constants.YOUTH_CONNECT_DATABASE), doc_id, assignedToUSers);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                    builder.setTitle("Doc assignment");
+                    builder.setMessage("Done.");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                DatabaseUtil.startReplications(FileUploadNodalOfficerActivity.this,
+                                        FileUploadNodalOfficerActivity.this, TAG);
+                            } catch(CouchbaseLiteException exception){
+                                Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                            } catch(IOException exception){
+                                Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                            } catch(Exception exception){
+                                Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                            }
+                            dialog.dismiss();
                         }
-                    }
+                    });
+                    builder.show();
+                } catch(CouchbaseLiteException exception){
+                    Log.e(TAG, "OnClick()", exception);
+                } catch(IOException exception){
+                    Log.e(TAG, "OnClick()", exception);
+                } catch(Exception exception){
+                    Log.e(TAG, "OnClick()", exception);
                 }
-
-                /**
-                 * {
-                 {
-                  "message":"File sent successfully."
-                 }
-                 * */
-
-                if(response != null && response.length() > 0){
-
-                    JSONObject res = new JSONObject(response);
-                    message = res.optString("message");
-                    int status = res.optInt("status");
-                    if(status == 1){
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            } catch(SocketTimeoutException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch(ConnectException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch(MalformedURLException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch (IOException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch(Exception exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
             }
-
-            return false;
         }
+    }
 
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            super.onPostExecute(isSuccess);
+    @Override
+    public void changed(Replication.ChangeEvent event) {
 
-            //if(progressDialog != null) progressDialog.dismiss();
-            if(activityIndicator == null){
-                activityIndicator = new ActivityIndicator(FileUploadNodalOfficerActivity.this);
-            }
-            activityIndicator.dismiss();
-
-            if(isChangePassword){
-                AlertDialog.Builder builder = new AlertDialog.Builder(FileUploadNodalOfficerActivity.this, R.style.AppCompatAlertDialogStyle);
-                builder.setTitle(getResources().getString(R.string.password_changed_title));
-                builder.setMessage(getResources().getString(R.string.password_changed_description));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        Intent intent = new Intent(FileUploadNodalOfficerActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("Exit me", true);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                builder.show();
-
-                return;
-            }
-
-            if(isSuccess){
-                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 1).commit();
-            } else{
-                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.IS_ACTION_TAKEN_FOR_DOC, 0).commit();
-            }
-
-            String dialogMessage = "";
-            if(message != null && message.length() > 0){
-                dialogMessage = message;
-            }
-            AlertDialog.Builder builder = new AlertDialog.Builder(FileUploadNodalOfficerActivity.this, R.style.AppCompatAlertDialogStyle);
-            builder.setTitle("Youth Connect");
-            builder.setMessage(dialogMessage);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finish();
-                }
-            });
-            builder.show();
-        }
     }
 }

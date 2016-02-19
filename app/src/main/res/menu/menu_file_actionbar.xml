@@ -4,5 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.luminousinfoways.sportsnyouth.sportsyouth.activity.MainActivity">
 
-
+    <item android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@android:drawable/ic_menu_search"
+        app:showAsAction="collapseActionView|ifRoom"
+        android:actionViewClass="android.widget.SearchView" />
 </menu>

@@ -19,9 +19,18 @@ public class Doc implements Serializable {
     private List<FileToUpload> fileToUploads;
     private String created;
     private int is_uploaded;
+    private int is_published;
     private String created_by_user_name;
     private int created_by_user_id;
     private List<AssignedToUSer> doc_assigned_to_user_ids;
+
+    public int getIs_published() {
+        return is_published;
+    }
+
+    public void setIs_published(int is_published) {
+        this.is_published = is_published;
+    }
 
     public String getDoc_id() {
         return doc_id;

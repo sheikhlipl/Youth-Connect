@@ -1,5 +1,6 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,7 +24,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
@@ -73,7 +74,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class FileActivity extends ActionBarActivity {
+public class FileActivity extends ActionBarActivity implements SearchView.OnQueryTextListener {
 
     private static Toolbar mToolbar = null;
 
@@ -82,7 +83,6 @@ public class FileActivity extends ActionBarActivity {
     private DocDataAdapter adapter;
     private static final String TAG = "FileActivity";
     private int doc_last_id = 0;
-    private SearchView search;
     private ProgressBar pBar = null;
 
     @Override
@@ -101,34 +101,6 @@ public class FileActivity extends ActionBarActivity {
 
         pBar = (ProgressBar) findViewById(R.id.pBar);
 
-        search = (SearchView) findViewById(R.id.searchView1);
-        search.setQueryHint("Search Here");
-
-        //*** setOnQueryTextFocusChangeListener ***
-        search.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
-
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-
-            }
-        });
-
-        //*** setOnQueryTextListener ***
-        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                setFileList(newText);
-                return false;
-            }
-        });
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,6 +116,33 @@ public class FileActivity extends ActionBarActivity {
         listView = (ListView) findViewById(R.id.qnaList);
         adapter = new DocDataAdapter(mListItems, this);
         listView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        /*if(newText == null || newText.length() <= 0) return false;
+
+        List<Doc> docList = new ArrayList<Doc>();
+        if(mListItems != null && mListItems.size() > 0){
+            for(Doc doc : mListItems){
+                if(doc != null && doc.getDoc_title() != null
+                        && doc.getDoc_title().toLowerCase().contains(newText.toLowerCase())){
+                    docList.add(doc);
+                }
+            }
+        }
+
+        adapter = new DocDataAdapter(docList, FileActivity.this);
+        listView.setAdapter(adapter);*/
+        setFileList(newText);
+
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return true;
     }
 
     @Override
@@ -227,6 +226,17 @@ public class FileActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_file_actionbar, menu);
+
+        SearchManager searchManager = (SearchManager)
+                getSystemService(Context.SEARCH_SERVICE);
+        MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
+
+        searchView.setSearchableInfo(searchManager.
+                getSearchableInfo(getComponentName()));
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(this);
+
         return true;
     }
 

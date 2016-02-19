@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.lipl.youthconnect.youth_connect.pojo.Answer;
 import com.lipl.youthconnect.youth_connect.pojo.AssignedToUSer;
@@ -15,7 +17,10 @@ import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Android Luminous on 2/18/2016.
@@ -37,6 +42,7 @@ public class DocUtil {
             String user_name = (String) document.getProperty(DatabaseUtil.DOC_CREATED_BY_USER_NAME);
             int created_by_user_id = (Integer) document.getProperty(DatabaseUtil.DOC_CREATED_BY_USER_ID);
             int is_uploaded = (Integer) document.getProperty(DatabaseUtil.DOC_IS_UPLOADED);
+            int is_published = (Integer) document.getProperty(DatabaseUtil.DOC_IS_PUBLISHED);
 
             ArrayList<String> fileList = (ArrayList<String>) document.getProperty(DatabaseUtil.DOC_FILES);
             ArrayList<LinkedHashMap<String, Object>> assigned_user_ids = (ArrayList<LinkedHashMap<String, Object>>) document.getProperty(DatabaseUtil.DOC_ASSIGNED_TO_USER_IDS);
@@ -80,7 +86,9 @@ public class DocUtil {
             Doc doc = new Doc();
             doc.setDoc_id(doc_id);
             doc.setDoc_title(title);
+            doc.setCreated(postDate);
             doc.setDoc_purpose(docPurpose);
+            doc.setIs_published(is_published);
             doc.setCreated_by_user_name(user_name);
             doc.setCreated_by_user_id(created_by_user_id);
             doc.setIs_uploaded(is_uploaded);
@@ -92,5 +100,51 @@ public class DocUtil {
             Log.e("QAUtil", "getQAFromDocument()", exception);
         }
         return null;
+    }
+
+    public static void updateDocForPublishStatus(Database database, String documentId, int is_published){
+        Document document = database.getDocument(documentId);
+        try {
+            // Update the document with more data
+
+                Map<String, Object> updatedProperties = new HashMap<String, Object>();
+                updatedProperties.putAll(document.getProperties());
+                updatedProperties.put(DatabaseUtil.DOC_IS_PUBLISHED, is_published);
+                // Save to the Couchbase local Couchbase Lite DB
+                document.putProperties(updatedProperties);
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e("DocUtil", "Error putting", e);
+        } catch(Exception exception){
+            Log.e("DocUtil", "updateDocument()", exception);
+        }
+    }
+
+    public static void updateDocForAssignedUsers(Database database, String documentId,
+                                                 List<AssignedToUSer> assigned_to_user_ids){
+        Document document = database.getDocument(documentId);
+        try {
+            // Update the document with more data
+
+            Map<String, Object> updatedProperties = new HashMap<String, Object>();
+            updatedProperties.putAll(document.getProperties());
+            updatedProperties.put(DatabaseUtil.DOC_ASSIGNED_TO_USER_IDS, assigned_to_user_ids);
+            // Save to the Couchbase local Couchbase Lite DB
+            document.putProperties(updatedProperties);
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e("DocUtil", "Error putting", e);
+        } catch(Exception exception){
+            Log.e("DocUtil", "updateDocument()", exception);
+        }
+    }
+
+    public static void deleteDoc(Database database, String documentId){
+        Document document = database.getDocument(documentId);
+        try {
+            document.delete();
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e("DocUtil", "Error putting", e);
+        } catch(Exception exception){
+            Log.e("DocUtil", "updateDocument()", exception);
+        }
     }
 }

@@ -40,16 +40,16 @@
                 android:layout_height="match_parent"
                 android:padding="12dp">
 
-                <TextView
-                    android:id="@+id/tvCreatedByTitle"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:text="Created By"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:padding="12dp"/>
+                <!--<TextView-->
+                    <!--android:id="@+id/tvCreatedByTitle"-->
+                    <!--android:layout_width="fill_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:fontFamily="sans-serif-light"-->
+                    <!--android:text="Created By"-->
+                    <!--android:textColor="@color/colorPrimary"-->
+                    <!--android:textStyle="bold"-->
+                    <!--android:textAppearance="?android:textAppearanceLarge"-->
+                    <!--android:padding="12dp"/>-->
 
                 <TextView
                     android:id="@+id/tvCreatedBy"
@@ -59,21 +59,22 @@
                     android:text="Created By"
                     android:layout_margin="5dp"
                     android:paddingLeft="12dp"
-                    android:layout_below="@+id/tvCreatedByTitle"
+                    android:gravity="right"
+                    android:layout_alignParentRight="true"
                     android:textColor="@color/textColorPrimary"
                     android:textAppearance="?android:textAppearanceMedium" />
 
-                <TextView
-                    android:id="@+id/tvEventTitle"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:text="Event Title"
-                    android:layout_below="@+id/tvCreatedBy"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:padding="12dp"/>
+                <!--<TextView-->
+                    <!--android:id="@+id/tvEventTitle"-->
+                    <!--android:layout_width="fill_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:fontFamily="sans-serif-light"-->
+                    <!--android:text="Event Title"-->
+                    <!--android:layout_below="@+id/tvCreatedBy"-->
+                    <!--android:textColor="@color/colorPrimary"-->
+                    <!--android:textStyle="bold"-->
+                    <!--android:textAppearance="?android:textAppearanceLarge"-->
+                    <!--android:padding="12dp"/>-->
 
                 <TextView
                     android:id="@+id/tvEventTitleValue"
@@ -81,35 +82,23 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
                     android:text="Event Title Value"
-                    android:layout_margin="5dp"
-                    android:paddingLeft="12dp"
-                    android:layout_below="@+id/tvEventTitle"
-                    android:textColor="@color/textColorPrimary"
-                    android:textAppearance="?android:textAppearanceMedium" />
-
-                <TextView
-                    android:id="@+id/tvEventPurposeTitle"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:text="Purpose"
-                    android:layout_below="@+id/tvEventTitleValue"
-                    android:textColor="@color/colorPrimary"
                     android:textStyle="bold"
-                    android:textAppearance="?android:textAppearanceLarge"
-                    android:padding="12dp" />
+                    android:padding="12dp"
+                    android:layout_below="@+id/tvCreatedBy"
+                    android:textColor="@color/colorPrimary"
+                    android:textAppearance="?android:textAppearanceLarge" />
 
                 <TextView
                     android:id="@+id/tvEventPurpose"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-                    android:text="Created By"
-                    android:layout_margin="5dp"
-                    android:paddingLeft="12dp"
-                    android:layout_below="@+id/tvEventPurposeTitle"
+                    android:text="Purpose"
+                    android:layout_below="@+id/tvEventTitleValue"
                     android:textColor="@color/textColorPrimary"
-                    android:textAppearance="?android:textAppearanceMedium" />
+                    android:textStyle="bold"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:padding="12dp" />
 
                 <TextView
                     android:id="@+id/tvUploadDoc"

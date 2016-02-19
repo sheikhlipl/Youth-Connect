@@ -34,6 +34,7 @@ public class DatabaseUtil {
     public static final String DOC_PURPOSE = "doc_purpose";
     public static final String DOC_FILES = "files";
     public static final String DOC_CREATED = "created";
+    public static final String DOC_IS_PUBLISHED = "is_published";
     public static final String DOC_CREATED_BY_USER_NAME = "created_by_user_name";
     public static final String DOC_CREATED_BY_USER_ID = "created_by_user_id";
     public static final String DOC_ASSIGNED_TO_USER_IDS = "doc_assigned_to_user_ids";

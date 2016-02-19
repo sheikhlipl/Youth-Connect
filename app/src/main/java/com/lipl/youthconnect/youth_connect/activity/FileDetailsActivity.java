@@ -11,6 +11,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.replicator.Replication;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -35,6 +38,8 @@ import com.lipl.youthconnect.youth_connect.pojo.Doc;
 import com.lipl.youthconnect.youth_connect.pojo.FileToUpload;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.DocUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.pojo.Document;
 import com.lipl.youthconnect.youth_connect.pojo.DocumentUpload;
@@ -65,13 +70,14 @@ import java.util.Set;
 /**
  * Created by luminousinfoways on 21/12/15.
  */
-public class FileDetailsActivity extends ActionBarActivity implements View.OnClickListener {
+public class FileDetailsActivity extends ActionBarActivity implements View.OnClickListener, Replication.ChangeListener {
 
     private static Toolbar mToolbar = null;
     private Doc document = null;
     String host = "http://192.168.1.107";
     String port = "4984";
     String dbName = Constants.YOUTH_CONNECT_DATABASE;
+    private static final String TAG = "FileDetailsActivity";
     /*
     * url to download file : http://192.168.1.107:4984/youth_connect/{doc_id}/{file_name}
     * */
@@ -187,18 +193,116 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
 
                 // condition : which are not published and not deleted you can delete
                 // Delete document
+                if(document != null && document.getIs_published() == 0){
+                    String doc_id = document.getDoc_id();
+                    try {
+                        DocUtil.deleteDoc(DatabaseUtil.getDatabaseInstance(FileDetailsActivity.this,
+                                Constants.YOUTH_CONNECT_DATABASE), doc_id);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                        builder.setTitle("Doc Publish");
+                        builder.setMessage("Done.");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    DatabaseUtil.startReplications(FileDetailsActivity.this,
+                                            FileDetailsActivity.this, TAG);
+                                } catch(CouchbaseLiteException exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                } catch(IOException exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                } catch(Exception exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                }
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.show();
+                    } catch(CouchbaseLiteException exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    } catch(IOException exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    } catch(Exception exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    }
+                }
 
                 break;
             case R.id.fabPublish:
 
                 // Publish Document
                 // condition : which are not published and not deleted you can publish
+                if(document != null && document.getIs_published() == 0){
+                    String doc_id = document.getDoc_id();
+                    try {
+                        DocUtil.updateDocForPublishStatus(DatabaseUtil.getDatabaseInstance(FileDetailsActivity.this,
+                                Constants.YOUTH_CONNECT_DATABASE), doc_id, 1);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                        builder.setTitle("Doc Publish");
+                        builder.setMessage("Done.");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    DatabaseUtil.startReplications(FileDetailsActivity.this,
+                                            FileDetailsActivity.this, TAG);
+                                } catch(CouchbaseLiteException exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                } catch(IOException exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                } catch(Exception exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                }
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.show();
+                    } catch(CouchbaseLiteException exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    } catch(IOException exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    } catch(Exception exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    }
+                }
 
                 break;
             case R.id.fabUnpublish:
 
                 // Un publish Document
                 // condition : which are published and not deleted you can publish
+                if(document != null && document.getIs_published() == 1){
+                    String doc_id = document.getDoc_id();
+                    try {
+                        DocUtil.updateDocForPublishStatus(DatabaseUtil.getDatabaseInstance(FileDetailsActivity.this,
+                                Constants.YOUTH_CONNECT_DATABASE), doc_id, 1);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                        builder.setTitle("Doc UnPublish");
+                        builder.setMessage("Done.");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    DatabaseUtil.startReplications(FileDetailsActivity.this,
+                                            FileDetailsActivity.this, TAG);
+                                } catch(CouchbaseLiteException exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                } catch(IOException exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                } catch(Exception exception){
+                                    Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
+                                }
+                                dialog.dismiss();
+                            }
+                        });
+                    } catch(CouchbaseLiteException exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    } catch(IOException exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    } catch(Exception exception){
+                        Log.e(TAG, "OnClick()", exception);
+                    }
+                }
 
                 break;
             default:
@@ -408,5 +512,10 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
             }, 2000);
 
         }
+    }
+
+    @Override
+    public void changed(Replication.ChangeEvent event) {
+
     }
 }

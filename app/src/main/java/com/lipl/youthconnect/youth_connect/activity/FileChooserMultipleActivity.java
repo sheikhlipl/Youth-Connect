@@ -744,6 +744,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
         map.put(DatabaseUtil.DOC_CREATED_BY_USER_ID, doc_created_by_user_id);
         map.put(DatabaseUtil.DOC_FILES, fileToUploads);
         map.put(DatabaseUtil.DOC_IS_UPLOADED, 0);
+        map.put(DatabaseUtil.DOC_IS_PUBLISHED, 0);
         map.put(DatabaseUtil.DOC_CREATED, currentTimestamp);
         map.put(DatabaseUtil.DOC_ASSIGNED_TO_USER_IDS, assigned_to_user_ids);
         try {
