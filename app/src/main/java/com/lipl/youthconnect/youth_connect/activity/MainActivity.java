@@ -145,15 +145,22 @@ public class MainActivity extends ActionBarActivity implements
             ft.commitAllowingStateLoss();
         }
 
-        try {
-            DatabaseUtil.startReplications(MainActivity.this, this, TAG);
-        } catch(CouchbaseLiteException exception){
-            Log.e(TAG, "onCreate()", exception);
-        } catch(IOException exception){
-            Log.e(TAG, "onCreate()", exception);
-        } catch(Exception exception){
-            Log.e(TAG, "onCreate()", exception);
-        }
+        new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    DatabaseUtil.startReplications(MainActivity.this, MainActivity.this, TAG);
+                } catch(CouchbaseLiteException exception){
+                    Log.e(TAG, "onCreate()", exception);
+                } catch(IOException exception){
+                    Log.e(TAG, "onCreate()", exception);
+                } catch(Exception exception){
+                    Log.e(TAG, "onCreate()", exception);
+                }
+                return null;
+            }
+        }.execute();
+
     }
 
     public void setVisibilityOfFloatingIcon(boolean visibility){
