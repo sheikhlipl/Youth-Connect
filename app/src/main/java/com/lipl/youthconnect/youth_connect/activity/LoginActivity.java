@@ -20,16 +20,22 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.LogExActivity;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.pojo.Block;
 import com.lipl.youthconnect.youth_connect.pojo.Desg;
 import com.lipl.youthconnect.youth_connect.pojo.District;
+import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
 import com.lipl.youthconnect.youth_connect.pojo.Organization;
 import com.lipl.youthconnect.youth_connect.pojo.State;
 import com.lipl.youthconnect.youth_connect.pojo.User;
 import com.lipl.youthconnect.youth_connect.pojo.UserType;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.MasterDataUtil;
+import com.lipl.youthconnect.youth_connect.util.TinyDB;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.rengwuxian.materialedittext.MaterialEditText;
@@ -55,7 +61,7 @@ import java.util.List;
 /**
  * Created by luminousinfoways on 08/12/15.
  */
-public class LoginActivity extends Activity implements View.OnClickListener {
+public class LoginActivity extends Activity implements View.OnClickListener, Replication.ChangeListener {
 
     private ProgressBar progressBar;
 
@@ -479,10 +485,27 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                             getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.SP_USER_TYPE, 2).commit();
                         } else if (userType == 1) {
                             getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.SP_USER_TYPE, 1).commit();
+                            new AsyncTask<Void, Void, Void>(){
+                                @Override
+                                protected Void doInBackground(Void... params) {
+
+                                    try{
+                                        DatabaseUtil.startReplications(LoginActivity.this, LoginActivity.this, "LoginActivity");
+                                    } catch(CouchbaseLiteException exception){
+                                        Log.e("LoginActivity", "error", exception);
+                                    } catch(IOException exception){
+                                        Log.e("LoginActivity", "error", exception);
+                                    } catch(Exception exception){
+                                        Log.e("LoginActivity", "error", exception);
+                                    }
+
+                                    return null;
+                                }
+                            }.execute();
                         }
 
                         //getNotification();
-                        syncDistrictList();
+                        //syncDistrictList();
 
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
@@ -691,7 +714,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         return null;
                     }
 
-                    List<User> nodalUserList = new ArrayList<User>();
+                    List<NodalUser> nodalUserList = new ArrayList<NodalUser>();
 
                     for(int i = 0; i < nodal.length(); i++){
 
@@ -701,18 +724,14 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         String full_name = userObj.optString("full_name");
 
                         if(user_id != null && user_id.trim().length() > 0 && TextUtils.isDigitsOnly(user_id)) {
-                            User user = new User(Parcel.obtain());
+                            NodalUser user = new NodalUser(Parcel.obtain());
                             user.setUser_id(Integer.parseInt(user_id));
                             user.setM_district_id(m_district_id);
                             user.setFull_name(full_name);
-                            user.setM_user_type_id("2");
                             nodalUserList.add(user);
                         }
                     }
 
-                    if(nodalUserList != null && nodalUserList.size() > 0){
-                        YouthConnectSingleTone.getInstance().nodalOfficerUsers.addAll(nodalUserList);
-                    }
                     return null;
                 }
             } catch(SocketTimeoutException exception){
@@ -742,5 +761,10 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 finish();
             }
         }
+    }
+
+    @Override
+    public void changed(Replication.ChangeEvent event) {
+
     }
 }

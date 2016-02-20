@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.activity.FileUploadNodalOfficerActivity;
+import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
 import com.lipl.youthconnect.youth_connect.pojo.User;
 
 import java.util.List;
@@ -21,10 +22,10 @@ import java.util.List;
  */
 public class NodalOfficerListViewAdapter extends BaseAdapter {
 
-    private List<User> userList;
+    private List<NodalUser> userList;
     private Context context;
 
-    public NodalOfficerListViewAdapter(List<User> userList, Context context){
+    public NodalOfficerListViewAdapter(List<NodalUser> userList, Context context){
         this.userList = userList;
         this.context = context;
     }
@@ -66,7 +67,7 @@ public class NodalOfficerListViewAdapter extends BaseAdapter {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 try {
-                    User user = (User) compoundButton.getTag();
+                    NodalUser user = (NodalUser) compoundButton.getTag();
                     if (b) {
                         boolean isExist = false;
                         for (int i = 0; i < FileUploadNodalOfficerActivity.selectedNodalOfficers.size(); i++) {

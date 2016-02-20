@@ -1,13 +1,18 @@
 package com.lipl.youthconnect.youth_connect.util;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.util.Log;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
 import com.lipl.youthconnect.youth_connect.pojo.Answer;
 import com.lipl.youthconnect.youth_connect.pojo.Comment;
+import com.lipl.youthconnect.youth_connect.pojo.Doc;
 import com.lipl.youthconnect.youth_connect.pojo.Question;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 
@@ -15,8 +20,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +32,8 @@ import java.util.Map;
  * Created by Android Luminous on 2/16/2016.
  */
 public class QAUtil {
+
+    private static final String TAG = "QAUtil";
 
     public static QuestionAndAnswer getQAFromDocument(Document document){
 
@@ -154,5 +163,58 @@ public class QAUtil {
         } catch(Exception exception){
             Log.e("QAUtil", "updateDocument()", exception);
         }
+    }
+
+    public static List<QuestionAndAnswer> getPendingQuestionAndAnswerList(Context context) throws
+            CouchbaseLiteException, IOException, Exception{
+        List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
+
+        Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
+        List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
+        for(String doc_id : allDocIds){
+            Document document = DatabaseUtil.getDocumentFromDocumentId(database, doc_id);
+            QuestionAndAnswer questionAndAnswer = getQAFromDocument(document);
+            if(questionAndAnswer != null && (questionAndAnswer.getAnswerList() == null
+                    || questionAndAnswer.getAnswerList().size() <= 0)){
+                questionAndAnswerList.add(questionAndAnswer);
+            }
+        }
+
+        return questionAndAnswerList;
+    }
+
+    public static List<QuestionAndAnswer> getAnsweredQuestionAndAnswerList(Context context) throws
+            CouchbaseLiteException, IOException, Exception{
+        List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
+
+        Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
+        List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
+        for(String doc_id : allDocIds){
+            Document document = DatabaseUtil.getDocumentFromDocumentId(database, doc_id);
+            QuestionAndAnswer questionAndAnswer = getQAFromDocument(document);
+            if(questionAndAnswer != null && questionAndAnswer.getAnswerList() != null
+                    && questionAndAnswer.getAnswerList().size() > 0){
+                questionAndAnswerList.add(questionAndAnswer);
+            }
+        }
+
+        return questionAndAnswerList;
+    }
+
+    public static List<QuestionAndAnswer> getPublishedQuestionAndAnswerList(Context context) throws
+            CouchbaseLiteException, IOException, Exception{
+        List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
+
+        Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
+        List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
+        for(String doc_id : allDocIds){
+            Document document = DatabaseUtil.getDocumentFromDocumentId(database, doc_id);
+            QuestionAndAnswer questionAndAnswer = getQAFromDocument(document);
+            if(questionAndAnswer != null && questionAndAnswer.getIs_published() ==1){
+                questionAndAnswerList.add(questionAndAnswer);
+            }
+        }
+
+        return questionAndAnswerList;
     }
 }

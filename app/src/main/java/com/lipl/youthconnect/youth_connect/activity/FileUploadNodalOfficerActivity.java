@@ -29,10 +29,12 @@ import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.pojo.AssignedToUSer;
 import com.lipl.youthconnect.youth_connect.pojo.Doc;
+import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.DocUtil;
+import com.lipl.youthconnect.youth_connect.util.MasterDataUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.adapter.NodalOfficerListViewAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Document;
@@ -67,8 +69,8 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
     private ListView listView;
     private NodalOfficerListViewAdapter mAdapter;
 
-    private List<User> nodalOfficers;
-    public static List<User> selectedNodalOfficers;
+    private List<NodalUser> nodalOfficers;
+    public static List<NodalUser> selectedNodalOfficers;
 
     private SearchView search;
     protected Handler handler;
@@ -119,13 +121,22 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
         tvEmptyView = (TextView) findViewById(R.id.tvNoRecordFoundText);
         listView = (ListView) findViewById(R.id.distList);
         if(nodalOfficers == null) {
-            nodalOfficers = new ArrayList<User>();
+            nodalOfficers = new ArrayList<NodalUser>();
         }
 
-        if(YouthConnectSingleTone.getInstance().nodalOfficerUsers != null
-                && YouthConnectSingleTone.getInstance().nodalOfficerUsers.size() > 0){
-            nodalOfficers.clear();
-            nodalOfficers.addAll(YouthConnectSingleTone.getInstance().nodalOfficerUsers);
+        try {
+            List<NodalUser> nodalOfficerUsers = MasterDataUtil.getNodalUsersList(FileUploadNodalOfficerActivity.this);
+            if (nodalOfficerUsers != null
+                    && nodalOfficerUsers.size() > 0) {
+                nodalOfficers.clear();
+                nodalOfficers.addAll(nodalOfficerUsers);
+            }
+        } catch (CouchbaseLiteException exception){
+            Log.e(TAG, "error", exception);
+        } catch(IOException exception){
+            Log.e(TAG, "error", exception);
+        } catch(Exception exception){
+            Log.e(TAG, "error", exception);
         }
         handler = new Handler();
 
@@ -145,7 +156,7 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
         }
 
         mAdapter.notifyDataSetChanged();
-        selectedNodalOfficers = new ArrayList<User>();
+        selectedNodalOfficers = new ArrayList<NodalUser>();
 
         if(getIntent().getExtras() != null){
             document = (Doc) getIntent().getExtras().getSerializable(Constants.INTENT_KEY_DOCUMENT);
@@ -155,7 +166,7 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
 
     private void setNodalOfficersList(String filterText){
 
-        final List<User> nodalOfficerList = new ArrayList<User>();
+        final List<NodalUser> nodalOfficerList = new ArrayList<NodalUser>();
         if(filterText != null && filterText.trim().length() > 0){
             for(int i = 0; i < nodalOfficers.size(); i++){
                 String m_district = nodalOfficers.get(i).getFull_name();
@@ -294,7 +305,7 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
                 assignedToUSers = new ArrayList<AssignedToUSer>();
             }
             for(int i = 0; i < selectedNodalOfficers.size(); i++){
-                User user = selectedNodalOfficers.get(i);
+                NodalUser user = selectedNodalOfficers.get(i);
                 String user_name = user.getFull_name();
                 int user_id = user.getUser_id();
 

@@ -22,6 +22,55 @@
 
             <!-- Nodal Officers  -->
             <RelativeLayout
+                android:id="@+id/layoutQusAnsweredd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/dashboard_question_answer_selector"
+                android:layout_marginLeft="@dimen/dashboard_count_margin"
+                android:layout_marginRight="@dimen/dashboard_count_margin"
+                android:layout_marginTop="@dimen/dashboard_count_margin">
+
+                <ImageView
+                    android:id="@+id/imgNodalOfficerss"
+                    android:layout_width="@dimen/dashboard_each_count_width_height"
+                    android:layout_height="@dimen/dashboard_each_count_width_height"
+                    android:background="@drawable/dashboard_nodal_background"
+                    android:padding="@dimen/dashboard_icon_circle_width_height"
+                    android:src="@drawable/ic_nodal_officers"
+                    android:layout_margin="@dimen/dashboard_count_icon_margin"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_toRightOf="@+id/imgNodalOfficerss"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvNodalOfficerss"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/dashboard_feedbacks_received"
+                        android:textStyle="bold"
+                        android:textAppearance="?android:textAppearanceMedium"/>
+
+                    <TextView
+                        android:id="@+id/tvFirstTitlee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nodal Officer(s)"
+                        android:textColor="@color/dashboard_feedbacks_received"
+                        android:textStyle="bold"
+                        android:textAppearance="?android:textAppearanceMedium"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- Nodal Officers  -->
+            <RelativeLayout
                 android:id="@+id/layoutQusAnswered"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,7 +85,7 @@
                     android:layout_height="@dimen/dashboard_each_count_width_height"
                     android:background="@drawable/dashboard_nodal_officer_circle"
                     android:padding="@dimen/dashboard_icon_circle_width_height"
-                    android:src="@drawable/ic_nodal_officers"
+                    android:src="@drawable/ic_comment_white"
                     android:layout_margin="@dimen/dashboard_count_icon_margin"/>
 
                 <LinearLayout
@@ -48,7 +97,7 @@
                     android:layout_gravity="center_vertical">
 
                     <TextView
-                        android:id="@+id/tvNodalOfficers"
+                        android:id="@+id/tvAnswereds"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
@@ -118,52 +167,52 @@
             </RelativeLayout>
 
             <!-- Feedback Received  -->
-            <RelativeLayout
-                android:id="@+id/layoutPendingFeedback"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/dashboard_feedback_received_selector"
-                android:layout_marginLeft="@dimen/dashboard_count_margin"
-                android:layout_marginRight="@dimen/dashboard_count_margin"
-                android:layout_marginTop="@dimen/dashboard_count_margin">
+            <!--<RelativeLayout-->
+                <!--android:id="@+id/layoutPendingFeedback"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:background="@drawable/dashboard_feedback_received_selector"-->
+                <!--android:layout_marginLeft="@dimen/dashboard_count_margin"-->
+                <!--android:layout_marginRight="@dimen/dashboard_count_margin"-->
+                <!--android:layout_marginTop="@dimen/dashboard_count_margin">-->
 
-                <ImageView
-                    android:id="@+id/imgFeedbackReceived"
-                    android:layout_width="@dimen/dashboard_each_count_width_height"
-                    android:layout_height="@dimen/dashboard_each_count_width_height"
-                    android:background="@drawable/dashboard_pending_feedback_circle"
-                    android:padding="@dimen/dashboard_icon_circle_width_height"
-                    android:src="@drawable/ic_feedback_white"
-                    android:layout_margin="@dimen/dashboard_count_icon_margin"/>
+                <!--<ImageView-->
+                    <!--android:id="@+id/imgFeedbackReceived"-->
+                    <!--android:layout_width="@dimen/dashboard_each_count_width_height"-->
+                    <!--android:layout_height="@dimen/dashboard_each_count_width_height"-->
+                    <!--android:background="@drawable/dashboard_pending_feedback_circle"-->
+                    <!--android:padding="@dimen/dashboard_icon_circle_width_height"-->
+                    <!--android:src="@drawable/ic_feedback_white"-->
+                    <!--android:layout_margin="@dimen/dashboard_count_icon_margin"/>-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_toRightOf="@+id/imgFeedbackReceived"
-                    android:layout_centerVertical="true"
-                    android:layout_gravity="center_vertical">
+                <!--<LinearLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:orientation="vertical"-->
+                    <!--android:layout_toRightOf="@+id/imgFeedbackReceived"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_gravity="center_vertical">-->
 
-                    <TextView
-                        android:id="@+id/tvFeedbackReceived"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/dashboard_feedbacks_received"
-                        android:textStyle="bold"
-                        android:textAppearance="?android:textAppearanceMedium"/>
+                    <!--<TextView-->
+                        <!--android:id="@+id/tvFeedbackReceived"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:text="0"-->
+                        <!--android:textColor="@color/dashboard_feedbacks_received"-->
+                        <!--android:textStyle="bold"-->
+                        <!--android:textAppearance="?android:textAppearanceMedium"/>-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pending Feedback(s)"
-                        android:textColor="@color/dashboard_feedbacks_received"
-                        android:textStyle="bold"
-                        android:textAppearance="?android:textAppearanceMedium"/>
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:text="Pending Feedback(s)"-->
+                        <!--android:textColor="@color/dashboard_feedbacks_received"-->
+                        <!--android:textStyle="bold"-->
+                        <!--android:textAppearance="?android:textAppearanceMedium"/>-->
 
-                </LinearLayout>
+                <!--</LinearLayout>-->
 
-            </RelativeLayout>
+            <!--</RelativeLayout>-->
 
             <!-- Comment  -->
             <RelativeLayout
@@ -239,6 +288,15 @@
                     android:layout_toRightOf="@+id/imgDoc"
                     android:layout_centerVertical="true"
                     android:layout_gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvDocCounts"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/dashboard_doc_bg"
+                        android:textStyle="bold"
+                        android:textAppearance="?android:textAppearanceMedium"/>
 
                     <TextView
                         android:layout_width="wrap_content"

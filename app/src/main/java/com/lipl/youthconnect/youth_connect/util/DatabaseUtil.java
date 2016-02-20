@@ -6,6 +6,9 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
@@ -13,11 +16,16 @@ import com.couchbase.lite.util.Log;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by Android Luminous on 2/15/2016.
  */
 public class DatabaseUtil {
+
+    private static final String TAG = "DatabaseUtil";
 
     public static final String QA_TITLE = "title";
     public static final String QA_DESC = "description";
@@ -29,6 +37,9 @@ public class DatabaseUtil {
     public static final String QA_IS_ANSWERED = "is_answered";
     public static final String QA_IS_PUBLISHED = "is_published";
     public static final String QA_IS_UPLOADED = "is_uploaded";
+
+    public static final String DISTRICTS = "districts";
+    public static final String NODAL_OFFICERS = "users";
 
     public static final String DOC_TITLE = "doc_title";
     public static final String DOC_PURPOSE = "doc_purpose";
@@ -102,5 +113,26 @@ public class DatabaseUtil {
         } catch(Exception exception){
             android.util.Log.e("DocUtil", "updateDocument()", exception);
         }
+    }
+
+    public static List<String> getAllDocumentIds(Context context){
+
+        List<String> docIds = new ArrayList<String>();
+        try {
+            Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
+            Query query = database.createAllDocumentsQuery();
+            query.setAllDocsMode(Query.AllDocsMode.BY_SEQUENCE);
+            QueryEnumerator result = query.run();
+            for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+                QueryRow row = it.next();
+                docIds.add(row.getDocumentId());
+            }
+        } catch(CouchbaseLiteException exception){
+            android.util.Log.e(TAG, "Error", exception);
+        } catch (IOException exception){
+            com.couchbase.lite.util.Log.e(TAG, "onDeleteClick()", exception);
+        }
+
+        return docIds;
     }
 }

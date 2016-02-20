@@ -1,22 +1,13 @@
 package com.lipl.youthconnect.youth_connect.fragment;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Parcel;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -30,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.couchbase.lite.CouchbaseLiteException;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarData;
@@ -44,28 +36,19 @@ import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.activity.FeedbackActivity;
 import com.lipl.youthconnect.youth_connect.activity.FileActivity;
 import com.lipl.youthconnect.youth_connect.activity.MainActivity;
+import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
 import com.lipl.youthconnect.youth_connect.util.Constants;
+import com.lipl.youthconnect.youth_connect.util.DocUtil;
 import com.lipl.youthconnect.youth_connect.util.DummyContent;
-import com.lipl.youthconnect.youth_connect.util.Util;
+import com.lipl.youthconnect.youth_connect.util.MasterDataUtil;
+import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.adapter.PagerAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Dashboard;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.ConnectException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -156,10 +139,17 @@ public class DashboardFragment extends Fragment implements
         layoutQusAnswered.setOnClickListener(this);
         RelativeLayout layoutPendingQus = (RelativeLayout) view.findViewById(R.id.layoutPendingQus);
         layoutPendingQus.setOnClickListener(this);
-        RelativeLayout layoutPendingFeedback = (RelativeLayout) view.findViewById(R.id.layoutPendingFeedback);
-        layoutPendingFeedback.setOnClickListener(this);
+        //RelativeLayout layoutPendingFeedback = (RelativeLayout) view.findViewById(R.id.layoutPendingFeedback);
+        //layoutPendingFeedback.setOnClickListener(this);
         RelativeLayout layoutComment = (RelativeLayout) view.findViewById(R.id.layoutComment);
         layoutComment.setOnClickListener(this);
+
+        int user_type_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
+        if(user_type_id == 1){
+            //layoutPendingFeedback.setVisibility(View.GONE);
+        } else{
+            //layoutPendingFeedback.setVisibility(View.VISIBLE);
+        }
 
         if(getActivity() != null &&
                 getActivity() instanceof MainActivity){
@@ -176,7 +166,6 @@ public class DashboardFragment extends Fragment implements
             }
         });
 
-        int user_type_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
         this.mUserTypeId = user_type_id;
 
         if(mUserTypeId == 1){
@@ -221,12 +210,12 @@ public class DashboardFragment extends Fragment implements
                 ft.addToBackStack(Constants.FRAGMENT_QA_PAGE_PENDING);
                 ft.commitAllowingStateLoss();
                 break;
-            case R.id.layoutPendingFeedback:
+            /*case R.id.layoutPendingFeedback:
                 if(getActivity() != null && user_type_id == 2) {
                     Intent intent = new Intent(getActivity(), FeedbackActivity.class);
                     getActivity().startActivity(intent);
                 }
-                break;
+                break;*/
             case R.id.layoutComment:
                 YouthConnectSingleTone.getInstance().CURRENT_FRAGMENT_IN_HOME = Constants.FRAGMENT_HOME_SUB_FRAGMENT_SHOWCASE;
                 YouthConnectSingleTone.getInstance().currentFragmentOnMainActivity = Constants.FRAGMENT_HOME_SHOWCASE;
@@ -253,7 +242,7 @@ public class DashboardFragment extends Fragment implements
         swipeRefreshLayout.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        fetchData(_view, false);
+                                        fetchData(_view);
                                     }
                                 }
         );
@@ -265,45 +254,108 @@ public class DashboardFragment extends Fragment implements
     @Override
     public void onRefresh() {
         if (getView() != null) {
-            fetchData(getView(), true);
+            fetchData(getView());
         }
     }
 
-    private void fetchData(View view, boolean isSwipeToRefresh) {
+    private void fetchData(View view) {
 
-        Dashboard _dash = null;
-        if(getActivity() != null){
-            int userid = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
-            if(userid > 0) {
-
-            }
+        if(swipeRefreshLayout != null) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
+        if(view == null){
+            return;
         }
 
-        if(_dash != null && isSwipeToRefresh == false){
-            this.dashboard = _dash;
-            setDataToView(view, this.dashboard);
-        } else {
-            if (Util.getNetworkConnectivityStatus(getActivity())) {
-                GetDashboardAsync getDashboardAsync = new GetDashboardAsync();
-                getDashboardAsync.execute();
-            } else {
-                swipeRefreshLayout.setRefreshing(false);
-                Snackbar snackbar = Snackbar.make(view.findViewById(R.id.layoutParent), "No internet connection.", Snackbar.LENGTH_LONG).setAction("OK", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+        TextView tvNodalOfficers = (TextView) view.findViewById(R.id.tvNodalOfficerss);
+        TextView tvAnswereds = (TextView) view.findViewById(R.id.tvAnswereds);
+        TextView tvPendingQus = (TextView) view.findViewById(R.id.tvPendingQus);
+        //TextView tvFeedbackReceived = (TextView) view.findViewById(R.id.tvFeedbackReceived);
+        TextView tvShowcaseEvents = (TextView) view.findViewById(R.id.tvComments);
+        TextView tvDocCounts = (TextView) view.findViewById(R.id.tvDocCounts);
 
-                    }
-                });
-                View snackbarView = snackbar.getView();
-                TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-                tv.setTextColor(Color.WHITE);
-                TextView tvAction = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_action);
-                tvAction.setTextColor(Color.CYAN);
-                snackbar.show();
-
-                setDataToView(getView(), null);
+        int numberOfNodalOfficers = 0;
+        try {
+            List<NodalUser> nodalOfficerUsers = MasterDataUtil.getNodalUsersList(getActivity());
+            if (nodalOfficerUsers != null
+                    && nodalOfficerUsers.size() > 0) {
+                numberOfNodalOfficers = nodalOfficerUsers.size();
             }
+        } catch (CouchbaseLiteException exception){
+            Log.e("DashboardFragment", "error", exception);
+        } catch(IOException exception){
+            Log.e("DashboardFragment", "error", exception);
+        } catch(Exception exception){
+            Log.e("DashboardFragment", "error", exception);
         }
+        tvNodalOfficers.setText(numberOfNodalOfficers+"");
+
+        int numberOfAnswers = 0;
+        try {
+            if (QAUtil.getAnsweredQuestionAndAnswerList(getActivity()) != null
+                    && QAUtil.getAnsweredQuestionAndAnswerList(getActivity()).size() > 0) {
+                numberOfAnswers = QAUtil.getAnsweredQuestionAndAnswerList(getActivity()).size();
+            }
+            tvAnswereds.setText(numberOfAnswers + "");
+        } catch(CouchbaseLiteException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch(IOException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch(Exception exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        }
+
+        int numberOfPendingQuestions = 0;
+        try {
+            if (QAUtil.getPendingQuestionAndAnswerList(getActivity()) != null
+                    && QAUtil.getPendingQuestionAndAnswerList(getActivity()).size() > 0) {
+                numberOfPendingQuestions = QAUtil.getPendingQuestionAndAnswerList(getActivity()).size();
+            }
+        } catch(CouchbaseLiteException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch(IOException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch(Exception exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        }
+        tvPendingQus.setText(numberOfPendingQuestions+"");
+
+        int numberOfPublishedDoc = 0;
+        try {
+            if (DocUtil.getPublishedDocList(getActivity()) != null
+                    && DocUtil.getPublishedDocList(getActivity()).size() > 0) {
+                numberOfPublishedDoc = DocUtil.getPublishedDocList(getActivity()).size();
+            }
+        } catch(CouchbaseLiteException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch(IOException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch(Exception exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        }
+        tvShowcaseEvents.setText(numberOfPublishedDoc+"");
+
+        /*int feedbackReceived = 0;
+        if(YouthConnectSingleTone.getInstance().submitedReport != null
+                && YouthConnectSingleTone.getInstance().submitedReport.size() > 0){
+            feedbackReceived = YouthConnectSingleTone.getInstance().submitedReport.size();
+        }
+        tvFeedbackReceived.setText(feedbackReceived+"");*/
+
+        int docCount = 0;
+        try {
+            if (DocUtil.getAllDocList(getActivity()) != null
+                    && DocUtil.getAllDocList(getActivity()).size() > 0) {
+                docCount = DocUtil.getAllDocList(getActivity()).size();
+            }
+        } catch (CouchbaseLiteException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch(IOException exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        } catch (Exception exception){
+            Log.e("DashboardFragment", "fetchData()", exception);
+        }
+        tvDocCounts.setText(docCount + "");
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -576,247 +628,6 @@ public class DashboardFragment extends Fragment implements
     public void onNothingSelected() {
         Log.i("Nothing selected", "Nothing selected.");
     }
-    /**
-     * Async task to get sync camp table from server
-     */
-    private class GetDashboardAsync extends AsyncTask<Void, Void, Dashboard> {
-
-        private static final String TAG = "GetFileListAsyncTask";
-        private boolean isChangePassword = false;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // showing refresh animation before making http call
-            swipeRefreshLayout.setRefreshing(true);
-        }
-
-        @Override
-        protected Dashboard doInBackground(Void... params) {
-
-            if (getActivity() == null) {
-                return null;
-            }
-
-            int user_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
-            int user_type_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_TYPE, 0);
-            if (user_id <= 0 || user_type_id <= 0) {
-                return null;
-            }
-
-            try {
-                if (getActivity() == null) {
-                    return null;
-                }
-                String api_key = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_API_KEY, null);
-
-                if (api_key == null) {
-                    return null;
-                }
-
-                InputStream in = null;
-                int resCode = -1;
-
-                String link = Constants.BASE_URL + Constants.REQUEST_DASHBOARD;
-                URL url = new URL(link);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setAllowUserInteraction(false);
-                conn.setInstanceFollowRedirects(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Authorization", api_key);
-
-                Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("user_type_id", user_type_id + "")
-                        .appendQueryParameter("user_id", user_id + "");
-                String query = builder.build().getEncodedQuery();
-
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(query);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                conn.connect();
-                resCode = conn.getResponseCode();
-                if (resCode == HttpURLConnection.HTTP_OK) {
-                    in = conn.getInputStream();
-                }
-                if (in == null) {
-                    return null;
-                }
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-                String response = "", data = "";
-
-                while ((data = reader.readLine()) != null) {
-                    response += data + "\n";
-                }
-
-                Log.i(TAG, "Response : " + response);
-
-                /**
-                 *
-                 * {
-                 "pennding_qsn": 11,
-                 "qsn_answered": 7,
-                 "pending_feedback": 9,
-                 "showcased_event": 7
-                 }
-
-                 {
-
-                 "pennding_qsn": 10,
-                 "qsn_answered": 9,
-                 "qsn_publish": 8,
-                 "pending_feedback": 8,
-                 "received_feedback": 10,
-                 "showcased_event": 9
-
-                 }
-
-                 *
-                 * */
-
-            /*
-            * {
-                     "Apikey": "Api key does not exit"
-              }
-            * **/
-
-                if(response != null && response.length() > 0){
-                    JSONObject jsonObject = new JSONObject(response);
-                    if (jsonObject != null && jsonObject.isNull("Apikey") == false) {
-                        String changePasswordDoneFromWebMsg = jsonObject.optString("Apikey");
-                        if(changePasswordDoneFromWebMsg.equalsIgnoreCase("Api key does not exit")){
-                            isChangePassword = true;
-                            return null;
-                        }
-                    }
-                }
-
-                if (response != null && response.length() > 0) {
-                    JSONObject jsonObject = new JSONObject(response);
-
-                    int pennding_qsn = 0;
-                    if (jsonObject != null && jsonObject.isNull("pennding_qsn") == false) {
-                        pennding_qsn = jsonObject.optInt("pennding_qsn");
-                    }
-
-                    int qsn_answered = 0;
-                    if (jsonObject != null && jsonObject.isNull("qsn_answered") == false) {
-                        qsn_answered = jsonObject.optInt("qsn_answered");
-                    }
-
-                    int qsn_publish = 0;
-                    if (jsonObject != null && jsonObject.isNull("qsn_publish") == false) {
-                        qsn_publish = jsonObject.optInt("qsn_publish");
-                    }
-
-                    int pending_feedback = 0;
-                    if (jsonObject != null && jsonObject.isNull("pending_feedback") == false) {
-                        pending_feedback = jsonObject.optInt("pending_feedback");
-                    }
-
-                    int received_feedback = 0;
-                    if (jsonObject != null && jsonObject.isNull("received_feedback") == false) {
-                        received_feedback = jsonObject.optInt("received_feedback");
-                    }
-
-                    int showcased_event = 0;
-                    if (jsonObject != null && jsonObject.isNull("showcased_event") == false) {
-                        showcased_event = jsonObject.optInt("showcased_event");
-                    }
-
-                    int count_user = 0;
-                    if (jsonObject != null && jsonObject.isNull("count_user") == false) {
-                        count_user = jsonObject.optInt("count_user");
-                    }
-
-                    Dashboard dashboard = new Dashboard(Parcel.obtain());
-                    dashboard.setPennding_qsn(pennding_qsn);
-                    dashboard.setQsn_answered(qsn_answered);
-                    dashboard.setPending_feedback(pending_feedback);
-                    dashboard.setShowcased_event(showcased_event);
-                    dashboard.setSubmitted_feedback(received_feedback);
-                    dashboard.setQsn_publish(qsn_publish);
-                    dashboard.setCount_user(count_user);
-
-                    return dashboard;
-                }
-            } catch(SocketTimeoutException exception){
-                Log.e(TAG, "LoginAsync : doInBackground", exception);
-            } catch(ConnectException exception){
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch (MalformedURLException exception) {
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch (IOException exception) {
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            } catch (Exception exception) {
-                Log.e(TAG, "GetFileListAsyncTask : doInBackground", exception);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(final Dashboard dashboard) {
-            super.onPostExecute(dashboard);
-
-            if (getActivity() == null) {
-                return;
-            }
-
-            if(isChangePassword){
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppCompatAlertDialogStyle);
-                builder.setTitle(getResources().getString(R.string.password_changed_title));
-                builder.setMessage(getResources().getString(R.string.password_changed_description));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        Intent intent = new Intent(getActivity(), MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("Exit me", true);
-                        startActivity(intent);
-                        getActivity().finish();
-                    }
-                });
-                builder.show();
-
-                return;
-            }
-
-            /*if(progressDialog != null){
-                progressDialog.dismiss();
-            }*/
-            // stopping swipe refresh
-            swipeRefreshLayout.setRefreshing(false);
-
-            if (dashboard != null) {
-
-            } else {
-                Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.layoutParent),
-                        "Some problem occurred.", Snackbar.LENGTH_LONG).setAction("OK", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                });
-                View snackbarView = snackbar.getView();
-                TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-                tv.setTextColor(Color.WHITE);
-                TextView tvAction = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_action);
-                tvAction.setTextColor(Color.CYAN);
-                snackbar.show();
-            }
-        }
-    }
 
     private void setDataToView(View view, Dashboard _dashboard){
         if (view == null ) {
@@ -834,7 +645,7 @@ public class DashboardFragment extends Fragment implements
         }
 
         if(this.dashboard != null) {
-            TextView tvNodalOfficers = (TextView) view.findViewById(R.id.tvNodalOfficers);
+            TextView tvNodalOfficers = (TextView) view.findViewById(R.id.tvAnswereds);
             if(mUserTypeId == 1){
                 ImageView imgNodalOfficers = (ImageView) view.findViewById(R.id.imgNodalOfficers);
                 imgNodalOfficers.setImageResource(R.drawable.ic_nodal_officers);
@@ -859,11 +670,11 @@ public class DashboardFragment extends Fragment implements
             }
 
             TextView tvPendingQus = (TextView) view.findViewById(R.id.tvPendingQus);
-            TextView tvFeedbackReceived = (TextView) view.findViewById(R.id.tvFeedbackReceived);
+            //TextView tvFeedbackReceived = (TextView) view.findViewById(R.id.tvFeedbackReceived);
             TextView tvComments = (TextView) view.findViewById(R.id.tvComments);
 
             tvPendingQus.setText(this.dashboard.getPennding_qsn() + "");
-            tvFeedbackReceived.setText(this.dashboard.getPending_feedback() + "");
+            //tvFeedbackReceived.setText(this.dashboard.getPending_feedback() + "");
             tvComments.setText(this.dashboard.getShowcased_event() + "");
         }
     }

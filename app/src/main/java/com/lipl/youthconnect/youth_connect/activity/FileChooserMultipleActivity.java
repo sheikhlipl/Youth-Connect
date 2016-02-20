@@ -221,7 +221,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         PendingFileToUpload pendingFileToUpload = new PendingFileToUpload(Parcel.obtain());
 
                             Uri selectedAudioUri = uri_path;
-                            String selectedAudioPath = getPathForAudio(selectedAudioUri);
+                            //String selectedAudioPath = getPathForAudio(selectedAudioUri);
+                            String selectedAudioPath = getRealPathFromURI(selectedAudioUri);
                             pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, is_uploaded);
 
                         addViewToList(pendingFileToUpload, 1, position);
@@ -229,7 +230,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         final Uri uri = uri_path;
                         PendingFileToUpload pendingFileToUpload = new PendingFileToUpload(Parcel.obtain());
                         Uri selectedVideoUri = uri;
-                        String selectedImagePath = getPathForVideo(selectedVideoUri);
+                        //String selectedImagePath = getPathForVideo(selectedVideoUri);
+                        String selectedImagePath = getRealPathFromURI(selectedVideoUri);
                         pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, is_uploaded);
                         addViewToList(pendingFileToUpload, 1, position);
                     } else if(file_type == Constants.IMAGE){
@@ -300,7 +302,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                             .from(FileChooserMultipleActivity.this)
                             .inflate(R.layout.layout_list_file_child_doc, null);
 
-                    final String _filePath = getPathForAudio(Uri.parse(uri_path));
+                    //final String _filePath = getPathForAudio(Uri.parse(uri_path));
+                    final String _filePath = getRealPathFromURI(Uri.parse(uri_path));
                     if(_filePath != null) {
                         TextView textDocName = (TextView) layout_doc.findViewById(R.id.textDocName);
                         textDocName.setText(_filePath);
@@ -380,13 +383,15 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         }
                     });
 
-                    String selectedImagePath = getPathForVideo(Uri.parse(uri_path));
+                    //String selectedImagePath = getPathForVideo(Uri.parse(uri_path));
+                    String selectedImagePath = getRealPathFromURI(Uri.parse(uri_path));
                     if(selectedImagePath != null && selectedImagePath.length() > 0) {
                         Bitmap bmThumbnail = ThumbnailUtils.createVideoThumbnail(selectedImagePath, MediaStore.Video.Thumbnails.MICRO_KIND);
                         imageThumbnail.setImageBitmap(bmThumbnail);
                     }
 
-                    String filePathForVideo = getPathForVideo(Uri.parse(uri_path));
+                    //String filePathForVideo = getPathForVideo(Uri.parse(uri_path));
+                    String filePathForVideo = getRealPathFromURI(Uri.parse(uri_path));
                     layoutVideoItem.setTag(filePathForVideo);
 
                     ((ProgressBar) layoutVideoItem.findViewById(R.id.pBar)).setVisibility(View.INVISIBLE);
@@ -685,7 +690,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                 } else if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
                     Uri selectedVideoUri = data.getData();
-                    String selectedImagePath = getPathForVideo(selectedVideoUri);
+                    //String selectedImagePath = getPathForVideo(selectedVideoUri);
+                    String selectedImagePath = getRealPathFromURI(selectedVideoUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
                     fileToUpload.setInputStream(selectedVideoUri);
                     String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/")+1);
@@ -695,7 +701,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                 } else if (requestCode == PICK_AUDIO_REQUEST && resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
                     Uri selectedAudioUri = data.getData();
-                    String selectedAudioPath = getPathForAudio(selectedAudioUri);
+                    String selectedAudioPath = getRealPathFromURI(selectedAudioUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
                     fileToUpload.setInputStream(selectedAudioUri);
                     String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/")+1);
@@ -737,7 +743,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                 } else if (requestCode == CAMERA_CAPTURE_VIDEO_REQUEST_CODE && resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
                     Uri selectedVideoUri = data.getData();
-                    String selectedImagePath = getPathForVideo(selectedVideoUri);
+                    //String selectedImagePath = getPathForVideo(selectedVideoUri);
+                    String selectedImagePath = getRealPathFromURI(selectedVideoUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
                     fileToUpload.setInputStream(selectedVideoUri);
                     String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/")+1);
@@ -746,7 +753,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                 } else if (requestCode == RQS_RECORDING && resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
                     Uri selectedAudioUri = data.getData();
-                    String selectedAudioPath = getPathForAudio(selectedAudioUri);
+                    String selectedAudioPath = getRealPathFromURI(selectedAudioUri);
                     pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
                     fileToUpload.setInputStream(selectedAudioUri);
                     String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/")+1);
@@ -1106,7 +1113,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
         return image;
     }
 
-    public String getPathForVideo(Uri uri) {
+    /*public String getPathForVideo(Uri uri) {
 
         int currentapiVersion = Build.VERSION.SDK_INT;
         if(currentapiVersion >= Build.VERSION_CODES.LOLLIPOP){
@@ -1184,7 +1191,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
             cursor.moveToFirst();
             return cursor.getString(column_index);
         }
-    }
+    }*/
 
     private void clickPic() {
         // Check Camera

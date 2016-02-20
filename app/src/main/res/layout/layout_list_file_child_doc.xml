@@ -44,6 +44,16 @@
             android:layout_centerInParent="true"
             android:src="@drawable/ic_query_builder_white"/>
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imgRemove"
+            android:padding="12dp"
+            android:background="@drawable/circle_blue"
+            android:layout_marginBottom="12dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/abc_ic_clear_mtrl_alpha"/>
+
     </RelativeLayout>
 
 </RelativeLayout>

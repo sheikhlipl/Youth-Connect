@@ -1,5 +1,6 @@
 package com.lipl.youthconnect.youth_connect.util;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,6 +17,7 @@ import com.lipl.youthconnect.youth_connect.pojo.Question;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -135,5 +137,39 @@ public class DocUtil {
         } catch(Exception exception){
             Log.e("DocUtil", "updateDocument()", exception);
         }
+    }
+
+    public static List<Doc> getPublishedDocList(Context context) throws
+            CouchbaseLiteException, IOException, Exception{
+        List<Doc> docList = new ArrayList<Doc>();
+
+        Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
+        List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
+        for(String doc_id : allDocIds){
+            Document document = DatabaseUtil.getDocumentFromDocumentId(database, doc_id);
+            Doc doc = getDocFromDocument(document);
+            if(doc != null && doc.getIs_published() == 1){
+                docList.add(doc);
+            }
+        }
+
+        return docList;
+    }
+
+    public static List<Doc> getAllDocList(Context context) throws
+            CouchbaseLiteException, IOException, Exception{
+        List<Doc> docList = new ArrayList<Doc>();
+
+        Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
+        List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
+        for(String doc_id : allDocIds){
+            Document document = DatabaseUtil.getDocumentFromDocumentId(database, doc_id);
+            Doc doc = getDocFromDocument(document);
+            if(doc != null){
+                docList.add(doc);
+            }
+        }
+
+        return docList;
     }
 }
