@@ -23,6 +23,8 @@ import android.widget.TextView;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.activity.FileDetailsActivity;
 import com.lipl.youthconnect.youth_connect.activity.MainActivity;
+import com.lipl.youthconnect.youth_connect.pojo.Doc;
+import com.lipl.youthconnect.youth_connect.pojo.FileToUpload;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.OnLoadMoreListener;
 import com.lipl.youthconnect.youth_connect.util.Util;
@@ -45,10 +47,10 @@ import java.util.List;
  */
 public class ShowcaseDataAdapterExp extends BaseAdapter {
 
-    private List<Document> dataList;
+    private List<Doc> dataList;
     private Context context;
 
-    public ShowcaseDataAdapterExp(List<Document> documentList, Context context) {
+    public ShowcaseDataAdapterExp(List<Doc> documentList, Context context) {
         this.dataList = documentList;
         this.context = context;
     }
@@ -75,13 +77,13 @@ public class ShowcaseDataAdapterExp extends BaseAdapter {
             view = LayoutInflater.from(context).inflate(R.layout.showcase_event_list_item, null);
         }
 
-        Document document= (Document) dataList.get(position);
+        Doc document= (Doc) dataList.get(position);
         TextView tvActivityName = (TextView) view.findViewById(R.id.tvActivityName);
-        tvActivityName.setText(document.getDocumentMaster().getDocument_title());
+        tvActivityName.setText(document.getDoc_title());
         TextView tvActivityPurpose = (TextView) view.findViewById(R.id.tvActivityPurpose);
-        tvActivityPurpose.setText(document.getDocumentMaster().getDocument_purpose());
+        tvActivityPurpose.setText(document.getDoc_purpose());
 
-        String dateTime = document.getDocumentMaster().getCreated();
+        String dateTime = document.getCreated();
         try {
             if (dateTime != null && dateTime.length() > 0) {
                 //Format 2015-12-24 11:16:44
@@ -107,14 +109,14 @@ public class ShowcaseDataAdapterExp extends BaseAdapter {
         }
 
         TextView tvPostedBy = (TextView) view.findViewById(R.id.tvPostedBy);
-        tvPostedBy.setText(document.getUserFullName());
+        tvPostedBy.setText(document.getCreated_by_user_name());
 
         RecyclerView item_horizontal_list = (RecyclerView) view.findViewById(R.id.item_horizontal_list);
         item_horizontal_list.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false));
         HorizontalAdapter horizontalAdapter = new HorizontalAdapter();
         item_horizontal_list.setAdapter(horizontalAdapter);
 
-        horizontalAdapter.setData(dataList.get(position).getDocumentUploadList(), context);
+        horizontalAdapter.setData(dataList.get(position).getFileToUploads(), context);
         horizontalAdapter.setRowIndex(position);
 
         return view;
@@ -122,19 +124,19 @@ public class ShowcaseDataAdapterExp extends BaseAdapter {
 
     private static class HorizontalAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private List<DocumentUpload> mDataList;
+        private List<FileToUpload> mDataList;
         private int mRowIndex = -1;
         private Context context;
 
         public HorizontalAdapter() {
         }
 
-        public void setData(List<DocumentUpload> data, Context context) {
+        public void setData(List<FileToUpload> data, Context context) {
             if (mDataList != data) {
                 mDataList = data;
                 notifyDataSetChanged();
             } else {
-                mDataList = new ArrayList<DocumentUpload>();
+                mDataList = new ArrayList<FileToUpload>();
             }
             this.context = context;
         }
@@ -180,8 +182,8 @@ public class ShowcaseDataAdapterExp extends BaseAdapter {
 
             String uploadfile = null;
             if (mDataList != null && mDataList.size() > 0) {
-                DocumentUpload documentUpload = mDataList.get(position);
-                uploadfile = documentUpload.getUpload_file();
+                FileToUpload documentUpload = mDataList.get(position);
+                uploadfile = documentUpload.getFile_name();
             }
 
             holder.img.setImageResource(R.drawable.ic_insert_drive_file);
@@ -195,7 +197,7 @@ public class ShowcaseDataAdapterExp extends BaseAdapter {
                 dir.mkdirs();
             }
             OutputStream fOut = null;
-            String filename = mDataList.get(position).getUpload_file();
+            String filename = mDataList.get(position).getFile_name();
             File _file = new File(fullPath, filename);
             if (_file.exists()) {
                 holder.progressBar.setVisibility(View.INVISIBLE);
@@ -250,25 +252,26 @@ public class ShowcaseDataAdapterExp extends BaseAdapter {
             protected File doInBackground(Void... params) {
 
                 int a = index;
-                List<DocumentUpload> _mDataList = mDataList;
-                String df= mDataList.get(index).getUpload_file();
-                int sd = mDataList.get(index).getUpload_file().length();
+                List<FileToUpload> _mDataList = mDataList;
+                String df= mDataList.get(index).getDownload_link_url();
+                int sd = mDataList.get(index).getDownload_link_url().length();
 
                 if (index >= 0 && mDataList != null && mDataList.size() > 0
                         && index <= mDataList.size() - 1 &&
-                        mDataList.get(index).getUpload_file() != null &&
-                        mDataList.get(index).getUpload_file().length() > 0) {
+                        mDataList.get(index).getFile_name() != null &&
+                        mDataList.get(index).getFile_name().length() > 0) {
 
                     int count;
                     try {
 
-                        String fileName = mDataList.get(index).getUpload_file();
+                        String fileName = mDataList.get(index).getFile_name();
+                        String download_link = mDataList.get(index).getDownload_link_url();
 
-                        if (fileName == null || fileName.trim().length() <= 0) {
+                        if (download_link == null || download_link.trim().length() <= 0) {
                             return null;
                         }
 
-                        String req_url = Constants.BASE_URL + Constants.DOCUMENT_DOWNLOAD_REQUEST_URL + fileName;
+                        String req_url = download_link;
 
                         URL url = new URL(req_url);
                         URLConnection conection = url.openConnection();

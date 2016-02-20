@@ -189,8 +189,10 @@ public class FileChooserMultipleActivity extends ActionBarActivity
     private void setPreviousDataToList(){
 
         LinearLayout layoutDoc = (LinearLayout) findViewById(R.id.layoutDoc);
+        layoutDoc.removeAllViews();
         if(fileUploadList != null && fileUploadList.size() > 0){
             for(int i = 0; i < fileUploadList.size(); i++){
+                int position = i;
                 PendingFileToUpload fileUpload1 = fileUploadList.get(i);
                 int file_type = fileUpload1.getFileType();
                 String file_path = fileUpload1.getFilePath();
@@ -204,7 +206,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         String FilePath = file_path;
                         pendingFileToUpload = getPendingFileToBeUploadFromData(FilePath, "", Constants.DOC, is_uploaded);
 
-                        addViewToList(pendingFileToUpload, 1);
+                        addViewToList(pendingFileToUpload, 1, position);
                     }
                 }
 
@@ -222,28 +224,30 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                             String selectedAudioPath = getPathForAudio(selectedAudioUri);
                             pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, is_uploaded);
 
-                        addViewToList(pendingFileToUpload, 1);
+                        addViewToList(pendingFileToUpload, 1, position);
                     } else if (file_type == Constants.VIDEO) {
                         final Uri uri = uri_path;
                         PendingFileToUpload pendingFileToUpload = new PendingFileToUpload(Parcel.obtain());
                         Uri selectedVideoUri = uri;
                         String selectedImagePath = getPathForVideo(selectedVideoUri);
                         pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, is_uploaded);
-                        addViewToList(pendingFileToUpload, 1);
+                        addViewToList(pendingFileToUpload, 1, position);
                     } else if(file_type == Constants.IMAGE){
                         final Uri uri = uri_path;
                         String filePathForImage = getRealPathFromURI(uri_path);
                         Uri selectedImageUri = uri;
                         PendingFileToUpload pendingFileToUpload = new PendingFileToUpload(Parcel.obtain());
                         pendingFileToUpload = getPendingFileToBeUploadFromData(filePathForImage, selectedImageUri.toString(), Constants.IMAGE, is_uploaded);
-                        addViewToList(pendingFileToUpload, 1);
+                        addViewToList(pendingFileToUpload, 1, position);
                     }
                 }
             }
+        } else{
+            layoutDoc.removeAllViews();
         }
     }
 
-    private void addViewToList(PendingFileToUpload pendingFileToBeUpload, int is_new) {
+    private void addViewToList(PendingFileToUpload pendingFileToBeUpload, int is_new, final int position) {
         LinearLayout layoutDoc = (LinearLayout) findViewById(R.id.layoutDoc);
 
         String file_path = pendingFileToBeUpload.getFilePath();
@@ -277,6 +281,15 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                             imgPending.setVisibility(View.VISIBLE);
                         }
                     }
+                    ImageView imgRemove = (ImageView) relativeLayout.findViewById(R.id.imgRemove);
+                    imgRemove.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fileUploadList.remove(position);
+                            fileToUploads.remove(position);
+                            setPreviousDataToList();
+                        }
+                    });
                 }
             }
         } else{
@@ -307,6 +320,16 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         ImageView imgPending = (ImageView) layout_doc.findViewById(R.id.imgPending);
                         imgPending.setVisibility(View.VISIBLE);
                     }
+
+                    ImageView imgRemove = (ImageView) layout_doc.findViewById(R.id.imgRemove);
+                    imgRemove.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fileUploadList.remove(position);
+                            fileToUploads.remove(position);
+                            setPreviousDataToList();
+                        }
+                    });
 
                     layoutDoc.addView(layout_doc);
                     layout_doc.setTag(_filePath);
@@ -381,6 +404,16 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         imgPending.setVisibility(View.VISIBLE);
                     }
 
+                    ImageView jh = (ImageView) layoutVideoItem.findViewById(R.id.imgRemove);
+                    jh.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fileUploadList.remove(position);
+                            fileToUploads.remove(position);
+                            setPreviousDataToList();
+                        }
+                    });
+
                     layoutDoc.addView(layoutVideoItem);
 
                     break;
@@ -422,6 +455,16 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         imgPending.setVisibility(View.VISIBLE);
                     }
 
+                    ImageView kjjk = (ImageView) layoutImageItem.findViewById(R.id.imgRemove);
+                    kjjk.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fileUploadList.remove(position);
+                            fileToUploads.remove(position);
+                            setPreviousDataToList();
+                        }
+                    });
+
                     layoutDoc.addView(layoutImageItem);
 
                     break;
@@ -451,6 +494,16 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         ImageView imgPending = (ImageView) _layout_doc.findViewById(R.id.imgPending);
                         imgPending.setVisibility(View.VISIBLE);
                     }
+
+                    ImageView jhh = (ImageView) _layout_doc.findViewById(R.id.imgRemove);
+                    jhh.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fileUploadList.remove(position);
+                            fileToUploads.remove(position);
+                            setPreviousDataToList();
+                        }
+                    });
 
                     layoutDoc.addView(_layout_doc);
 
@@ -606,7 +659,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
 
         mRevealView = (LinearLayout) findViewById(R.id.reveal_items);
         mRevealView.setVisibility(View.INVISIBLE);
-        setPreviousDataToList();
+        //setPreviousDataToList();
         isFromActivityResult = true;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
@@ -701,7 +754,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                     fileToUpload.setMime_type(getMimeTypeFromUri(selectedAudioUri));
                 }
 
-                addViewToList(pendingFileToUpload, 1);
+                int pos = fileUploadList.size();
+                addViewToList(pendingFileToUpload, 1, pos);
                 fileUploadList.add(pendingFileToUpload);
                 fileToUploads.add(fileToUpload);
 

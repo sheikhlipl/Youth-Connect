@@ -24,6 +24,7 @@ import com.lipl.youthconnect.youth_connect.activity.EditQuestionActivity;
 import com.lipl.youthconnect.youth_connect.activity.QNADetailsActivity;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
+import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
@@ -198,15 +199,117 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
             }
         });
 
+        ImageView imgPublish = (ImageView) view.findViewById(R.id.imgPublish);
+        imgPublish.setTag(position);
+
+        ImageView imgUnpublish = (ImageView) view.findViewById(R.id.imgUnpublish);
+        imgUnpublish.setTag(position);
+
         ImageView imgEdit = (ImageView) view.findViewById(R.id.imgEdit);
         imgEdit.setTag(position);
         if(isFromAnswered){
             imgEdit.setVisibility(View.VISIBLE);
+            imgPublish.setVisibility(View.GONE);
+            imgUnpublish.setVisibility(View.GONE);
         } else if(isFromAnswered == false && isFromAnswered == false){
             imgEdit.setVisibility(View.VISIBLE);
+            imgPublish.setVisibility(View.GONE);
+            imgUnpublish.setVisibility(View.GONE);
         } else{
             imgEdit.setVisibility(View.GONE);
+            if(dataList != null && dataList.size() > 0
+                    && dataList.get(position) != null) {
+                int is_publish = dataList.get(position).getIs_published();
+                if (is_publish == 0) {
+                    imgPublish.setVisibility(View.VISIBLE);
+                    imgUnpublish.setVisibility(View.GONE);
+                } else {
+                    imgPublish.setVisibility(View.GONE);
+                    imgUnpublish.setVisibility(View.VISIBLE);
+                }
+            }
         }
+
+        imgPublish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int pos = (Integer) v.getTag();
+                QuestionAndAnswer questionAndAnswer = dataList.get(pos);
+                String doc_id = questionAndAnswer.getQid();
+                int is_publish = questionAndAnswer.getIs_published();
+                if(is_publish == 0) {
+                    try {
+                        QAUtil.updateDocForPublish(DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE), doc_id, 1);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppCompatAlertDialogStyle);
+                        builder.setTitle("Question publish");
+                        builder.setMessage("Done.");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    DatabaseUtil.startReplications(context, QADataAdapter.this, TAG);
+                                } catch(CouchbaseLiteException exception){
+                                    Log.e(TAG, "onClick()", exception);
+                                } catch(IOException exception){
+                                    Log.e(TAG, "onClick()", exception);
+                                } catch (Exception exception){
+                                    Log.e(TAG, "onClick()", exception);
+                                }
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.show();
+                    } catch (CouchbaseLiteException exception) {
+                        Log.e(TAG, "getView()", exception);
+                    } catch (IOException exception) {
+                        Log.e(TAG, "getView()", exception);
+                    } catch (Exception exception) {
+                        Log.e(TAG, "getView()", exception);
+                    }
+                }
+            }
+        });
+
+        imgUnpublish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int pos = (Integer) v.getTag();
+                QuestionAndAnswer questionAndAnswer = dataList.get(pos);
+                String doc_id = questionAndAnswer.getQid();
+                int is_publish = questionAndAnswer.getIs_published();
+                if(is_publish == 1) {
+                    try {
+                        QAUtil.updateDocForPublish(DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE), doc_id, 0);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppCompatAlertDialogStyle);
+                        builder.setTitle("Question publish");
+                        builder.setMessage("Done.");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    DatabaseUtil.startReplications(context, QADataAdapter.this, TAG);
+                                } catch(CouchbaseLiteException exception){
+                                    Log.e(TAG, "onClick()", exception);
+                                } catch(IOException exception){
+                                    Log.e(TAG, "onClick()", exception);
+                                } catch (Exception exception){
+                                    Log.e(TAG, "onClick()", exception);
+                                }
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.show();
+                    } catch (CouchbaseLiteException exception) {
+                        Log.e(TAG, "getView()", exception);
+                    } catch (IOException exception) {
+                        Log.e(TAG, "getView()", exception);
+                    } catch (Exception exception) {
+                        Log.e(TAG, "getView()", exception);
+                    }
+                }
+            }
+        });
+
         imgEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -130,6 +130,36 @@
                 android:scaleType="fitCenter"/>
 
         </LinearLayout>
+
+        <!-- publish button -->
+        <ImageView
+            android:id="@+id/imgPublish"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:src="@drawable/ic_publish_black"
+            android:padding="6dp"
+            android:layout_below="@+id/layout_above"
+            android:adjustViewBounds="true"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            android:scaleType="fitCenter"/>
+
+        <!-- unpublish buttton-->
+        <ImageView
+            android:id="@+id/imgUnpublish"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/layout_above"
+            android:src="@drawable/ic_not_interested_black"
+            android:padding="6dp"
+            android:visibility="gone"
+            android:adjustViewBounds="true"
+            android:layout_centerVertical="true"
+            android:scaleType="fitCenter"/>
+
     </RelativeLayout>
 
     <LinearLayout

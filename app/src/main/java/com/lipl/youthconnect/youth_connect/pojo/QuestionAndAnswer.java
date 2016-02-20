@@ -19,6 +19,7 @@ public class QuestionAndAnswer implements Parcelable {
     private ArrayList<Comment> commentList;
     private int question_by_user_id;
     private int is_uploaded;
+    private int is_published;
     private int is_id_generated_for_offline;
     private String answerJson;
     private String commentJson;
@@ -103,6 +104,14 @@ public class QuestionAndAnswer implements Parcelable {
         this.commentList = commentList;
     }
 
+    public int getIs_published() {
+        return is_published;
+    }
+
+    public void setIs_published(int is_published) {
+        this.is_published = is_published;
+    }
+
     public static final Creator<QuestionAndAnswer> CREATOR = new Creator<QuestionAndAnswer>() {
 
         @Override
@@ -138,6 +147,7 @@ public class QuestionAndAnswer implements Parcelable {
         dest.writeInt(is_id_generated_for_offline);
         dest.writeString(answerJson);
         dest.writeString(commentJson);
+        dest.writeInt(is_published);
     }
 
     private void readFromParcel(Parcel in){
@@ -159,5 +169,6 @@ public class QuestionAndAnswer implements Parcelable {
         is_id_generated_for_offline = in.readInt();
         answerJson = in.readString();
         commentJson = in.readString();
+        is_published = in.readInt();
     }
 }

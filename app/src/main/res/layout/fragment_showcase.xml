@@ -5,18 +5,13 @@
     android:id="@+id/coordinatorLayout"
     tools:context="com.luminousinfoways.bloodbank.fragment.AllDonorListFragment">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
         <!--<android.support.v7.widget.RecyclerView-->
             <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
             <!--android:id="@+id/showcaseEventRecycleList"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="match_parent"/>-->
 
-        <com.lipl.youthconnect.youth_connect.util.PullAndLoadListView
+        <ListView
             android:id="@+id/showcaseEventRecycleList"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -25,8 +20,6 @@
             android:padding="12dp"
             android:divider="@android:color/transparent"
             android:dividerHeight="4dp"/>
-
-    </android.support.v4.widget.SwipeRefreshLayout>
 
     <TextView
         android:id="@+id/tvNoRecordFoundText"

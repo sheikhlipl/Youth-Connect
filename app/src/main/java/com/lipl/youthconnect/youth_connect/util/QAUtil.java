@@ -84,7 +84,6 @@ public class QAUtil {
             question.setQa_description(description);
             question.setAskedBy(user_name);
             question.setIs_answer(is_answered);
-            question.setIs_publish(is_published);
             question.setPost_date(postDate);
             question.setQus_asked_by_user_id(asked_by_user_id);
             question.setIs_uploaded(is_uploaded);
@@ -93,6 +92,7 @@ public class QAUtil {
             questionAndAnswer.setQuestion(question);
             questionAndAnswer.setAnswerList(answerArrayList);
             questionAndAnswer.setCommentList(commentArrayList);
+            questionAndAnswer.setIs_published(is_published);
             questionAndAnswer.setQid(id);
 
             return questionAndAnswer;
@@ -130,6 +130,23 @@ public class QAUtil {
             updatedProperties.putAll(document.getProperties());
             updatedProperties.put(DatabaseUtil.QA_ANSWER, answerList);
             updatedProperties.put(DatabaseUtil.QA_ASKED_BY_USER_ID, asked_by_user_id);
+            // Save to the Couchbase local Couchbase Lite DB
+            document.putProperties(updatedProperties);
+        } catch (CouchbaseLiteException e) {
+            com.couchbase.lite.util.Log.e("QAUtil", "Error putting", e);
+        } catch(Exception exception){
+            Log.e("QAUtil", "updateDocument()", exception);
+        }
+    }
+
+    public static void updateDocForPublish(Database database, String documentId,
+                                           int is_publish){
+        Document document = database.getDocument(documentId);
+        try {
+            // Update the document with more data
+            Map<String, Object> updatedProperties = new HashMap<String, Object>();
+            updatedProperties.putAll(document.getProperties());
+            updatedProperties.put(DatabaseUtil.QA_IS_PUBLISHED, is_publish);
             // Save to the Couchbase local Couchbase Lite DB
             document.putProperties(updatedProperties);
         } catch (CouchbaseLiteException e) {
