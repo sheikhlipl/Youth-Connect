@@ -243,6 +243,7 @@ public class MainActivity extends ActionBarActivity implements
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 menuItem.setChecked(true);
                 mDrawerLayout.closeDrawers();
+                Menu menu = navigationView.getMenu();
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 switch (menuItem.getItemId()) {
 
@@ -259,13 +260,31 @@ public class MainActivity extends ActionBarActivity implements
                         break;
 
                     case R.id.action_settings:
-                        navigationView.getMenu().getItem(2).setChecked(true);
+                        navigationView.getMenu().getItem(0).setChecked(true);
                         Intent intent2 = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(intent2);
                         break;
 
                     case R.id.action_logout:
                         showAlertDialog("Are you sure want to logout?", "Logout", "Yes", "No", LOGOUT);
+                        break;
+
+                    case R.id.action_forum:
+                        navigationView.getMenu().getItem(0).setChecked(true);
+                        Intent intent3 = new Intent(MainActivity.this, QAForumActivity.class);
+                        startActivity(intent3);
+                        break;
+
+                    case R.id.action_pending:
+                        navigationView.getMenu().getItem(1).setChecked(true);
+                        Intent intent4 = new Intent(MainActivity.this, QAPendingActivity.class);
+                        startActivity(intent4);
+                        break;
+
+                    case R.id.action_answered:
+                        navigationView.getMenu().getItem(2).setChecked(true);
+                        Intent intent5 = new Intent(MainActivity.this, QAAnsweredActivity.class);
+                        startActivity(intent5);
                         break;
 
                     default:
@@ -327,7 +346,7 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home_actionbar, menu);
+        /*getMenuInflater().inflate(R.menu.menu_home_actionbar, menu);
 
         MenuItem item = menu.findItem(R.id.action_notification);
         MenuItemCompat.setActionView(item, R.layout.feed_update_count);
@@ -348,7 +367,7 @@ public class MainActivity extends ActionBarActivity implements
                 ft.addToBackStack(Constants.FRAGMENT_NOTIFICATION_PAGE);
                 ft.commitAllowingStateLoss();
             }
-        });
+        });*/
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -418,6 +437,15 @@ public class MainActivity extends ActionBarActivity implements
 //            Toast.makeText(MainActivity.this, "Chat Screen", Toast.LENGTH_SHORT).show();
 //        }
         }  else if(id == android.R.id.home){
+            mDrawerLayout.openDrawer(GravityCompat.START);
+            return true;
+        } else if(id == R.id.action_pending){
+            mDrawerLayout.openDrawer(GravityCompat.START);
+            return true;
+        } else if(id == R.id.action_answered){
+            mDrawerLayout.openDrawer(GravityCompat.START);
+            return true;
+        } else if(id == R.id.action_forum){
             mDrawerLayout.openDrawer(GravityCompat.START);
             return true;
         }

@@ -11,6 +11,15 @@ public class NodalUser implements Parcelable {
     int user_id;
     String full_name;
     String m_district_id;
+    boolean is_selected;
+
+    public boolean is_selected() {
+        return is_selected;
+    }
+
+    public void setIs_selected(boolean is_selected) {
+        this.is_selected = is_selected;
+    }
 
     public int getUser_id() {
         return user_id;
@@ -65,11 +74,13 @@ public class NodalUser implements Parcelable {
         dest.writeInt(user_id);
         dest.writeString(full_name);
         dest.writeString(m_district_id);
+        dest.writeByte((byte) (is_selected ? 1 : 0));
     }
 
     private void readFromParcel(Parcel in){
         user_id = in.readInt();
         full_name = in.readString();
         m_district_id = in.readString();
+        is_selected = in.readByte() != 0;
     }
 }

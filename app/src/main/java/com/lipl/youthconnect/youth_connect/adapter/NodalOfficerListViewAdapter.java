@@ -24,14 +24,12 @@ public class NodalOfficerListViewAdapter extends BaseAdapter {
 
     private List<NodalUser> userList;
     private Context context;
+    boolean checkAll_flag = false;
+    boolean checkItem_flag = false;
 
     public NodalOfficerListViewAdapter(List<NodalUser> userList, Context context){
         this.userList = userList;
         this.context = context;
-    }
-
-    private class ViewHolder {
-        CheckBox name;
     }
 
     @Override
@@ -49,7 +47,48 @@ public class NodalOfficerListViewAdapter extends BaseAdapter {
         return i;
     }
 
+    static class ViewHolder {
+        //protected TextView text;
+        protected CheckBox checkbox;
+    }
+
     @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+
+        ViewHolder viewHolder = null;
+        if (convertView == null) {
+            LayoutInflater inflator = LayoutInflater.from(context);
+            convertView = inflator.inflate(R.layout.list_row_dist, null);
+            viewHolder = new ViewHolder();
+            //viewHolder.text = (TextView) convertView.findViewById(R.id.label);
+            viewHolder.checkbox = (CheckBox) convertView.findViewById(R.id.tvDist);
+            viewHolder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    int getPosition = (Integer) buttonView.getTag();  // Here we get the position that we have set for the checkbox using setTag.
+                    userList.get(getPosition).setIs_selected(buttonView.isChecked()); // Set the value of checkbox to maintain its state.
+                }
+            });
+            convertView.setTag(viewHolder);
+            //convertView.setTag(R.id.label, viewHolder.text);
+            convertView.setTag(R.id.tvDist, viewHolder.checkbox);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+        viewHolder.checkbox.setTag(position); // This line is important.
+
+        //viewHolder.text.setText(list.get(position).getName());
+        viewHolder.checkbox.setChecked(userList.get(position).is_selected());
+        if(userList.get(position) != null &&
+                userList.get(position).getFull_name() != null) {
+            viewHolder.checkbox.setText(userList.get(position).getFull_name());
+        }
+
+        return convertView;
+    }
+
+    /*@Override
     public View getView(int position, View view, ViewGroup viewGroup) {
 
         if(view == null){
@@ -102,5 +141,5 @@ public class NodalOfficerListViewAdapter extends BaseAdapter {
         });
 
         return view;
-    }
+    }*/
 }

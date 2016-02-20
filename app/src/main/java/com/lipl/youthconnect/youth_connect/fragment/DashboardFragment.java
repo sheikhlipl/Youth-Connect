@@ -1,8 +1,10 @@
 package com.lipl.youthconnect.youth_connect.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -41,6 +43,7 @@ import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DocUtil;
 import com.lipl.youthconnect.youth_connect.util.DummyContent;
 import com.lipl.youthconnect.youth_connect.util.MasterDataUtil;
+import com.lipl.youthconnect.youth_connect.util.MyApplication;
 import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.adapter.PagerAdapter;
@@ -260,102 +263,147 @@ public class DashboardFragment extends Fragment implements
 
     private void fetchData(View view) {
 
-        if(swipeRefreshLayout != null) {
-            swipeRefreshLayout.setRefreshing(false);
-        }
         if(view == null){
             return;
         }
 
+        new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                Context context = getActivity();
+                if(context == null){
+                    return null;
+                }
+
+                int numberOfNodalOfficers = 0;
+                try {
+                    List<NodalUser> nodalOfficerUsers = MasterDataUtil.getNodalUsersList(context);
+                    if (nodalOfficerUsers != null
+                            && nodalOfficerUsers.size() > 0) {
+                        numberOfNodalOfficers = nodalOfficerUsers.size();
+                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
+                                .putInt(Constants.SP_KEY_COUNT_NODAL_OFFICERS, numberOfNodalOfficers).commit();
+                    }
+                } catch (CouchbaseLiteException exception){
+                    Log.e("DashboardFragment", "error", exception);
+                } catch(IOException exception){
+                    Log.e("DashboardFragment", "error", exception);
+                } catch(Exception exception){
+                    Log.e("DashboardFragment", "error", exception);
+                }
+
+                int numberOfPendingQuestions = 0;
+                try {
+                    if (QAUtil.getPendingQuestionAndAnswerList(context) != null
+                            && QAUtil.getPendingQuestionAndAnswerList(context).size() > 0) {
+                        numberOfPendingQuestions = QAUtil.getPendingQuestionAndAnswerList(context).size();
+                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
+                                .putInt(Constants.SP_KEY_COUNT_PENDING_QUESTIONS, numberOfPendingQuestions).commit();
+                    }
+                } catch(CouchbaseLiteException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch(IOException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch(Exception exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                }
+
+                int numberOfAnsweredQuestion = 0;
+                try {
+                    if (QAUtil.getAnsweredQuestionAndAnswerList(context) != null
+                            && QAUtil.getAnsweredQuestionAndAnswerList(context).size() > 0) {
+                        numberOfAnsweredQuestion = QAUtil.getAnsweredQuestionAndAnswerList(context).size();
+                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
+                                .putInt(Constants.SP_KEY_COUNT_QUESTIONS_ANSWERED, numberOfAnsweredQuestion).commit();
+                    }
+                } catch(CouchbaseLiteException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch(IOException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch(Exception exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                }
+
+                int numberOfPublishedDoc = 0;
+                try {
+                    if (DocUtil.getPublishedDocList(context) != null
+                            && DocUtil.getPublishedDocList(context).size() > 0) {
+                        numberOfPublishedDoc = DocUtil.getPublishedDocList(context).size();
+                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
+                                .putInt(Constants.SP_KEY_COUNT_SHOWCASE_EVENTS, numberOfPublishedDoc).commit();
+                    }
+                } catch(CouchbaseLiteException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch(IOException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch(Exception exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                }
+
+                int docCount = 0;
+                try {
+                    if (DocUtil.getAllDocList(context) != null
+                            && DocUtil.getAllDocList(context).size() > 0) {
+                        docCount = DocUtil.getAllDocList(context).size();
+                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
+                                .putInt(Constants.SP_KEY_COUNT_DOCUMENT, docCount).commit();
+                    }
+                } catch (CouchbaseLiteException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch(IOException exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                } catch (Exception exception){
+                    Log.e("DashboardFragment", "fetchData()", exception);
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if(swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+                if(getActivity() != null
+                        && getView() != null ){
+                    showCounts(getView());
+                }
+            }
+        }.execute();
+
+        if(getView() != null){
+            showCounts(getView());
+        }
+    }
+
+    private void showCounts(View view){
         TextView tvNodalOfficers = (TextView) view.findViewById(R.id.tvNodalOfficerss);
         TextView tvAnswereds = (TextView) view.findViewById(R.id.tvAnswereds);
         TextView tvPendingQus = (TextView) view.findViewById(R.id.tvPendingQus);
-        //TextView tvFeedbackReceived = (TextView) view.findViewById(R.id.tvFeedbackReceived);
         TextView tvShowcaseEvents = (TextView) view.findViewById(R.id.tvComments);
         TextView tvDocCounts = (TextView) view.findViewById(R.id.tvDocCounts);
 
-        int numberOfNodalOfficers = 0;
-        try {
-            List<NodalUser> nodalOfficerUsers = MasterDataUtil.getNodalUsersList(getActivity());
-            if (nodalOfficerUsers != null
-                    && nodalOfficerUsers.size() > 0) {
-                numberOfNodalOfficers = nodalOfficerUsers.size();
-            }
-        } catch (CouchbaseLiteException exception){
-            Log.e("DashboardFragment", "error", exception);
-        } catch(IOException exception){
-            Log.e("DashboardFragment", "error", exception);
-        } catch(Exception exception){
-            Log.e("DashboardFragment", "error", exception);
-        }
-        tvNodalOfficers.setText(numberOfNodalOfficers+"");
+        int nodalOfficersCount = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_KEY_COUNT_NODAL_OFFICERS, 0);
+        tvNodalOfficers.setText(nodalOfficersCount+"");
 
-        int numberOfAnswers = 0;
-        try {
-            if (QAUtil.getAnsweredQuestionAndAnswerList(getActivity()) != null
-                    && QAUtil.getAnsweredQuestionAndAnswerList(getActivity()).size() > 0) {
-                numberOfAnswers = QAUtil.getAnsweredQuestionAndAnswerList(getActivity()).size();
-            }
-            tvAnswereds.setText(numberOfAnswers + "");
-        } catch(CouchbaseLiteException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch(IOException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch(Exception exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        }
+        int pendingQuestionsCount = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_KEY_COUNT_PENDING_QUESTIONS, 0);
+        tvPendingQus.setText(pendingQuestionsCount+"");
 
-        int numberOfPendingQuestions = 0;
-        try {
-            if (QAUtil.getPendingQuestionAndAnswerList(getActivity()) != null
-                    && QAUtil.getPendingQuestionAndAnswerList(getActivity()).size() > 0) {
-                numberOfPendingQuestions = QAUtil.getPendingQuestionAndAnswerList(getActivity()).size();
-            }
-        } catch(CouchbaseLiteException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch(IOException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch(Exception exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        }
-        tvPendingQus.setText(numberOfPendingQuestions+"");
+        int answeredQuestionCount = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_KEY_COUNT_QUESTIONS_ANSWERED, 0);
+        tvAnswereds.setText(answeredQuestionCount+"");
 
-        int numberOfPublishedDoc = 0;
-        try {
-            if (DocUtil.getPublishedDocList(getActivity()) != null
-                    && DocUtil.getPublishedDocList(getActivity()).size() > 0) {
-                numberOfPublishedDoc = DocUtil.getPublishedDocList(getActivity()).size();
-            }
-        } catch(CouchbaseLiteException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch(IOException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch(Exception exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        }
-        tvShowcaseEvents.setText(numberOfPublishedDoc+"");
+        int publishedDocCount = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_KEY_COUNT_SHOWCASE_EVENTS, 0);
+        tvShowcaseEvents.setText(publishedDocCount + "");
 
-        /*int feedbackReceived = 0;
-        if(YouthConnectSingleTone.getInstance().submitedReport != null
-                && YouthConnectSingleTone.getInstance().submitedReport.size() > 0){
-            feedbackReceived = YouthConnectSingleTone.getInstance().submitedReport.size();
-        }
-        tvFeedbackReceived.setText(feedbackReceived+"");*/
-
-        int docCount = 0;
-        try {
-            if (DocUtil.getAllDocList(getActivity()) != null
-                    && DocUtil.getAllDocList(getActivity()).size() > 0) {
-                docCount = DocUtil.getAllDocList(getActivity()).size();
-            }
-        } catch (CouchbaseLiteException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch(IOException exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        } catch (Exception exception){
-            Log.e("DashboardFragment", "fetchData()", exception);
-        }
-        tvDocCounts.setText(docCount + "");
+        int totalDocCounts = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_KEY_COUNT_DOCUMENT, 0);
+        tvDocCounts.setText(totalDocCounts+"");
     }
 
     // TODO: Rename method, update argument and hook method into UI event

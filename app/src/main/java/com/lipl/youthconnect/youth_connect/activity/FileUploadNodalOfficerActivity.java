@@ -19,6 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -61,7 +63,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FileUploadNodalOfficerActivity extends ActionBarActivity implements Replication.ChangeListener {
+public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
+        Replication.ChangeListener, AdapterView.OnItemClickListener {
 
     private static Toolbar mToolbar = null;
     private TextView tvEmptyView;
@@ -161,7 +164,27 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
         if(getIntent().getExtras() != null){
             document = (Doc) getIntent().getExtras().getSerializable(Constants.INTENT_KEY_DOCUMENT);
         }
+    }
 
+    @Override
+    public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
+
+        if(selectedNodalOfficers == null){
+            selectedNodalOfficers = new ArrayList<NodalUser>();
+        }
+
+        CheckBox checkbox = (CheckBox) v.getTag(R.id.tvDist);
+        NodalUser nodalUser = nodalOfficers.get(position);
+        if(checkbox.isChecked()) {
+            selectedNodalOfficers.add(nodalUser);
+        } else{
+            for(int i = 0; i < selectedNodalOfficers.size(); i++){
+                NodalUser user = selectedNodalOfficers.get(i);
+                if(user.getUser_id() == nodalUser.getUser_id()){
+                    selectedNodalOfficers.remove(i);
+                }
+            }
+        }
     }
 
     private void setNodalOfficersList(String filterText){

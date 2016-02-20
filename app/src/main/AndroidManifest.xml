@@ -120,6 +120,14 @@
         <activity android:name=".activity.EditQuestionActivity"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".activity.QAAnsweredActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".activity.QAForumActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".activity.QAPendingActivity"
+            android:screenOrientation="portrait"/>
 
         <!--<service-->
         <!--android:name=".activity.Util.NotificationService"-->

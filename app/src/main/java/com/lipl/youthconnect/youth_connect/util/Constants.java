@@ -142,4 +142,10 @@ public class Constants {
             = "com.lipl.youthconnect.youth_connect.replication.change";
 
     public static final String NEXT_ACTIVITY = "nextActivity";
+
+    public static final String SP_KEY_COUNT_NODAL_OFFICERS = "nodal_officers_count";
+    public static final String SP_KEY_COUNT_QUESTIONS_ANSWERED = "questions_answered_count";
+    public static final String SP_KEY_COUNT_PENDING_QUESTIONS = "pending_questions_count";
+    public static final String SP_KEY_COUNT_SHOWCASE_EVENTS = "showcase_events_count";
+    public static final String SP_KEY_COUNT_DOCUMENT = "documents_count";
 }
