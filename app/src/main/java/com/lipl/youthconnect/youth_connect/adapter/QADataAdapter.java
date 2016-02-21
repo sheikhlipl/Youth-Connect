@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.couchbase.lite.CouchbaseLiteException;
-import com.couchbase.lite.Document;
 import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
-import com.lipl.youthconnect.youth_connect.activity.AskQuestionActivity;
 import com.lipl.youthconnect.youth_connect.activity.EditAnswerActivity;
 import com.lipl.youthconnect.youth_connect.activity.EditQuestionActivity;
 import com.lipl.youthconnect.youth_connect.activity.QNADetailsActivity;
@@ -30,7 +27,6 @@ import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 

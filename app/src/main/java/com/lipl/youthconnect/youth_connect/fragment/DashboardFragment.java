@@ -38,6 +38,9 @@ import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.activity.FeedbackActivity;
 import com.lipl.youthconnect.youth_connect.activity.FileActivity;
 import com.lipl.youthconnect.youth_connect.activity.MainActivity;
+import com.lipl.youthconnect.youth_connect.activity.QAAnsweredActivity;
+import com.lipl.youthconnect.youth_connect.activity.QAForumActivity;
+import com.lipl.youthconnect.youth_connect.activity.QAPendingActivity;
 import com.lipl.youthconnect.youth_connect.database.DBHelper;
 import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
 import com.lipl.youthconnect.youth_connect.util.Constants;
@@ -172,7 +175,7 @@ public class DashboardFragment extends Fragment implements
 
         this.mUserTypeId = user_type_id;
 
-        if(mUserTypeId == 1){
+        /*if(mUserTypeId == 1){
             ImageView imgNodalOfficers = (ImageView) view.findViewById(R.id.imgNodalOfficers);
             imgNodalOfficers.setImageResource(R.drawable.ic_nodal_officers);
         } else if(mUserTypeId == 2) {
@@ -181,7 +184,7 @@ public class DashboardFragment extends Fragment implements
         } else{
             ImageView imgNodalOfficers = (ImageView) view.findViewById(R.id.imgNodalOfficers);
             imgNodalOfficers.setImageResource(R.drawable.ic_nodal_officers);
-        }
+        }*/
 
         return view;
     }
@@ -197,22 +200,26 @@ public class DashboardFragment extends Fragment implements
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         switch (id){
             case R.id.layoutQusAnswered:
-                if(getActivity() != null && user_type_id == 2) {
-                    YouthConnectSingleTone.getInstance().currentFragmentOnMainActivity = Constants.FRAGMENT_QA;
-                    QNAFragment fragment = QNAFragment.newInstance("Demo", "2");
-                    ft.replace(R.id.frameLayout, fragment, Constants.FRAGMENT_QA_PAGE_FORUM);
-                    ft.show(fragment);
-                    ft.addToBackStack(Constants.FRAGMENT_QA_PAGE_FORUM);
-                    ft.commitAllowingStateLoss();
+                if(getActivity() != null) {
+//                    YouthConnectSingleTone.getInstance().currentFragmentOnMainActivity = Constants.FRAGMENT_QA;
+//                    QNAFragment fragment = QNAFragment.newInstance("Demo", "2");
+//                    ft.replace(R.id.frameLayout, fragment, Constants.FRAGMENT_QA_PAGE_FORUM);
+//                    ft.show(fragment);
+//                    ft.addToBackStack(Constants.FRAGMENT_QA_PAGE_FORUM);
+//                    ft.commitAllowingStateLoss();
+                    Intent intent = new Intent(getActivity(), QAAnsweredActivity.class);
+                    startActivity(intent);
                 }
                 break;
             case R.id.layoutPendingQus:
-                YouthConnectSingleTone.getInstance().currentFragmentOnMainActivity = Constants.FRAGMENT_QA;
+                /*YouthConnectSingleTone.getInstance().currentFragmentOnMainActivity = Constants.FRAGMENT_QA;
                 QNAFragment fragment2 = QNAFragment.newInstance("Demo", "1");
                 ft.replace(R.id.frameLayout, fragment2, Constants.FRAGMENT_QA_PAGE_PENDING);
                 ft.show(fragment2);
                 ft.addToBackStack(Constants.FRAGMENT_QA_PAGE_PENDING);
-                ft.commitAllowingStateLoss();
+                ft.commitAllowingStateLoss();*/
+                Intent intent = new Intent(getActivity(), QAPendingActivity.class);
+                startActivity(intent);
                 break;
             /*case R.id.layoutPendingFeedback:
                 if(getActivity() != null && user_type_id == 2) {
@@ -487,72 +494,72 @@ public class DashboardFragment extends Fragment implements
         });*/
     }
 
-    private void showLineChartQA(View view, Dashboard dashboard) {
-
-        if (getActivity() == null || dashboard == null) {
-            return;
-        }
-
-        mChartQA = (HorizontalBarChart) view.findViewById(R.id.chart1);
-        mChartQA.setOnChartValueSelectedListener(this);
-        mChartQA.setTouchEnabled(false);
-        // mChartQA.setHighlightEnabled(false);
-
-        mChartQA.setDrawBarShadow(false);
-        mChartQA.setDrawValueAboveBar(true);
-        mChartQA.setDescription("");
-
-        // if more than 60 entries are displayed in the chart, no values will be
-        // drawn
-        mChartQA.setMaxVisibleValueCount(60);
-
-        // scaling can now only be done on x- and y-axis separately
-        mChartQA.setPinchZoom(false);
-
-        // draw shadows for each bar that show the maximum value
-        // mChartQA.setDrawBarShadow(true);
-
-        // mChartQA.setDrawXLabels(false);
-
-        mChartQA.setDrawGridBackground(false);
-
-        // mChartQA.setDrawYLabels(false);
-
-        tf = Typeface.createFromAsset(getActivity().getAssets(), Constants.ROBOTO_LIGHT);
-
-        XAxis xl = mChartQA.getXAxis();
-        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xl.setTypeface(tf);
-        xl.setDrawAxisLine(true);
-        xl.setDrawGridLines(true);
-        xl.setGridLineWidth(0.3f);
-
-        YAxis yl = mChartQA.getAxisLeft();
-        yl.setTypeface(tf);
-        yl.setDrawAxisLine(true);
-        yl.setDrawGridLines(true);
-        yl.setGridLineWidth(0.3f);
-//        yl.setInverted(true);
-
-        YAxis yr = mChartQA.getAxisRight();
-        yr.setTypeface(tf);
-        yr.setDrawAxisLine(true);
-        yr.setDrawGridLines(false);
-//        yr.setInverted(true);
-
-        setDataQA(dashboard);
-        mChartQA.animateY(2500);
-
-        // setting data
-        setDataQA(dashboard);
-
-        Legend l = mChartQA.getLegend();
-        l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
-        l.setFormSize(8f);
-        l.setXEntrySpace(4f);
-
-        // mChartQA.setDrawLegend(false);
-    }
+//    private void showLineChartQA(View view, Dashboard dashboard) {
+//
+//        if (getActivity() == null || dashboard == null) {
+//            return;
+//        }
+//
+//        mChartQA = (HorizontalBarChart) view.findViewById(R.id.chart1);
+//        mChartQA.setOnChartValueSelectedListener(this);
+//        mChartQA.setTouchEnabled(false);
+//        // mChartQA.setHighlightEnabled(false);
+//
+//        mChartQA.setDrawBarShadow(false);
+//        mChartQA.setDrawValueAboveBar(true);
+//        mChartQA.setDescription("");
+//
+//        // if more than 60 entries are displayed in the chart, no values will be
+//        // drawn
+//        mChartQA.setMaxVisibleValueCount(60);
+//
+//        // scaling can now only be done on x- and y-axis separately
+//        mChartQA.setPinchZoom(false);
+//
+//        // draw shadows for each bar that show the maximum value
+//        // mChartQA.setDrawBarShadow(true);
+//
+//        // mChartQA.setDrawXLabels(false);
+//
+//        mChartQA.setDrawGridBackground(false);
+//
+//        // mChartQA.setDrawYLabels(false);
+//
+//        tf = Typeface.createFromAsset(getActivity().getAssets(), Constants.ROBOTO_LIGHT);
+//
+//        XAxis xl = mChartQA.getXAxis();
+//        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
+//        xl.setTypeface(tf);
+//        xl.setDrawAxisLine(true);
+//        xl.setDrawGridLines(true);
+//        xl.setGridLineWidth(0.3f);
+//
+//        YAxis yl = mChartQA.getAxisLeft();
+//        yl.setTypeface(tf);
+//        yl.setDrawAxisLine(true);
+//        yl.setDrawGridLines(true);
+//        yl.setGridLineWidth(0.3f);
+////        yl.setInverted(true);
+//
+//        YAxis yr = mChartQA.getAxisRight();
+//        yr.setTypeface(tf);
+//        yr.setDrawAxisLine(true);
+//        yr.setDrawGridLines(false);
+////        yr.setInverted(true);
+//
+//        setDataQA(dashboard);
+//        mChartQA.animateY(2500);
+//
+//        // setting data
+//        setDataQA(dashboard);
+//
+//        Legend l = mChartQA.getLegend();
+//        l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
+//        l.setFormSize(8f);
+//        l.setXEntrySpace(4f);
+//
+//        // mChartQA.setDrawLegend(false);
+//    }
 
     private void setDataQA(Dashboard dashboard) {
 
@@ -583,74 +590,74 @@ public class DashboardFragment extends Fragment implements
         mChartQA.setData(data);
     }
 
-    private void showLineChartFeedback(View view, Dashboard dashboard) {
-
-        if (getActivity() == null || dashboard == null) {
-            return;
-        }
-
-        mChartFeedback = (HorizontalBarChart) view.findViewById(R.id.chart2);
-        mChartFeedback.setOnChartValueSelectedListener(this);
-        mChartFeedback.setTouchEnabled(false);
-        // mChartQA.setHighlightEnabled(false);
-
-        mChartFeedback.setDrawBarShadow(false);
-
-        mChartFeedback.setDrawValueAboveBar(true);
-
-        mChartFeedback.setDescription("");
-
-        // if more than 60 entries are displayed in the chart, no values will be
-        // drawn
-        mChartFeedback.setMaxVisibleValueCount(60);
-
-        // scaling can now only be done on x- and y-axis separately
-        mChartFeedback.setPinchZoom(false);
-
-        // draw shadows for each bar that show the maximum value
-        // mChartQA.setDrawBarShadow(true);
-
-        // mChartQA.setDrawXLabels(false);
-
-        mChartFeedback.setDrawGridBackground(false);
-
-        // mChartQA.setDrawYLabels(false);
-
-        tf = Typeface.createFromAsset(getActivity().getAssets(), Constants.ROBOTO_LIGHT);
-
-        XAxis xl = mChartFeedback.getXAxis();
-        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xl.setTypeface(tf);
-        xl.setDrawAxisLine(true);
-        xl.setDrawGridLines(true);
-        xl.setGridLineWidth(0.3f);
-
-        YAxis yl = mChartFeedback.getAxisLeft();
-        yl.setTypeface(tf);
-        yl.setDrawAxisLine(true);
-        yl.setDrawGridLines(true);
-        yl.setGridLineWidth(0.3f);
-//        yl.setInverted(true);
-
-        YAxis yr = mChartFeedback.getAxisRight();
-        yr.setTypeface(tf);
-        yr.setDrawAxisLine(true);
-        yr.setDrawGridLines(false);
-//        yr.setInverted(true);
-
-        setDataFeedback(dashboard);
-        mChartFeedback.animateY(2500);
-
-        // setting data
-        setDataFeedback(dashboard);
-
-        Legend l = mChartFeedback.getLegend();
-        l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
-        l.setFormSize(8f);
-        l.setXEntrySpace(4f);
-
-        // mChartQA.setDrawLegend(false);
-    }
+//    private void showLineChartFeedback(View view, Dashboard dashboard) {
+//
+//        if (getActivity() == null || dashboard == null) {
+//            return;
+//        }
+//
+//        mChartFeedback = (HorizontalBarChart) view.findViewById(R.id.chart2);
+//        mChartFeedback.setOnChartValueSelectedListener(this);
+//        mChartFeedback.setTouchEnabled(false);
+//        // mChartQA.setHighlightEnabled(false);
+//
+//        mChartFeedback.setDrawBarShadow(false);
+//
+//        mChartFeedback.setDrawValueAboveBar(true);
+//
+//        mChartFeedback.setDescription("");
+//
+//        // if more than 60 entries are displayed in the chart, no values will be
+//        // drawn
+//        mChartFeedback.setMaxVisibleValueCount(60);
+//
+//        // scaling can now only be done on x- and y-axis separately
+//        mChartFeedback.setPinchZoom(false);
+//
+//        // draw shadows for each bar that show the maximum value
+//        // mChartQA.setDrawBarShadow(true);
+//
+//        // mChartQA.setDrawXLabels(false);
+//
+//        mChartFeedback.setDrawGridBackground(false);
+//
+//        // mChartQA.setDrawYLabels(false);
+//
+//        tf = Typeface.createFromAsset(getActivity().getAssets(), Constants.ROBOTO_LIGHT);
+//
+//        XAxis xl = mChartFeedback.getXAxis();
+//        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
+//        xl.setTypeface(tf);
+//        xl.setDrawAxisLine(true);
+//        xl.setDrawGridLines(true);
+//        xl.setGridLineWidth(0.3f);
+//
+//        YAxis yl = mChartFeedback.getAxisLeft();
+//        yl.setTypeface(tf);
+//        yl.setDrawAxisLine(true);
+//        yl.setDrawGridLines(true);
+//        yl.setGridLineWidth(0.3f);
+////        yl.setInverted(true);
+//
+//        YAxis yr = mChartFeedback.getAxisRight();
+//        yr.setTypeface(tf);
+//        yr.setDrawAxisLine(true);
+//        yr.setDrawGridLines(false);
+////        yr.setInverted(true);
+//
+//        setDataFeedback(dashboard);
+//        mChartFeedback.animateY(2500);
+//
+//        // setting data
+//        setDataFeedback(dashboard);
+//
+//        Legend l = mChartFeedback.getLegend();
+//        l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
+//        l.setFormSize(8f);
+//        l.setXEntrySpace(4f);
+//
+//        // mChartQA.setDrawLegend(false);
+//    }
 
     private void setDataFeedback(Dashboard dashboard) {
 
@@ -694,15 +701,15 @@ public class DashboardFragment extends Fragment implements
 
         if(_dashboard != null) {
             this.dashboard = _dashboard;
-            showLineChartQA(view, _dashboard);
-            showLineChartFeedback(view, _dashboard);
+            //showLineChartQA(view, _dashboard);
+            //showLineChartFeedback(view, _dashboard);
         } else {
             if(getActivity() != null){
                 int userid = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
             }
         }
 
-        if(this.dashboard != null) {
+        /*if(this.dashboard != null) {
             TextView tvNodalOfficers = (TextView) view.findViewById(R.id.tvAnswereds);
             if(mUserTypeId == 1){
                 ImageView imgNodalOfficers = (ImageView) view.findViewById(R.id.imgNodalOfficers);
@@ -734,7 +741,7 @@ public class DashboardFragment extends Fragment implements
             tvPendingQus.setText(this.dashboard.getPennding_qsn() + "");
             //tvFeedbackReceived.setText(this.dashboard.getPending_feedback() + "");
             tvComments.setText(this.dashboard.getShowcased_event() + "");
-        }
+        }*/
     }
 
     @Override

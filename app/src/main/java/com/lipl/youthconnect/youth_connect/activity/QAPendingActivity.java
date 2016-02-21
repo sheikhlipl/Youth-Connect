@@ -1,10 +1,7 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
@@ -18,48 +15,30 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
-import com.couchbase.lite.DatabaseOptions;
 import com.couchbase.lite.Document;
-import com.couchbase.lite.Emitter;
-import com.couchbase.lite.LiveQuery;
-import com.couchbase.lite.Manager;
-import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
-import com.couchbase.lite.android.AndroidContext;
-import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.adapter.QADataAdapter;
-import com.lipl.youthconnect.youth_connect.adapter.QASyncArrayAdapter;
-import com.lipl.youthconnect.youth_connect.demo.GrocerySyncArrayAdapter;
-import com.lipl.youthconnect.youth_connect.demo.SplashScreenDialog;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.QAUtil;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-public class QAPendingActivity extends ActionBarActivity implements Replication.ChangeListener,
-        AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+public class QAPendingActivity extends ActionBarActivity implements View.OnClickListener {
 
     private static Toolbar mToolbar = null;
     /**
@@ -71,26 +50,12 @@ public class QAPendingActivity extends ActionBarActivity implements Replication.
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-
-    public static String TAG = "QASync";
-
-    //constants
-    public static final String DATABASE_NAME = Constants.YOUTH_CONNECT_DATABASE;
-    public static final String designDocName = "youth_connect-local";
-    public static final String byDateViewName = DatabaseUtil.QA_TITLE;
-
-    // By default, use the sync gateway running on the Couchbase demo server.
-    // Warning: this will have "random data" entered by other users.
-    // If you want to limit this to your own data, please install and run your own
-    // Sync Gateway and point it to that URL instead.
-    public static final String SYNC_URL = DatabaseUtil.syncURL;
-    protected ListView listView;
-    protected QASyncArrayAdapter qaSyncArrayAdapter;
-
-    //couch internals
-    protected static Manager manager;
-    private Database database;
-    private LiveQuery liveQuery;
+    private LinkedList<QuestionAndAnswer> mListItems;
+    private QADataAdapter adapter;
+    private ListView listView;
+    private static final String TAG = "PendingFragment";
+    private int last_id = 0;
+    private ProgressBar pBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,12 +79,6 @@ public class QAPendingActivity extends ActionBarActivity implements Replication.
                 startActivity(new Intent(QAPendingActivity.this, AskQuestionActivity.class));
             }
         });
-
-        try {
-            startCBLite();
-        } catch (Exception e) {
-            com.couchbase.lite.util.Log.e(TAG, "Error initializing CBLite", e);
-        }
     }
 
     @Override
@@ -157,212 +116,192 @@ public class QAPendingActivity extends ActionBarActivity implements Replication.
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                setQuestionAnswerList(newText);
 
                 return false;
             }
         });
-    }
 
-    protected void onDestroy() {
-        if(manager != null) {
-            manager.close();
-        }
-        super.onDestroy();
-    }
+        final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
+            //ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
 
-    protected void startCBLite() throws Exception {
-
-        Manager.enableLogging(TAG, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_SYNC_ASYNC_TASK, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_SYNC, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_QUERY, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_VIEW, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_DATABASE, com.couchbase.lite.util.Log.VERBOSE);
-
-        manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
-
-        //install a view definition needed by the application
-        DatabaseOptions options = new DatabaseOptions();
-        options.setCreate(true);
-        database = manager.openDatabase(DATABASE_NAME, options);
-        com.couchbase.lite.View viewItemsByDate = database.getView(String.format("%s/%s", designDocName, byDateViewName));
-        viewItemsByDate.setMap(new Mapper() {
             @Override
-            public void map(Map<String, Object> document, Emitter emitter) {
-                Object createdAt = document.get(DatabaseUtil.QA_TITLE);
-                if (createdAt != null) {
-                    emitter.emit(createdAt.toString(), null);
+            protected void onPreExecute() {
+                super.onPreExecute();
+                /*if (isCancelled() == false && isVisible() == true
+                        && getActivity() != null && activityIndicator != null) {
+                    activityIndicator.show();
+                }*/
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    questionAndAnswerList = getQAList();
+                } catch (CouchbaseLiteException exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
+                } catch (IOException exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
+                } catch (Exception exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
+                } catch (OutOfMemoryError outOfMemoryError) {
+                    Log.e(TAG, "onViewCreated()", outOfMemoryError);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                /*if (isCancelled() == false && isVisible() == true
+                        && getActivity() != null && activityIndicator != null) {
+                    activityIndicator.dismiss();
+                }*/
+                try {
+                    if (questionAndAnswerList != null && questionAndAnswerList.size() > 0) {
+                        if (mListItems == null) {
+                            mListItems = new LinkedList<QuestionAndAnswer>();
+                        }
+                        mListItems.clear();
+                        mListItems.addAll(questionAndAnswerList);
+                        adapter = new QADataAdapter(mListItems, QAPendingActivity.this, false, false);
+                        listView.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+                    }
+                } catch (Exception exception) {
+                    Log.e(TAG, "onViewCreated()", exception);
                 }
             }
-        }, "1.0");
+        };
 
-        initItemListAdapter();
-
-        startLiveQuery(viewItemsByDate);
-
-        startSync();
-
-    }
-
-    private void startSync() {
-
-        URL syncUrl;
-        try {
-            syncUrl = new URL(SYNC_URL);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-
-        Replication pullReplication = database.createPullReplication(syncUrl);
-        pullReplication.setContinuous(true);
-
-        Replication pushReplication = database.createPushReplication(syncUrl);
-        pushReplication.setContinuous(true);
-
-        pullReplication.start();
-        pushReplication.start();
-
-        pullReplication.addChangeListener(this);
-        pushReplication.addChangeListener(this);
-
-    }
-
-    private void startLiveQuery(com.couchbase.lite.View view) throws Exception {
-
-        final ProgressDialog progressDialog = showLoadingSpinner();
-
-        //if (liveQuery == null) {
-
-            liveQuery = view.createQuery().toLiveQuery();
-
-            liveQuery.addChangeListener(new LiveQuery.ChangeListener() {
-                public void changed(final LiveQuery.ChangeEvent event) {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            qaSyncArrayAdapter.clear();
-                            for (Iterator<QueryRow> it = event.getRows(); it.hasNext();) {
-                                qaSyncArrayAdapter.add(it.next());
-                            }
-                            qaSyncArrayAdapter.notifyDataSetChanged();
-                            listView.setAdapter(qaSyncArrayAdapter);
-                            progressDialog.dismiss();
-                        }
-                    });
-                }
-            });
-
-            liveQuery.start();
-
-        //}
-
-    }
-
-    private void initItemListAdapter() {
-        qaSyncArrayAdapter = new QASyncArrayAdapter(
-                getApplicationContext(),
-                R.layout.list_row,
-                R.id.label,
-                new ArrayList<QueryRow>()
-        );
-        listView.setAdapter(qaSyncArrayAdapter);
-        listView.setOnItemClickListener(QAPendingActivity.this);
-        listView.setOnItemLongClickListener(QAPendingActivity.this);
-    }
-
-
-    private ProgressDialog showLoadingSpinner() {
-        ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Loading");
-        progress.setMessage("Wait while loading...");
-        progress.show();
-        return progress;
-    }
-
-
-    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-
-        QueryRow row = (QueryRow) adapterView.getItemAtPosition(position);
-        Document document = row.getDocument();
-        Map<String, Object> newProperties = new HashMap<String, Object>(document.getProperties());
-
-        /*boolean checked = ((Boolean) newProperties.get("check")).booleanValue();
-        newProperties.put("check", !checked);
-
-        try {
-            document.putProperties(newProperties);
-            qaSyncArrayAdapter.notifyDataSetChanged();
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "Error updating database, see logs for details", Toast.LENGTH_LONG).show();
-            com.couchbase.lite.util.Log.e(TAG, "Error updating database", e);
-        }*/
-
-    }
-
-    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-
-        QueryRow row = (QueryRow) adapterView.getItemAtPosition(position);
-        final Document clickedDocument = row.getDocument();
-        String itemText = (String) clickedDocument.getCurrentRevision().getProperty(DatabaseUtil.QA_TITLE);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(QAPendingActivity.this);
-        AlertDialog alert = builder.setTitle("Delete Item?")
-                .setMessage("Are you sure you want to delete \"" + itemText + "\"?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        try {
-                            clickedDocument.delete();
-                        } catch (Exception e) {
-                            Toast.makeText(getApplicationContext(), "Error deleting document, see logs for details", Toast.LENGTH_LONG).show();
-                            com.couchbase.lite.util.Log.e(TAG, "Error deleting document", e);
-                        }
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Handle Cancel
-                    }
-                })
-                .create();
-
-        alert.show();
-
-        return true;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                asyncTask.execute();
+            }
+        }, 2000);
     }
 
     @Override
-    public void changed(Replication.ChangeEvent event) {
-
-        Replication replication = event.getSource();
-        com.couchbase.lite.util.Log.d(TAG, "Replication : " + replication + " changed.");
-        if (!replication.isRunning()) {
-            String msg = String.format("Replicator %s not running", replication);
-            com.couchbase.lite.util.Log.d(TAG, msg);
-        }
-        else {
-            int processed = replication.getCompletedChangesCount();
-            int total = replication.getChangesCount();
-            String msg = String.format("Replicator processed %d / %d", processed, total);
-            com.couchbase.lite.util.Log.d(TAG, msg);
-        }
-
-        if (event.getError() != null) {
-            showError("Sync error", event.getError());
-        }
-
+    public void onStart() {
+        super.onStart();
+        registerReceiver(broadcastReceiver,
+                new IntentFilter(Constants.BROADCAST_ACTION_REPLICATION_CHANGE));
     }
 
-    public void showError(final String errorMessage, final Throwable throwable) {
+    @Override
+    public void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcastReceiver);
+    }
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                String msg = String.format("%s: %s", errorMessage, throwable);
-                com.couchbase.lite.util.Log.e(TAG, msg, throwable);
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setUp();
+        }
+    };
+
+    private List<QuestionAndAnswer> getQAList() throws CouchbaseLiteException, IOException {
+
+        List<QuestionAndAnswer> questionAndAnswerArrayList = new ArrayList<QuestionAndAnswer>();
+        List<String> ids = getAllDocumentIds();
+        if(ids != null && ids.size() > 0) {
+            for (String id : ids) {
+                Document document = DatabaseUtil.getDocumentFromDocumentId(DatabaseUtil.getDatabaseInstance(QAPendingActivity.this,
+                        Constants.YOUTH_CONNECT_DATABASE), id);
+                QuestionAndAnswer questionAndAnswer = QAUtil.getQAFromDocument(document);
+
+                int user_type_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
+                if(user_type_id == 1) {
+                    // for admin show all pending questions which are not answer
+                    if (questionAndAnswer != null
+                            && questionAndAnswer.getQuestion() != null
+                            && questionAndAnswer.getQuestion().getIs_answer() == 0
+                            && questionAndAnswer.getQuestion().getIs_publish() == 0) {
+                        questionAndAnswerArrayList.add(questionAndAnswer);
+                    }
+                } else if(user_type_id == 2){
+                    // for nodal officers show all pending questions which are not answered
+                    // and asked by logged in user only
+                    int curently_logged_in_user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_ID, 0);
+                    if (questionAndAnswer != null
+                            && questionAndAnswer.getQuestion() != null
+                            && questionAndAnswer.getQuestion().getIs_answer() == 0
+                            && questionAndAnswer.getQuestion().getIs_publish() == 0
+                            && questionAndAnswer.getQuestion().getQus_asked_by_user_id() == curently_logged_in_user_id) {
+                        questionAndAnswerArrayList.add(questionAndAnswer);
+                    }
+                }
             }
-        });
+        }
 
+        return questionAndAnswerArrayList;
+    }
+
+    private List<String> getAllDocumentIds(){
+
+        List<String> docIds = new ArrayList<String>();
+        try {
+            Database database = DatabaseUtil.getDatabaseInstance(QAPendingActivity.this, Constants.YOUTH_CONNECT_DATABASE);
+            Query query = database.createAllDocumentsQuery();
+            query.setAllDocsMode(Query.AllDocsMode.ALL_DOCS);
+            QueryEnumerator result = query.run();
+            for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+                QueryRow row = it.next();
+                docIds.add(row.getDocumentId());
+            }
+        } catch(CouchbaseLiteException exception){
+            Log.e(TAG, "Error", exception);
+        } catch (IOException exception){
+            com.couchbase.lite.util.Log.e(TAG, "onDeleteClick()", exception);
+        }
+
+        return docIds;
+    }
+
+
+    private void setQuestionAnswerList(String filterText){
+
+        if(QAPendingActivity.this.mListItems == null){
+            QAPendingActivity.this.mListItems = new LinkedList<QuestionAndAnswer>();
+        }
+
+        final List<QuestionAndAnswer> _questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
+        if(filterText != null && filterText.trim().length() > 0){
+            for(int i = 0; i < mListItems.size(); i++){
+                String question = mListItems.get(i).getQuestion().getQa_title();
+                if(question != null &&
+                        filterText != null && question.length() > 0
+                        && filterText.length() > 0 &&
+                        question.toLowerCase().contains(filterText.toLowerCase())){
+                    _questionAndAnswerList.add(mListItems.get(i));
+                }
+            }
+        } else{
+            _questionAndAnswerList.addAll(mListItems);
+        }
+
+        // create an Object for Adapter
+        adapter = new QADataAdapter(_questionAndAnswerList, QAPendingActivity.this, false, false);
+
+        // set the adapter object to the Recyclerview
+        listView.setAdapter(adapter);
+        //  mAdapter.notifyDataSetChanged();
+
+        adapter.notifyDataSetChanged();
+    }
+
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id){
+
+            default:
+                break;
+        }
     }
 
     public static Toolbar getToolbar(){

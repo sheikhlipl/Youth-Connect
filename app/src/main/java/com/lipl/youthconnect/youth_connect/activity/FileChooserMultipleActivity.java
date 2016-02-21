@@ -667,104 +667,112 @@ public class FileChooserMultipleActivity extends ActionBarActivity
         //setPreviousDataToList();
         isFromActivityResult = true;
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-        builder.setTitle("File Upload");
-        builder.setMessage("Are you sure want to upload this file?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        Uri uri = data.getData();
+        if(uri != null){
+            long size = Util.getFileSizeFromUri(uri, FileChooserMultipleActivity.this);
+            try{
+                String sss = Util.formatFileSize(size);
+                if(sss != null && sss.contains(".")){
+                    String[] sd = sss.split(".");
+                    if(sd != null && sd.length > 0 && sd[0] != null && sd[0].length() < 1){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                        builder.setTitle("File Upload");
+                        builder.setMessage("Are you sure want to upload this file?");
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
 
-                PendingFileToUpload pendingFileToUpload = new PendingFileToUpload(Parcel.obtain());
-                FileToUpload fileToUpload = new FileToUpload();
+                                PendingFileToUpload pendingFileToUpload = new PendingFileToUpload(Parcel.obtain());
+                                FileToUpload fileToUpload = new FileToUpload();
 
-                if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+                                if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-                    Uri selectedImageUri = data.getData();
-                    String filePathForImage = getRealPathFromURI(selectedImageUri);
-                    pendingFileToUpload = getPendingFileToBeUploadFromData(filePathForImage, selectedImageUri.toString(), Constants.IMAGE, 0);
-                    fileToUpload.setInputStream(selectedImageUri);
-                    String filename = filePathForImage.substring(filePathForImage.lastIndexOf("/")+1);
-                    fileToUpload.setFile_name(filename);
-                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedImageUri));
+                                    Uri selectedImageUri = data.getData();
+                                    String filePathForImage = getRealPathFromURI(selectedImageUri);
+                                    pendingFileToUpload = getPendingFileToBeUploadFromData(filePathForImage, selectedImageUri.toString(), Constants.IMAGE, 0);
+                                    fileToUpload.setInputStream(selectedImageUri);
+                                    String filename = filePathForImage.substring(filePathForImage.lastIndexOf("/") + 1);
+                                    fileToUpload.setFile_name(filename);
+                                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedImageUri));
 
-                } else if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+                                } else if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-                    Uri selectedVideoUri = data.getData();
-                    //String selectedImagePath = getPathForVideo(selectedVideoUri);
-                    String selectedImagePath = getRealPathFromURI(selectedVideoUri);
-                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
-                    fileToUpload.setInputStream(selectedVideoUri);
-                    String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/")+1);
-                    fileToUpload.setFile_name(filename);
-                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedVideoUri));
+                                    Uri selectedVideoUri = data.getData();
+                                    //String selectedImagePath = getPathForVideo(selectedVideoUri);
+                                    String selectedImagePath = getRealPathFromURI(selectedVideoUri);
+                                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
+                                    fileToUpload.setInputStream(selectedVideoUri);
+                                    String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/") + 1);
+                                    fileToUpload.setFile_name(filename);
+                                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedVideoUri));
 
-                } else if (requestCode == PICK_AUDIO_REQUEST && resultCode == RESULT_OK
-                        && data != null && data.getData() != null) {
-                    Uri selectedAudioUri = data.getData();
-                    String selectedAudioPath = getRealPathFromURI(selectedAudioUri);
-                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
-                    fileToUpload.setInputStream(selectedAudioUri);
-                    String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/")+1);
-                    fileToUpload.setFile_name(filename);
-                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedAudioUri));
+                                } else if (requestCode == PICK_AUDIO_REQUEST && resultCode == RESULT_OK
+                                        && data != null && data.getData() != null) {
+                                    Uri selectedAudioUri = data.getData();
+                                    String selectedAudioPath = getRealPathFromURI(selectedAudioUri);
+                                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
+                                    fileToUpload.setInputStream(selectedAudioUri);
+                                    String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/") + 1);
+                                    fileToUpload.setFile_name(filename);
+                                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedAudioUri));
 
-                } else if (requestCode == PICK_DOC_REQUEST && resultCode == RESULT_OK
-                        && data != null && data.getData() != null) {
+                                } else if (requestCode == PICK_DOC_REQUEST && resultCode == RESULT_OK
+                                        && data != null && data.getData() != null) {
 
-                    String FilePath = data.getData().getPath();
-                    Uri geturi = data.getData();
-                    pendingFileToUpload = getPendingFileToBeUploadFromData(FilePath, "", Constants.DOC, 0);
-                    fileToUpload.setInputStream(geturi);
-                    String filename = FilePath.substring(FilePath.lastIndexOf("/")+1);
-                    fileToUpload.setFile_name(filename);
-                    String type = null;
-                    String extension = MimeTypeMap.getFileExtensionFromUrl(filename);
-                    if (extension != null) {
-                        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    }
-                    fileToUpload.setMime_type(type);
-                    Log.i("asdfsdf","asdfsadf");
+                                    String FilePath = data.getData().getPath();
+                                    Uri geturi = data.getData();
+                                    pendingFileToUpload = getPendingFileToBeUploadFromData(FilePath, "", Constants.DOC, 0);
+                                    fileToUpload.setInputStream(geturi);
+                                    String filename = FilePath.substring(FilePath.lastIndexOf("/") + 1);
+                                    fileToUpload.setFile_name(filename);
+                                    String type = null;
+                                    String extension = MimeTypeMap.getFileExtensionFromUrl(filename);
+                                    if (extension != null) {
+                                        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                                    }
+                                    fileToUpload.setMime_type(type);
+                                    Log.i("asdfsdf", "asdfsadf");
 
-                } else if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK
-                        && data != null && data.getExtras() != null) {
+                                } else if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE && resultCode == RESULT_OK
+                                        && data != null && data.getExtras() != null) {
 
-                    Bitmap photo = (Bitmap) data.getExtras().get("data");
-                    Uri tempUri = getImageUri(getApplicationContext(), photo);
-                    File finalFile = new File(getRealPathFromURI(tempUri));
-                    if (finalFile != null) {
-                        System.out.println(finalFile.getPath());
-                    }
-                    String filePathForImage = getRealPathFromURI(tempUri);
-                    pendingFileToUpload = getPendingFileToBeUploadFromData(filePathForImage, tempUri.toString(), Constants.IMAGE, 0);
-                    fileToUpload.setInputStream(tempUri);
-                    String filename = filePathForImage.substring(filePathForImage.lastIndexOf("/")+1);
-                    fileToUpload.setFile_name(filename);
-                    fileToUpload.setMime_type(getMimeTypeFromUri(tempUri));
-                } else if (requestCode == CAMERA_CAPTURE_VIDEO_REQUEST_CODE && resultCode == RESULT_OK
-                        && data != null && data.getData() != null) {
-                    Uri selectedVideoUri = data.getData();
-                    //String selectedImagePath = getPathForVideo(selectedVideoUri);
-                    String selectedImagePath = getRealPathFromURI(selectedVideoUri);
-                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
-                    fileToUpload.setInputStream(selectedVideoUri);
-                    String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/")+1);
-                    fileToUpload.setFile_name(filename);
-                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedVideoUri));
-                } else if (requestCode == RQS_RECORDING && resultCode == RESULT_OK
-                        && data != null && data.getData() != null) {
-                    Uri selectedAudioUri = data.getData();
-                    String selectedAudioPath = getRealPathFromURI(selectedAudioUri);
-                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
-                    fileToUpload.setInputStream(selectedAudioUri);
-                    String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/")+1);
-                    fileToUpload.setFile_name(filename);
-                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedAudioUri));
-                }
+                                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                                    Uri tempUri = getImageUri(getApplicationContext(), photo);
+                                    File finalFile = new File(getRealPathFromURI(tempUri));
+                                    if (finalFile != null) {
+                                        System.out.println(finalFile.getPath());
+                                    }
+                                    String filePathForImage = getRealPathFromURI(tempUri);
+                                    pendingFileToUpload = getPendingFileToBeUploadFromData(filePathForImage, tempUri.toString(), Constants.IMAGE, 0);
+                                    fileToUpload.setInputStream(tempUri);
+                                    String filename = filePathForImage.substring(filePathForImage.lastIndexOf("/") + 1);
+                                    fileToUpload.setFile_name(filename);
+                                    fileToUpload.setMime_type(getMimeTypeFromUri(tempUri));
+                                } else if (requestCode == CAMERA_CAPTURE_VIDEO_REQUEST_CODE && resultCode == RESULT_OK
+                                        && data != null && data.getData() != null) {
+                                    Uri selectedVideoUri = data.getData();
+                                    //String selectedImagePath = getPathForVideo(selectedVideoUri);
+                                    String selectedImagePath = getRealPathFromURI(selectedVideoUri);
+                                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedImagePath, selectedVideoUri.toString(), Constants.VIDEO, 0);
+                                    fileToUpload.setInputStream(selectedVideoUri);
+                                    String filename = selectedImagePath.substring(selectedImagePath.lastIndexOf("/") + 1);
+                                    fileToUpload.setFile_name(filename);
+                                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedVideoUri));
+                                } else if (requestCode == RQS_RECORDING && resultCode == RESULT_OK
+                                        && data != null && data.getData() != null) {
+                                    Uri selectedAudioUri = data.getData();
+                                    String selectedAudioPath = getRealPathFromURI(selectedAudioUri);
+                                    pendingFileToUpload = getPendingFileToBeUploadFromData(selectedAudioPath, selectedAudioUri.toString(), Constants.AUDIO, 0);
+                                    fileToUpload.setInputStream(selectedAudioUri);
+                                    String filename = selectedAudioPath.substring(selectedAudioPath.lastIndexOf("/") + 1);
+                                    fileToUpload.setFile_name(filename);
+                                    fileToUpload.setMime_type(getMimeTypeFromUri(selectedAudioUri));
+                                }
 
-                int pos = fileUploadList.size();
-                addViewToList(pendingFileToUpload, 1, pos);
-                fileUploadList.add(pendingFileToUpload);
-                fileToUploads.add(fileToUpload);
+                                int pos = fileUploadList.size();
+                                addViewToList(pendingFileToUpload, 1, pos);
+                                fileUploadList.add(pendingFileToUpload);
+                                fileToUploads.add(fileToUpload);
 
                 /*
                 Log.i(TAG, "File path call service");
@@ -775,17 +783,57 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                 registerReceiver(broadcastReceiver, new IntentFilter(FileUploadService.BROADCAST_ACTION));*/
 
 
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
 
-        if(resultCode == RESULT_OK){
-            builder.show();
+                        if(resultCode == RESULT_OK){
+                            builder.show();
+                        }
+                    } else{
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                        builder.setTitle("File Upload");
+                        builder.setMessage("This file is too large. Sorry, it can not be upload.");
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.show();
+                        //Show alert for large file size
+                    }
+                } else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                    builder.setTitle("File Upload");
+                    builder.setMessage("This file is too large. Sorry, it can not be upload.");
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.show();
+                    //Show alert for large file size
+                }
+            } catch (Exception exception){
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                builder.setTitle("File Upload");
+                builder.setMessage("This file is too large. Sorry, it can not be upload.");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+                //Show alert for large file size
+            }
         }
     }
 

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -16,6 +17,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -801,5 +803,37 @@ public class Util {
         }
 
         return _id;
+    }
+
+    /*
+    * size of the file in bytes
+    * */
+    public static long getFileSizeFromUri(Uri returnUri, Context context){
+        /*
+     * Get the file's content URI from the incoming Intent,
+     * then query the server app to get the file's display name
+     * and size.
+     */
+        Cursor returnCursor =
+                context.getContentResolver().query(returnUri, null, null, null, null);
+    /*
+     * Get the column indexes of the data in the Cursor,
+     * move to the first row in the Cursor, get the data,
+     * and display it.
+     */
+        long sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        returnCursor.moveToFirst();
+
+        return sizeIndex;
+    }
+
+    public static String formatFileSize(long size) throws Exception {
+
+        String hrSize = null;
+
+        double m = ((size/1024.0)/1024.0);
+        hrSize = m+" MB";
+
+        return hrSize;
     }
 }

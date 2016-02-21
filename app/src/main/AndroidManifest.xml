@@ -79,9 +79,6 @@
             android:name=".util.FileChooser"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.AskQuestionActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.QNADetailsActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -124,6 +121,9 @@
             android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.QAForumActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".activity.AskQuestionActivity"
             android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.QAPendingActivity"
