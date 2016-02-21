@@ -46,9 +46,9 @@
             android:name="io.fabric.ApiKey"
             android:value="8b3f9256eace7a2e044cfbff6365843f6bc1f834" />
 
-        <activity
-            android:name=".activity.LoginActivity"
-            android:screenOrientation="portrait" />
+        <activity android:name=".activity.LoginActivity"
+            android:screenOrientation="portrait"/>
+
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />

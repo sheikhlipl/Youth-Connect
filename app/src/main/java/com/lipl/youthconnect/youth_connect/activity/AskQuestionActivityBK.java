@@ -1,7 +1,6 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -16,33 +15,23 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
-import com.couchbase.lite.DatabaseOptions;
 import com.couchbase.lite.Document;
-import com.couchbase.lite.Emitter;
-import com.couchbase.lite.LiveQuery;
-import com.couchbase.lite.Manager;
-import com.couchbase.lite.Mapper;
-import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
-import com.lipl.youthconnect.youth_connect.adapter.QASyncArrayAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Answer;
 import com.lipl.youthconnect.youth_connect.pojo.Comment;
+import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
-import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,25 +39,10 @@ import java.util.Map;
 /**
  * Created by luminousinfoways on 18/12/15.
  */
-public class AskQuestionActivity extends ActionBarActivity implements View.OnClickListener,
+public class AskQuestionActivityBK extends ActionBarActivity implements View.OnClickListener,
         Replication.ChangeListener {
 
-    public static String TAG = "QASync";
-
-    //constants
-    public static final String DATABASE_NAME = Constants.YOUTH_CONNECT_DATABASE;
-    public static final String designDocName = "youthconnect-local";
-    public static final String byDateViewName = "byQATitle";
-
-    // By default, use the sync gateway running on the Couchbase demo server.
-    // Warning: this will have "random data" entered by other users.
-    // If you want to limit this to your own data, please install and run your own
-    // Sync Gateway and point it to that URL instead.
-    public static final String SYNC_URL = DatabaseUtil.syncURL;
-    //couch internals
-    protected static Manager manager;
-    private Database database;
-    private LiveQuery liveQuery;
+    private static final String TAG = "AskQuestionActivity";
 
     private static Toolbar mToolbar = null;
     private QuestionAndAnswer questionAndAnswer = null;
@@ -97,67 +71,6 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         Button btnAsk = (Button) findViewById(R.id.btnAsk);
         btnAsk.setOnClickListener(this);
         YouthConnectSingleTone.getInstance().IS_FROM_QUESTION_ASK_WITH_SUCCESS = 0;
-    }
-
-    protected void onDestroy() {
-        if(manager != null) {
-            manager.close();
-        }
-        super.onDestroy();
-    }
-
-    protected void startCBLite() throws Exception {
-
-        Manager.enableLogging(TAG, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_SYNC_ASYNC_TASK, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_SYNC, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_QUERY, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_VIEW, com.couchbase.lite.util.Log.VERBOSE);
-        Manager.enableLogging(com.couchbase.lite.util.Log.TAG_DATABASE, com.couchbase.lite.util.Log.VERBOSE);
-
-        manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
-
-        //install a view definition needed by the application
-        DatabaseOptions options = new DatabaseOptions();
-        options.setCreate(true);
-        database = manager.openDatabase(DATABASE_NAME, options);
-        com.couchbase.lite.View viewItemsByDate = database.getView(String.format("%s/%s", designDocName, byDateViewName));
-        viewItemsByDate.setMap(new Mapper() {
-            @Override
-            public void map(Map<String, Object> document, Emitter emitter) {
-                Object createdAt = document.get("created_at");
-                if (createdAt != null) {
-                    emitter.emit(createdAt.toString(), null);
-                }
-            }
-        }, "1.0");
-
-        startSync();
-
-    }
-
-    private void startSync() {
-
-        URL syncUrl;
-        try {
-            syncUrl = new URL(SYNC_URL);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-
-        Replication pullReplication = database.createPullReplication(syncUrl);
-        pullReplication.setContinuous(true);
-
-        Replication pushReplication = database.createPushReplication(syncUrl);
-        pushReplication.setContinuous(true);
-
-        pullReplication.start();
-        pushReplication.start();
-
-        pullReplication.addChangeListener(this);
-        pushReplication.addChangeListener(this);
-
     }
 
     @Override
@@ -262,19 +175,32 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
                             }
                             String user_name = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getString(Constants.SP_USER_NAME, null);
                             int user_id = getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_ID, 0);
-                            createDocument(database,
+                            createDocument(DatabaseUtil.getDatabaseInstance(AskQuestionActivityBK.this, Constants.YOUTH_CONNECT_DATABASE),
                                     description, title, user_name, is_answered, is_published, user_id);
-                            AlertDialog.Builder builder12 = new AlertDialog.Builder(AskQuestionActivity.this, R.style.AppCompatAlertDialogStyle);
+                            AlertDialog.Builder builder12 = new AlertDialog.Builder(AskQuestionActivityBK.this, R.style.AppCompatAlertDialogStyle);
                             builder12.setTitle("Post Question");
                             builder12.setMessage("Done.");
                             builder12.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    try {
+                                        DatabaseUtil.startReplications(AskQuestionActivityBK.this, AskQuestionActivityBK.this, TAG);
+                                    } catch(CouchbaseLiteException exception){
+                                        Log.e(TAG, "onClick()", exception);
+                                    } catch(IOException exception){
+                                        Log.e(TAG, "onClick()", exception);
+                                    } catch (Exception exception){
+                                        Log.e(TAG, "onClick()", exception);
+                                    }
                                     dialog.dismiss();
                                     finish();
                                 }
                             });
                             builder12.show();
+                        } catch(CouchbaseLiteException exception){
+                            Log.e(TAG, "on Add Click", exception);
+                        } catch(IOException exception){
+                            Log.e(TAG, "on Add Click", exception);
                         } catch(Exception exception){
                             Log.e(TAG, "on Add Click", exception);
                         }

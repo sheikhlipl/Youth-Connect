@@ -91,6 +91,8 @@ public class DatabaseUtil {
         com.couchbase.lite.util.Log.i(TAG, "startReplications()", "Replication start");
     }
 
+    public static final String syncURL = "http://192.168.1.107" + ":" + "4984" + "/" + Constants.YOUTH_CONNECT_DATABASE;
+
     private static URL createSyncURL(boolean isEncrypted){
         URL syncURL = null;
         String host = "http://192.168.1.107";

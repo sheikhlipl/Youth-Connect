@@ -29,6 +29,8 @@ import android.widget.Toast;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.demo.QNADataAdapter;
+import com.lipl.youthconnect.youth_connect.demo.QQAPendingActivity;
 import com.lipl.youthconnect.youth_connect.fragment.AnsweredFragment;
 import com.lipl.youthconnect.youth_connect.fragment.PendingFragment;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;

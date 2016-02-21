@@ -38,6 +38,7 @@ import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.activity.FeedbackActivity;
 import com.lipl.youthconnect.youth_connect.activity.FileActivity;
 import com.lipl.youthconnect.youth_connect.activity.MainActivity;
+import com.lipl.youthconnect.youth_connect.database.DBHelper;
 import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DocUtil;
@@ -278,17 +279,16 @@ public class DashboardFragment extends Fragment implements
 
                 int numberOfNodalOfficers = 0;
                 try {
-                    List<NodalUser> nodalOfficerUsers = MasterDataUtil.getNodalUsersList(context);
+                    DBHelper dbHelper = new DBHelper(getActivity());
+                    List<NodalUser> nodalOfficerUsers = dbHelper.getAllNodalUsers();
+                    dbHelper.close();
+
                     if (nodalOfficerUsers != null
                             && nodalOfficerUsers.size() > 0) {
                         numberOfNodalOfficers = nodalOfficerUsers.size();
                         context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
                                 .putInt(Constants.SP_KEY_COUNT_NODAL_OFFICERS, numberOfNodalOfficers).commit();
                     }
-                } catch (CouchbaseLiteException exception){
-                    Log.e("DashboardFragment", "error", exception);
-                } catch(IOException exception){
-                    Log.e("DashboardFragment", "error", exception);
                 } catch(Exception exception){
                     Log.e("DashboardFragment", "error", exception);
                 }
@@ -384,6 +384,16 @@ public class DashboardFragment extends Fragment implements
         TextView tvPendingQus = (TextView) view.findViewById(R.id.tvPendingQus);
         TextView tvShowcaseEvents = (TextView) view.findViewById(R.id.tvComments);
         TextView tvDocCounts = (TextView) view.findViewById(R.id.tvDocCounts);
+
+        RelativeLayout layoutQusAnsweredd = (RelativeLayout) view.findViewById(R.id.layoutQusAnsweredd);
+        int user_type_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
+        if(user_type_id == 1){
+            tvNodalOfficers.setVisibility(View.VISIBLE);
+            layoutQusAnsweredd.setVisibility(View.VISIBLE);
+        } else{
+            tvNodalOfficers.setVisibility(View.GONE);
+            layoutQusAnsweredd.setVisibility(View.GONE);
+        }
 
         int nodalOfficersCount = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
                 .getInt(Constants.SP_KEY_COUNT_NODAL_OFFICERS, 0);

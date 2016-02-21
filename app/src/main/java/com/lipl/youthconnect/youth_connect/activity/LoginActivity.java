@@ -1,6 +1,7 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -20,24 +21,15 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.couchbase.lite.CouchbaseLiteException;
-import com.couchbase.lite.replicator.Replication;
-import com.lipl.youthconnect.youth_connect.LogExActivity;
 import com.lipl.youthconnect.youth_connect.R;
-import com.lipl.youthconnect.youth_connect.pojo.Block;
+import com.lipl.youthconnect.youth_connect.database.DBHelper;
 import com.lipl.youthconnect.youth_connect.pojo.Desg;
 import com.lipl.youthconnect.youth_connect.pojo.District;
 import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
-import com.lipl.youthconnect.youth_connect.pojo.Organization;
-import com.lipl.youthconnect.youth_connect.pojo.State;
 import com.lipl.youthconnect.youth_connect.pojo.User;
 import com.lipl.youthconnect.youth_connect.pojo.UserType;
 import com.lipl.youthconnect.youth_connect.util.Constants;
-import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
-import com.lipl.youthconnect.youth_connect.util.MasterDataUtil;
-import com.lipl.youthconnect.youth_connect.util.TinyDB;
 import com.lipl.youthconnect.youth_connect.util.Util;
-import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import org.json.JSONArray;
@@ -61,7 +53,7 @@ import java.util.List;
 /**
  * Created by luminousinfoways on 08/12/15.
  */
-public class LoginActivity extends Activity implements View.OnClickListener, Replication.ChangeListener {
+public class LoginActivity extends Activity implements View.OnClickListener {
 
     private ProgressBar progressBar;
 
@@ -379,71 +371,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
                             //dbHelper.insertUser(user);
                         }
 
-                        JSONObject userTypeObj = res.optJSONObject("MUserType");
-                        String user_type_id = userTypeObj.optString("m_user_type_id");
-                        String m_user_type = userTypeObj.optString("m_user_type");
-
-                        if(user_type_id != null && TextUtils.isDigitsOnly(user_type_id)) {
-                            UserType userType = new UserType(Parcel.obtain());
-                            userType.setM_user_type_id(Integer.parseInt(user_type_id));
-                            userType.setM_user_type(m_user_type);
-                            //dbHelper.insertUserType(userType);
-                        }
-
-                        JSONObject dsegObj = res.optJSONObject("MDesg");
-                        String desg_id = dsegObj.optString("m_desg_id");
-                        String m_desg_nm = dsegObj.optString("m_desg_nm");
-
-                        if(desg_id != null && TextUtils.isDigitsOnly(desg_id)) {
-                            Desg _desg = new Desg(Parcel.obtain());
-                            _desg.setM_desg_id(Integer.parseInt(desg_id));
-                            _desg.setM_desg_nm(m_desg_nm);
-                            //dbHelper.insertDesignation(_desg);
-                        }
-
-                        JSONObject stateObj = res.optJSONObject("MState");
-                        String state_id = stateObj.optString("m_state_id");
-                        String m_state = stateObj.optString("m_state");
-
-                        if(state_id != null && TextUtils.isDigitsOnly(state_id)) {
-                            State state1 = new State(Parcel.obtain());
-                            state1.setM_state_id(Integer.parseInt(state_id));
-                            state1.setM_state(m_state);
-                            //dbHelper.insertState(state1);
-                        }
-
-                        JSONObject districtObj = res.optJSONObject("MDistrict");
-                        String district_id = districtObj.optString("m_district_id");
-                        String m_district = districtObj.optString("m_district");
-
-                        if(district_id != null && TextUtils.isDigitsOnly(district_id)) {
-                            District district1 = new District(Parcel.obtain());
-                            district1.setM_district_id(Integer.parseInt(district_id));
-                            district1.setM_district(m_district);
-                            //dbHelper.insetDistrict(district1);
-                        }
-
-                        JSONObject blockObj = res.optJSONObject("MBlock");
-                        String block_id = blockObj.optString("m_block_id");
-                        String m_block_nm = blockObj.optString("m_block_nm");
-
-                        if(block_id != null && TextUtils.isDigitsOnly(block_id)) {
-                            Block block = new Block(Parcel.obtain());
-                            block.setM_block_id(Integer.parseInt(block_id));
-                            block.setM_block_nm(m_block_nm);
-                            //dbHelper.insertBlock(block);
-                        }
-
-                        JSONObject orgObj = res.optJSONObject("MOrganization");
-                        String organization_id = orgObj.optString("m_organization_id");
-                        String organization_name = orgObj.optString("organization_name");
-
-                        if(organization_id != null && TextUtils.isDigitsOnly(organization_id)) {
-                            Organization organization = new Organization(Parcel.obtain());
-                            organization.setM_organization_id(Integer.parseInt(organization_id));
-                            organization.setOrganization_name(organization_name);
-                            //dbHelper.insertOrganisation(organization);
-                        }
                         //dbHelper.close();
                         return user;
                     }
@@ -474,7 +401,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
                 getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.SP_USER_ID, user.getUser_id()).commit();
                 getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putString(Constants.SP_USER_API_KEY, user.getApi_key()).commit();
                 getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putString(Constants.SP_USER_DESG_ID, user.getM_desg_id()).commit();
-                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putString(Constants.SP_USER_NAME, user.getFull_name()).commit();
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -483,32 +409,18 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
                         int userType = Integer.parseInt(user.getM_user_type_id());
                         if (userType == 2) {
                             getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.SP_USER_TYPE, 2).commit();
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
                         } else if (userType == 1) {
                             getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.SP_USER_TYPE, 1).commit();
-                            new AsyncTask<Void, Void, Void>(){
-                                @Override
-                                protected Void doInBackground(Void... params) {
-
-                                    try{
-                                        DatabaseUtil.startReplications(LoginActivity.this, LoginActivity.this, "LoginActivity");
-                                    } catch(CouchbaseLiteException exception){
-                                        Log.e("LoginActivity", "error", exception);
-                                    } catch(IOException exception){
-                                        Log.e("LoginActivity", "error", exception);
-                                    } catch(Exception exception){
-                                        Log.e("LoginActivity", "error", exception);
-                                    }
-
-                                    return null;
-                                }
-                            }.execute();
+                            syncDistrictList();
                         }
 
-                        //getNotification();
-                        //syncDistrictList();
 
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                        finish();
+                        //getNotification();
+
+                        //startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        //finish();
                     }
                 }, 0);
             } else{
@@ -599,8 +511,18 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
                 conn.setInstanceFollowRedirects(true);
                 conn.setRequestMethod("POST");
 
+                DBHelper _dbHelper = new DBHelper(LoginActivity.this);
+                List<District> districts = _dbHelper.getAllDistricts();
+                _dbHelper.close();
+
+                String _modifiedDate = "";
+                if(districts != null && districts.size() > 0){
+                    _modifiedDate = Util.getCurentDate();
+                } else{
+                    _modifiedDate = "";
+                }
                 Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("modified_date", "");
+                        .appendQueryParameter("modified_date", _modifiedDate);
                 String query = builder.build().getEncodedQuery();
 
                 OutputStream os = conn.getOutputStream();
@@ -683,6 +605,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
 
                 if(response != null && response.length() > 0){
 
+                    DBHelper dbHelper = new DBHelper(LoginActivity.this);
+
                     JSONObject res = new JSONObject(response);
                     JSONArray district = res.optJSONArray("DISTRICT");
 
@@ -705,6 +629,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
                             district1.setM_district_id(Integer.parseInt(dist_id));
                             district1.setModifiedDate(modifiedDate);
                             districtList.add(district1);
+                            dbHelper.insetDistrict(district1);
                         }
                     }
 
@@ -729,8 +654,10 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
                             user.setM_district_id(m_district_id);
                             user.setFull_name(full_name);
                             nodalUserList.add(user);
+                            dbHelper.insertUser(user);
                         }
                     }
+                    dbHelper.close();
 
                     return null;
                 }
@@ -761,10 +688,5 @@ public class LoginActivity extends Activity implements View.OnClickListener, Rep
                 finish();
             }
         }
-    }
-
-    @Override
-    public void changed(Replication.ChangeEvent event) {
-
     }
 }

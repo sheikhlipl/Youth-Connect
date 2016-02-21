@@ -49,6 +49,7 @@ android {
 
 repositories {
     maven { url "https://jitpack.io" }
+    mavenCentral()
 }
 
 dependencies {
@@ -77,4 +78,5 @@ dependencies {
 
     // PushBots Section: Please don't modify if not sure
     compile 'com.pushbots:pushbots-lib:2.0.13@aar'
+    compile 'com.google.api-client:google-api-client:1.19.1'
 }
