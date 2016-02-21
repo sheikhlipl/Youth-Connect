@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.database.DBHelper;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.Util;
 import com.lipl.youthconnect.youth_connect.adapter.FeedbackRecyclerAdapter;
@@ -412,6 +413,18 @@ public class FeedbackActivity extends ActionBarActivity implements
 
             if(feedbackList != null) {
 
+                DBHelper databaseHelper = new DBHelper(FeedbackActivity.this);
+                YouthConnectSingleTone.getInstance().submitedReport.clear();
+                YouthConnectSingleTone.getInstance().submitedReport = databaseHelper.getSubmittedFeedback();
+                Collections.reverse(YouthConnectSingleTone.getInstance().submitedReport);
+                YouthConnectSingleTone.getInstance().pendingReport.clear();
+                YouthConnectSingleTone.getInstance().pendingReport = databaseHelper.getPendingFeedbacks();
+                Collections.reverse(YouthConnectSingleTone.getInstance().pendingReport);
+                YouthConnectSingleTone.getInstance().expierdReport.clear();
+                YouthConnectSingleTone.getInstance().expierdReport = databaseHelper.getExpieredFeedback();
+                Collections.reverse(YouthConnectSingleTone.getInstance().expierdReport);
+                databaseHelper.close();
+
                 List<Feedback> submittedList = YouthConnectSingleTone.getInstance().submitedReport;
                 List<Feedback> pendingList = YouthConnectSingleTone.getInstance().pendingReport;
                 List<Feedback> expieredList = YouthConnectSingleTone.getInstance().expierdReport;
@@ -480,16 +493,16 @@ public class FeedbackActivity extends ActionBarActivity implements
 
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.setOnTabSelectedListener(
-            new TabLayout.ViewPagerOnTabSelectedListener(viewPager) {
-                @Override
-                public void onTabSelected(TabLayout.Tab tab) {
-                    super.onTabSelected(tab);
-                    switch (tab.getPosition()) {
-                        default:
-                            break;
+                new TabLayout.ViewPagerOnTabSelectedListener(viewPager) {
+                    @Override
+                    public void onTabSelected(TabLayout.Tab tab) {
+                        super.onTabSelected(tab);
+                        switch (tab.getPosition()) {
+                            default:
+                                break;
+                        }
                     }
-                }
-            });
+                });
         viewPager.getAdapter().notifyDataSetChanged();
     }
 
