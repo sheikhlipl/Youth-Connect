@@ -654,4 +654,10 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
     public void changed(Replication.ChangeEvent event) {
 
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

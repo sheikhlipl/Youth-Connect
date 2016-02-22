@@ -463,6 +463,9 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
                                             } catch (Exception exception){
                                                 Log.e(TAG, "onClick()", exception);
                                             }
+                                            Intent intent = new Intent(QNADetailsActivity.this, QAAnsweredActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
                                             dialog.dismiss();
                                             finish();
                                         }
@@ -1212,4 +1215,9 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
         unregisterReceiver(broadcastReceiver);
     }
 
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

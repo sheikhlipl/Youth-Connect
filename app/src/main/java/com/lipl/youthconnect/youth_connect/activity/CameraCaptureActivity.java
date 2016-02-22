@@ -158,6 +158,7 @@ public class CameraCaptureActivity extends ActionBarActivity implements Animatio
 		if(isUserLeavingPage) {
 			CapturedImgFile = null;
 		}
+		System.gc();
 		super.onDestroy();
 	}
 	
@@ -824,4 +825,5 @@ public class CameraCaptureActivity extends ActionBarActivity implements Animatio
 		});
 		builder.show();
 	}
+
 }

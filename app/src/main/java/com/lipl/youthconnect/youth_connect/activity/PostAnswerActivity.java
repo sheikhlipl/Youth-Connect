@@ -279,4 +279,10 @@ public class PostAnswerActivity extends ActionBarActivity implements View.OnClic
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

@@ -331,4 +331,10 @@ public class QAPendingActivity extends ActionBarActivity implements View.OnClick
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

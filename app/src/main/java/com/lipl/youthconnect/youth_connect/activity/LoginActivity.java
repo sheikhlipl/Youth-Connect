@@ -401,6 +401,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putInt(Constants.SP_USER_ID, user.getUser_id()).commit();
                 getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putString(Constants.SP_USER_API_KEY, user.getApi_key()).commit();
                 getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putString(Constants.SP_USER_DESG_ID, user.getM_desg_id()).commit();
+                getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit().putString(Constants.SP_USER_NAME, user.getFull_name()).commit();
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -688,5 +689,11 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 finish();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
     }
 }

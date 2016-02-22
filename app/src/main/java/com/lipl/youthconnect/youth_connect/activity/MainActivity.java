@@ -181,6 +181,11 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void onFragmentInteraction(String string) {
+
+    }
+
+    @Override
     public void onFragmentInteraction() {
 
     }
@@ -230,11 +235,6 @@ public class MainActivity extends ActionBarActivity implements
         } catch(Exception e){
             Log.e("MainActivity", "onResume()", e);
         }
-    }
-
-    @Override
-    public void onFragmentInteraction(String str) {
-
     }
 
     public void refreshView(){
@@ -681,6 +681,11 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void onDashboardFragmentInteraction(DashboardFragment dashboardFragment) {
+
+    }
+
+    @Override
     public void changed(Replication.ChangeEvent event) {
         Replication replication = event.getSource();
         com.couchbase.lite.util.Log.i(TAG, "Replication : " + replication + "changed.");
@@ -698,6 +703,8 @@ public class MainActivity extends ActionBarActivity implements
             showError("Sync error", event.getError());
         }
 
+        DatabaseUtil.setDashboardCountInfo(MainActivity.this);
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -711,6 +718,10 @@ public class MainActivity extends ActionBarActivity implements
         });
     }
 
+    public interface oChangeReplicationListener {
+        public void onChangeReplicationData();
+    }
+
     public void showError(final String errorMessage, final Throwable throwable){
         runOnUiThread(new Runnable() {
             @Override
@@ -720,5 +731,11 @@ public class MainActivity extends ActionBarActivity implements
                 //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
     }
 }

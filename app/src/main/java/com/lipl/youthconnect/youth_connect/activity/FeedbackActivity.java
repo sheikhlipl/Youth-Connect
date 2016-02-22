@@ -514,4 +514,10 @@ public class FeedbackActivity extends ActionBarActivity implements
             fetchData();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

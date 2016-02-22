@@ -667,14 +667,14 @@ public class FileChooserMultipleActivity extends ActionBarActivity
         //setPreviousDataToList();
         isFromActivityResult = true;
 
-        Uri uri = data.getData();
-        if(uri != null){
-            long size = Util.getFileSizeFromUri(uri, FileChooserMultipleActivity.this);
-            try{
-                String sss = Util.formatFileSize(size);
-                if(sss != null && sss.contains(".")){
-                    String[] sd = sss.split(".");
-                    if(sd != null && sd.length > 0 && sd[0] != null && sd[0].length() < 1){
+       // Uri uri = data.getData();
+        //if(uri != null){
+          //  long size = Util.getFileSizeFromUri(uri, FileChooserMultipleActivity.this);
+            //try{
+               // String sss = Util.formatFileSize(size);
+                //if(sss != null && sss.contains(".")){
+                  //  String[] sd = sss.split(".");
+                    //if(sd != null && sd.length > 0 && sd[0] != null && sd[0].length() < 1){
                         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
                         builder.setTitle("File Upload");
                         builder.setMessage("Are you sure want to upload this file?");
@@ -795,7 +795,7 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         if(resultCode == RESULT_OK){
                             builder.show();
                         }
-                    } else{
+                   /* } else{
                         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
                         builder.setTitle("File Upload");
                         builder.setMessage("This file is too large. Sorry, it can not be upload.");
@@ -807,8 +807,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                         });
                         builder.show();
                         //Show alert for large file size
-                    }
-                } else{
+                    }*/
+               /* } else{
                     AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
                     builder.setTitle("File Upload");
                     builder.setMessage("This file is too large. Sorry, it can not be upload.");
@@ -833,8 +833,8 @@ public class FileChooserMultipleActivity extends ActionBarActivity
                 });
                 builder.show();
                 //Show alert for large file size
-            }
-        }
+            }*/
+        //}
     }
 
     private String createDocument(Database database, String doc_title,
@@ -1496,5 +1496,11 @@ public class FileChooserMultipleActivity extends ActionBarActivity
     @Override
     public void changed(Replication.ChangeEvent event) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
     }
 }

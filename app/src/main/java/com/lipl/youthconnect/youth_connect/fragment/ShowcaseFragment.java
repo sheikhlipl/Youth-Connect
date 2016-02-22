@@ -300,4 +300,16 @@ public class ShowcaseFragment extends Fragment {
         YouthConnectSingleTone.getInstance().CURRENT_FRAGMENT_IN_HOME = Constants.FRAGMENT_HOME_SUB_FRAGMENT_SHOWCASE;
         //setPage(getView());
     }
+
+    @Override
+    public void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        System.gc();
+        super.onDestroyView();
+    }
 }

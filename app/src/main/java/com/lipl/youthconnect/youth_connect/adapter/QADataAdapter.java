@@ -139,7 +139,7 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
             tvQusByUserName.setText(username);
         }
 
-        ImageView imgStatus = (ImageView) view.findViewById(R.id.imgStatus);
+        /*ImageView imgStatus = (ImageView) view.findViewById(R.id.imgStatus);
         if(isFromForum){
             imgStatus.setImageResource(R.drawable.ic_done_white);
         } else if(isFromAnswered){
@@ -160,7 +160,7 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
             } else{
                 imgStatus.setImageResource(R.drawable.ic_watch_later);
             }
-        }
+        }*/
 
         view.setOnClickListener(new View.OnClickListener() {
 
@@ -186,50 +186,82 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
             }
         });
 
+        final ImageView imgPublish = (ImageView) view.findViewById(R.id.imgPublish);
+        imgPublish.setTag(position);
+
+        final ImageView imgUnpublish = (ImageView) view.findViewById(R.id.imgUnpublish);
+        imgUnpublish.setTag(position);
+
+        final ImageView imgEdit = (ImageView) view.findViewById(R.id.imgEdit);
+        imgEdit.setTag(position);
+
+        final ImageView imgDelete = (ImageView) view.findViewById(R.id.imgDelete);
+        imgDelete.setTag(position);
+
+        final int user_type_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1).getInt(Constants.SP_USER_TYPE, 0);
+
         final LinearLayout layoutEditAndDelete = (LinearLayout) view.findViewById(R.id.layoutEditAndDelete);
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 layoutEditAndDelete.setVisibility(View.VISIBLE);
+
+                // show publish for answerd section
+                if (user_type_id == 1) {
+                    if (isFromAnswered) {
+                        imgPublish.setVisibility(View.VISIBLE);
+                        imgUnpublish.setVisibility(View.GONE);
+                    } else if (isFromForum) {
+                        imgPublish.setVisibility(View.GONE);
+                        imgUnpublish.setVisibility(View.VISIBLE);
+                    } else {
+                        imgPublish.setVisibility(View.GONE);
+                        imgUnpublish.setVisibility(View.GONE);
+                    }
+                } else {
+                    imgPublish.setVisibility(View.GONE);
+                    imgUnpublish.setVisibility(View.GONE);
+                }
+
+                if(isFromAnswered){
+                    if(user_type_id == 1) {
+                        imgEdit.setVisibility(View.VISIBLE);
+                    } else {
+                        imgEdit.setVisibility(View.GONE);
+                    }
+                } else if(isFromAnswered == false && isFromAnswered == false){
+                    imgEdit.setVisibility(View.VISIBLE);
+                } else{
+                    imgEdit.setVisibility(View.GONE);
+                }
+
+                if(isFromAnswered){
+                    if(user_type_id == 1) {
+                        imgDelete.setVisibility(View.VISIBLE);
+                    } else {
+                        imgDelete.setVisibility(View.GONE);
+                    }
+                } else if(isFromAnswered == false && isFromAnswered == false){
+                    if(user_type_id == 1) {
+                        imgDelete.setVisibility(View.VISIBLE);
+                    } else {
+                        imgDelete.setVisibility(View.GONE);
+                    }
+                } else {
+                    imgDelete.setVisibility(View.GONE);
+                }
+
                 return true;
             }
         });
 
-        ImageView imgPublish = (ImageView) view.findViewById(R.id.imgPublish);
-        imgPublish.setTag(position);
-
-        ImageView imgUnpublish = (ImageView) view.findViewById(R.id.imgUnpublish);
-        imgUnpublish.setTag(position);
-
-        ImageView imgEdit = (ImageView) view.findViewById(R.id.imgEdit);
-        imgEdit.setTag(position);
-        if(isFromAnswered){
-            imgEdit.setVisibility(View.VISIBLE);
-            imgPublish.setVisibility(View.GONE);
-            imgUnpublish.setVisibility(View.GONE);
-        } else if(isFromAnswered == false && isFromAnswered == false){
-            imgEdit.setVisibility(View.VISIBLE);
-            imgPublish.setVisibility(View.GONE);
-            imgUnpublish.setVisibility(View.GONE);
-        } else{
-            imgEdit.setVisibility(View.GONE);
-            if(dataList != null && dataList.size() > 0
-                    && dataList.get(position) != null) {
-                int is_publish = dataList.get(position).getIs_published();
-                if (is_publish == 0) {
-                    imgPublish.setVisibility(View.VISIBLE);
-                    imgUnpublish.setVisibility(View.GONE);
-                } else {
-                    imgPublish.setVisibility(View.GONE);
-                    imgUnpublish.setVisibility(View.VISIBLE);
-                }
-            }
-        }
+        //final ImageView imgEdit = (ImageView) view.findViewById(R.id.imgEdit);
+        //imgEdit.setTag(position);
 
         imgPublish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int pos = (Integer) v.getTag();
+                final int pos = (Integer) v.getTag();
                 QuestionAndAnswer questionAndAnswer = dataList.get(pos);
                 String doc_id = questionAndAnswer.getQid();
                 int is_publish = questionAndAnswer.getIs_published();
@@ -251,6 +283,8 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
                                 } catch (Exception exception){
                                     Log.e(TAG, "onClick()", exception);
                                 }
+                                dataList.get(pos).setIs_published(1);
+                                notifyDataSetChanged();
                                 dialog.dismiss();
                             }
                         });
@@ -269,7 +303,7 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
         imgUnpublish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int pos = (Integer) v.getTag();
+                final int pos = (Integer) v.getTag();
                 QuestionAndAnswer questionAndAnswer = dataList.get(pos);
                 String doc_id = questionAndAnswer.getQid();
                 int is_publish = questionAndAnswer.getIs_published();
@@ -277,7 +311,7 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
                     try {
                         QAUtil.updateDocForPublish(DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE), doc_id, 0);
                         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppCompatAlertDialogStyle);
-                        builder.setTitle("Question publish");
+                        builder.setTitle("Question unpublish");
                         builder.setMessage("Done.");
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
@@ -291,6 +325,8 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
                                 } catch (Exception exception){
                                     Log.e(TAG, "onClick()", exception);
                                 }
+                                dataList.get(pos).setIs_published(0);
+                                notifyDataSetChanged();
                                 dialog.dismiss();
                             }
                         });
@@ -316,12 +352,12 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
                 * If in pending section then edit use for question to edit
                 * If in answerd section then edit use for edit answer
                 * */
-                if(isFromAnswered){
+                if (isFromAnswered) {
                     //Edit answer
                     Intent intent = new Intent(context, EditAnswerActivity.class);
                     intent.putExtra(Constants.QUESTION_DETAILS, questionAndAnswer);
                     context.startActivity(intent);
-                } else if(isFromAnswered == false && isFromAnswered == false){
+                } else if (isFromAnswered == false && isFromAnswered == false) {
                     //Edit question
                     Intent intent = new Intent(context, EditQuestionActivity.class);
                     intent.putExtra(Constants.QUESTION_DETAILS, questionAndAnswer);
@@ -330,15 +366,6 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
             }
         });
 
-        ImageView imgDelete = (ImageView) view.findViewById(R.id.imgDelete);
-        if(isFromAnswered){
-            imgDelete.setVisibility(View.VISIBLE);
-        } else if(isFromAnswered == false && isFromAnswered == false){
-            imgDelete.setVisibility(View.VISIBLE);
-        } else{
-            imgDelete.setVisibility(View.GONE);
-        }
-        imgDelete.setTag(position);
         imgDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -346,7 +373,7 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
                 /*
                 * Delete only works for pending and answered section
                 * */
-                int pos = (Integer) v.getTag();
+                final int pos = (Integer) v.getTag();
                 String doc_id = dataList.get(pos).getQid();
                 try {
                     DatabaseUtil.deleteDoc(DatabaseUtil.getDatabaseInstance(context,
@@ -366,6 +393,8 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
                             } catch (Exception exception){
                                 Log.e(TAG, "onClick()", exception);
                             }
+                            dataList.remove(pos);
+                            notifyDataSetChanged();
                             dialog.dismiss();
                         }
                     });
@@ -413,5 +442,6 @@ public class QADataAdapter extends BaseAdapter implements Replication.ChangeList
     public void changed(Replication.ChangeEvent event) {
         Intent intent_answered = new Intent(Constants.BROADCAST_ACTION_REPLICATION_CHANGE);
         QADataAdapter.this.context.sendBroadcast(intent_answered);
+        notifyDataSetChanged();
     }
 }

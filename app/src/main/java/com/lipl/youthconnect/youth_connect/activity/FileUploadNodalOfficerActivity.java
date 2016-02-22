@@ -29,6 +29,7 @@ import android.widget.TextView;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.replicator.Replication;
 import com.lipl.youthconnect.youth_connect.R;
+import com.lipl.youthconnect.youth_connect.database.DBHelper;
 import com.lipl.youthconnect.youth_connect.pojo.AssignedToUSer;
 import com.lipl.youthconnect.youth_connect.pojo.Doc;
 import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
@@ -123,21 +124,20 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
 
         tvEmptyView = (TextView) findViewById(R.id.tvNoRecordFoundText);
         listView = (ListView) findViewById(R.id.distList);
+        listView.setOnItemClickListener(this);
         if(nodalOfficers == null) {
             nodalOfficers = new ArrayList<NodalUser>();
         }
 
         try {
-            List<NodalUser> nodalOfficerUsers = MasterDataUtil.getNodalUsersList(FileUploadNodalOfficerActivity.this);
+            DBHelper dbHelper = new DBHelper(FileUploadNodalOfficerActivity.this);
+            List<NodalUser> nodalOfficerUsers = dbHelper.getAllNodalUsers();
+            dbHelper.close();
             if (nodalOfficerUsers != null
                     && nodalOfficerUsers.size() > 0) {
                 nodalOfficers.clear();
                 nodalOfficers.addAll(nodalOfficerUsers);
             }
-        } catch (CouchbaseLiteException exception){
-            Log.e(TAG, "error", exception);
-        } catch(IOException exception){
-            Log.e(TAG, "error", exception);
         } catch(Exception exception){
             Log.e(TAG, "error", exception);
         }
@@ -166,16 +166,13 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
         }
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-
+    public void onItemClickOfListView(int position, boolean isChecked){
         if(selectedNodalOfficers == null){
             selectedNodalOfficers = new ArrayList<NodalUser>();
         }
 
-        CheckBox checkbox = (CheckBox) v.getTag(R.id.tvDist);
         NodalUser nodalUser = nodalOfficers.get(position);
-        if(checkbox.isChecked()) {
+        if(isChecked) {
             selectedNodalOfficers.add(nodalUser);
         } else{
             for(int i = 0; i < selectedNodalOfficers.size(); i++){
@@ -185,6 +182,11 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
                 }
             }
         }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
+
     }
 
     private void setNodalOfficersList(String filterText){
@@ -296,24 +298,39 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
             onBackPressed();
         } else if(id == R.id.action_send) {
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-            builder.setMessage("Are you sure want to send document to selected nodal officers?");
-            builder.setTitle("Document assign");
-            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    sendDocumnetToNodalOfficers();
-                    dialog.dismiss();
-                }
-            });
-            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            if(selectedNodalOfficers != null && selectedNodalOfficers.size() > 0) {
 
-            builder.show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                builder.setMessage("Are you sure want to send document to selected nodal officers?");
+                builder.setTitle("Document assign");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        sendDocumnetToNodalOfficers();
+                        dialog.dismiss();
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.show();
+            } else{
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
+                builder.setMessage("Select atlest one officer to assign this document.");
+                builder.setTitle("Document assign");
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.show();
+            }
 
             return true;
         }
@@ -361,6 +378,7 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
                                 Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
                             }
                             dialog.dismiss();
+                            finish();
                         }
                     });
                     builder.show();
@@ -378,5 +396,11 @@ public class FileUploadNodalOfficerActivity extends ActionBarActivity implements
     @Override
     public void changed(Replication.ChangeEvent event) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
     }
 }

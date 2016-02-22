@@ -279,8 +279,7 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
                         Constants.YOUTH_CONNECT_DATABASE), id);
                 QuestionAndAnswer questionAndAnswer = QAUtil.getQAFromDocument(document);
                 if(questionAndAnswer != null
-                        && questionAndAnswer.getQuestion() != null
-                        && questionAndAnswer.getQuestion().getIs_publish() == 1) {
+                        && questionAndAnswer.getIs_published() == 1) {
                     questionAndAnswerArrayList.add(questionAndAnswer);
                 }
             }
@@ -340,5 +339,11 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
         //  mAdapter.notifyDataSetChanged();
 
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
     }
 }

@@ -245,4 +245,10 @@ public class CommentListActivity extends ActionBarActivity {
         });
         builder.show();
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

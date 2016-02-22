@@ -159,6 +159,10 @@ public class DocUtil {
     public static List<Doc> getAllDocList(Context context) throws
             CouchbaseLiteException, IOException, Exception{
         List<Doc> docList = new ArrayList<Doc>();
+        int currently_logged_in_user_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_USER_ID, 0);
+        int user_type_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_USER_TYPE, 0);
 
         Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
         List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
@@ -166,7 +170,24 @@ public class DocUtil {
             Document document = DatabaseUtil.getDocumentFromDocumentId(database, doc_id);
             Doc doc = getDocFromDocument(document);
             if(doc != null){
-                docList.add(doc);
+                if(user_type_id == 1) {
+                    docList.add(doc);
+                } else{
+                    if(user_type_id == 2){
+                        List<AssignedToUSer> assignedToUSers = doc.getDoc_assigned_to_user_ids();
+                        if(assignedToUSers != null && assignedToUSers.size() > 0){
+                            int count = 0;
+                            for(AssignedToUSer assignedToUSer : assignedToUSers){
+                                if(assignedToUSer != null && assignedToUSer.getUser_id() == currently_logged_in_user_id){
+                                    count++;
+                                }
+                            }
+                            if(count > 0){
+                                docList.add(doc);
+                            }
+                        }
+                    }
+                }
             }
         }
 

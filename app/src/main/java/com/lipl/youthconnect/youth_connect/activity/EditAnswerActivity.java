@@ -286,4 +286,10 @@ public class EditAnswerActivity extends ActionBarActivity implements View.OnClic
 
         return answers;
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

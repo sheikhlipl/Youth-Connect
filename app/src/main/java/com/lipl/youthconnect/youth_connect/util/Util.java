@@ -831,7 +831,7 @@ public class Util {
 
         String hrSize = null;
 
-        double m = ((size/1024.0)/1024.0);
+        double m = ((size/1024.0d)/1024.0d);
         hrSize = m+" MB";
 
         return hrSize;

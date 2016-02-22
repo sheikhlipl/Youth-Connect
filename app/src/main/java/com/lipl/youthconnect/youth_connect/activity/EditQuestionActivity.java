@@ -318,4 +318,10 @@ public class EditQuestionActivity extends ActionBarActivity implements View.OnCl
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

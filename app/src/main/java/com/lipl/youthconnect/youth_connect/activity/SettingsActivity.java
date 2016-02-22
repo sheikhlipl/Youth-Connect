@@ -394,4 +394,10 @@ public class SettingsActivity extends ActionBarActivity implements View.OnClickL
             builder.show();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

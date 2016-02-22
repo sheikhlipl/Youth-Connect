@@ -68,6 +68,9 @@ public class NodalOfficerListViewAdapter extends BaseAdapter {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     int getPosition = (Integer) buttonView.getTag();  // Here we get the position that we have set for the checkbox using setTag.
                     userList.get(getPosition).setIs_selected(buttonView.isChecked()); // Set the value of checkbox to maintain its state.
+                    if(context instanceof  FileUploadNodalOfficerActivity) {
+                        ((FileUploadNodalOfficerActivity) context).onItemClickOfListView(getPosition, buttonView.isChecked());
+                    }
                 }
             });
             convertView.setTag(viewHolder);

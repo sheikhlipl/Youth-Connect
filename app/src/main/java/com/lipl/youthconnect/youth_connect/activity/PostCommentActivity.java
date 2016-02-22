@@ -297,4 +297,10 @@ public class PostCommentActivity extends ActionBarActivity implements View.OnCli
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

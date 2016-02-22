@@ -19,43 +19,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.replicator.Replication;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.lipl.youthconnect.youth_connect.R;
-import com.lipl.youthconnect.youth_connect.activity.FeedbackActivity;
 import com.lipl.youthconnect.youth_connect.activity.FileActivity;
 import com.lipl.youthconnect.youth_connect.activity.MainActivity;
 import com.lipl.youthconnect.youth_connect.activity.QAAnsweredActivity;
-import com.lipl.youthconnect.youth_connect.activity.QAForumActivity;
 import com.lipl.youthconnect.youth_connect.activity.QAPendingActivity;
-import com.lipl.youthconnect.youth_connect.database.DBHelper;
-import com.lipl.youthconnect.youth_connect.pojo.NodalUser;
 import com.lipl.youthconnect.youth_connect.util.Constants;
-import com.lipl.youthconnect.youth_connect.util.DocUtil;
+import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.DummyContent;
-import com.lipl.youthconnect.youth_connect.util.MasterDataUtil;
-import com.lipl.youthconnect.youth_connect.util.MyApplication;
-import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.adapter.PagerAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Dashboard;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -67,7 +54,7 @@ import java.util.List;
  */
 public class DashboardFragment extends Fragment implements
         OnChartValueSelectedListener, AbsListView.OnItemClickListener,
-        SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
+        SwipeRefreshLayout.OnRefreshListener, View.OnClickListener, Replication.ChangeListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -269,7 +256,12 @@ public class DashboardFragment extends Fragment implements
         }
     }
 
-    private void fetchData(View view) {
+    @Override
+    public void changed(Replication.ChangeEvent event) {
+        fetchData(getView());
+    }
+
+    public void fetchData(View view) {
 
         if(view == null){
             return;
@@ -284,85 +276,7 @@ public class DashboardFragment extends Fragment implements
                     return null;
                 }
 
-                int numberOfNodalOfficers = 0;
-                try {
-                    DBHelper dbHelper = new DBHelper(getActivity());
-                    List<NodalUser> nodalOfficerUsers = dbHelper.getAllNodalUsers();
-                    dbHelper.close();
-
-                    if (nodalOfficerUsers != null
-                            && nodalOfficerUsers.size() > 0) {
-                        numberOfNodalOfficers = nodalOfficerUsers.size();
-                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
-                                .putInt(Constants.SP_KEY_COUNT_NODAL_OFFICERS, numberOfNodalOfficers).commit();
-                    }
-                } catch(Exception exception){
-                    Log.e("DashboardFragment", "error", exception);
-                }
-
-                int numberOfPendingQuestions = 0;
-                try {
-                    if (QAUtil.getPendingQuestionAndAnswerList(context) != null
-                            && QAUtil.getPendingQuestionAndAnswerList(context).size() > 0) {
-                        numberOfPendingQuestions = QAUtil.getPendingQuestionAndAnswerList(context).size();
-                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
-                                .putInt(Constants.SP_KEY_COUNT_PENDING_QUESTIONS, numberOfPendingQuestions).commit();
-                    }
-                } catch(CouchbaseLiteException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch(IOException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch(Exception exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                }
-
-                int numberOfAnsweredQuestion = 0;
-                try {
-                    if (QAUtil.getAnsweredQuestionAndAnswerList(context) != null
-                            && QAUtil.getAnsweredQuestionAndAnswerList(context).size() > 0) {
-                        numberOfAnsweredQuestion = QAUtil.getAnsweredQuestionAndAnswerList(context).size();
-                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
-                                .putInt(Constants.SP_KEY_COUNT_QUESTIONS_ANSWERED, numberOfAnsweredQuestion).commit();
-                    }
-                } catch(CouchbaseLiteException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch(IOException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch(Exception exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                }
-
-                int numberOfPublishedDoc = 0;
-                try {
-                    if (DocUtil.getPublishedDocList(context) != null
-                            && DocUtil.getPublishedDocList(context).size() > 0) {
-                        numberOfPublishedDoc = DocUtil.getPublishedDocList(context).size();
-                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
-                                .putInt(Constants.SP_KEY_COUNT_SHOWCASE_EVENTS, numberOfPublishedDoc).commit();
-                    }
-                } catch(CouchbaseLiteException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch(IOException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch(Exception exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                }
-
-                int docCount = 0;
-                try {
-                    if (DocUtil.getAllDocList(context) != null
-                            && DocUtil.getAllDocList(context).size() > 0) {
-                        docCount = DocUtil.getAllDocList(context).size();
-                        context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 2).edit()
-                                .putInt(Constants.SP_KEY_COUNT_DOCUMENT, docCount).commit();
-                    }
-                } catch (CouchbaseLiteException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch(IOException exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                } catch (Exception exception){
-                    Log.e("DashboardFragment", "fetchData()", exception);
-                }
+                DatabaseUtil.setDashboardCountInfo(context);
 
                 return null;
             }
@@ -426,7 +340,7 @@ public class DashboardFragment extends Fragment implements
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(String str) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(str);
+            mListener.onDashboardFragmentInteraction(this);
         }
     }
 
@@ -435,7 +349,7 @@ public class DashboardFragment extends Fragment implements
         if (null != mListener) {
             // Notify the active callbacks interfaces (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            mListener.onDashboardFragmentInteraction(this);
         }
     }
 
@@ -468,7 +382,7 @@ public class DashboardFragment extends Fragment implements
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String str);
+        public void onDashboardFragmentInteraction(DashboardFragment dashboardFragment);
     }
 
     @Override
@@ -797,5 +711,18 @@ public class DashboardFragment extends Fragment implements
             return;
         }
         YouthConnectSingleTone.getInstance().CURRENT_FRAGMENT_IN_HOME = Constants.FRAGMENT_HOME_SUB_FRAGMENT_DASHBOARD;
+        fetchData(getView());
+    }
+
+    @Override
+    public void onDestroyView() {
+        System.gc();
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        System.gc();
+        super.onDestroy();
     }
 }

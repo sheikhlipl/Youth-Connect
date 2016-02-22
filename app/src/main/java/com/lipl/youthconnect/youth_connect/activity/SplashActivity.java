@@ -100,4 +100,10 @@ public class SplashActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

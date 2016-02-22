@@ -336,4 +336,10 @@ public class FileActivity extends ActionBarActivity implements SearchView.OnQuer
         super.onPause();
         unregisterReceiver(broadcastReceiver);
     }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
+    }
 }

@@ -1,6 +1,7 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -193,6 +194,11 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
                                         Log.e(TAG, "onClick()", exception);
                                     }
                                     dialog.dismiss();
+
+                                    Intent intent = new Intent(AskQuestionActivity.this, QAPendingActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+
                                     finish();
                                 }
                             });
@@ -246,6 +252,7 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         String currentTimestamp = System.currentTimeMillis()+"";
 
         Map<String, Object> map = new HashMap<String, Object>();
+        map.put(DatabaseUtil.TYPE, DatabaseUtil.TYPE_QA);
         map.put(DatabaseUtil.QA_TITLE, title);
         map.put(DatabaseUtil.QA_DESC, description);
         map.put(DatabaseUtil.QA_UPDATED_TIMESTAMP, currentTimestamp);
@@ -316,5 +323,11 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.gc();
+        super.onDestroy();
     }
 }

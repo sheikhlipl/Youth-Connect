@@ -169,6 +169,12 @@ public class QAUtil {
             CouchbaseLiteException, IOException, Exception{
         List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
 
+        
+        int currently_logged_in_user_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_USER_ID, 0);
+        int user_type_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_USER_TYPE, 0);
+
         Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
         List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
         for(String doc_id : allDocIds){
@@ -176,7 +182,14 @@ public class QAUtil {
             QuestionAndAnswer questionAndAnswer = getQAFromDocument(document);
             if(questionAndAnswer != null && (questionAndAnswer.getAnswerList() == null
                     || questionAndAnswer.getAnswerList().size() <= 0)){
-                questionAndAnswerList.add(questionAndAnswer);
+                if(user_type_id == 1) {
+                    questionAndAnswerList.add(questionAndAnswer);
+                } else{
+                    if(user_type_id == 2 && questionAndAnswer.getQuestion() != null
+                            && questionAndAnswer.getQuestion().getQus_asked_by_user_id() == currently_logged_in_user_id){
+                        questionAndAnswerList.add(questionAndAnswer);
+                    }
+                }
             }
         }
 
@@ -186,6 +199,10 @@ public class QAUtil {
     public static List<QuestionAndAnswer> getAnsweredQuestionAndAnswerList(Context context) throws
             CouchbaseLiteException, IOException, Exception{
         List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
+        int currently_logged_in_user_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_USER_ID, 0);
+        int user_type_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
+                .getInt(Constants.SP_USER_TYPE, 0);
 
         Database database = DatabaseUtil.getDatabaseInstance(context, Constants.YOUTH_CONNECT_DATABASE);
         List<String> allDocIds = DatabaseUtil.getAllDocumentIds(context);
@@ -194,7 +211,14 @@ public class QAUtil {
             QuestionAndAnswer questionAndAnswer = getQAFromDocument(document);
             if(questionAndAnswer != null && questionAndAnswer.getAnswerList() != null
                     && questionAndAnswer.getAnswerList().size() > 0){
-                questionAndAnswerList.add(questionAndAnswer);
+                if(user_type_id == 1) {
+                    questionAndAnswerList.add(questionAndAnswer);
+                } else{
+                    if(user_type_id == 2 && questionAndAnswer.getQuestion() != null
+                            && questionAndAnswer.getQuestion().getQus_asked_by_user_id() == currently_logged_in_user_id){
+                        questionAndAnswerList.add(questionAndAnswer);
+                    }
+                }
             }
         }
 
