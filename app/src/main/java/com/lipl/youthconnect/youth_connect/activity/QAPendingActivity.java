@@ -1,5 +1,6 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
@@ -28,9 +30,11 @@ import com.couchbase.lite.QueryRow;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.adapter.QADataAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
+import com.lipl.youthconnect.youth_connect.util.Application;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.QAUtil;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,14 +129,20 @@ public class QAPendingActivity extends ActionBarActivity implements View.OnClick
         final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
             //ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
+            //ProgressDialog progressDialog;
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
+                //progressDialog = ProgressDialog.show(QAPendingActivity.this, "Title", "Message");
                 /*if (isCancelled() == false && isVisible() == true
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.show();
                 }*/
+                if(isFinishing() == false) {
+                    ProgressBar pBar = (ProgressBar) findViewById(R.id.pBar);
+                    pBar.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -154,10 +164,17 @@ public class QAPendingActivity extends ActionBarActivity implements View.OnClick
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+//                if(progressDialog != null) {
+//                    progressDialog.dismiss();
+//                }
                 /*if (isCancelled() == false && isVisible() == true
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.dismiss();
                 }*/
+                if(isFinishing() == false) {
+                    ProgressBar pBar = (ProgressBar) findViewById(R.id.pBar);
+                    pBar.setVisibility(View.GONE);
+                }
                 try {
                     if (questionAndAnswerList != null && questionAndAnswerList.size() > 0) {
                         if (mListItems == null) {
@@ -165,6 +182,7 @@ public class QAPendingActivity extends ActionBarActivity implements View.OnClick
                         }
                         mListItems.clear();
                         mListItems.addAll(questionAndAnswerList);
+                        setNoRecordsTextView(mListItems);
                         adapter = new QADataAdapter(mListItems, QAPendingActivity.this, false, false);
                         listView.setAdapter(adapter);
                         adapter.notifyDataSetChanged();
@@ -180,7 +198,16 @@ public class QAPendingActivity extends ActionBarActivity implements View.OnClick
             public void run() {
                 asyncTask.execute();
             }
-        }, 2000);
+        }, 200);
+    }
+
+    private void setNoRecordsTextView(List<QuestionAndAnswer> listWhichIsSetToList){
+        TextView tvNoRecordFoundText = (TextView) findViewById(R.id.tvNoRecordFoundText);
+        if(listWhichIsSetToList != null && listWhichIsSetToList.size() > 0) {
+            tvNoRecordFoundText.setVisibility(View.GONE);
+        } else {
+            tvNoRecordFoundText.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -336,5 +363,7 @@ public class QAPendingActivity extends ActionBarActivity implements View.OnClick
     protected void onDestroy() {
         System.gc();
         super.onDestroy();
+//        RefWatcher refWatcher = Application.getRefWatcher(QAPendingActivity.this);
+//        refWatcher.watch(this);
     }
 }

@@ -1,5 +1,6 @@
 package com.lipl.youthconnect.youth_connect.fragment;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
@@ -25,6 +27,8 @@ import com.couchbase.lite.QueryRow;
 import com.lipl.youthconnect.youth_connect.R;
 import com.lipl.youthconnect.youth_connect.pojo.AssignedToUSer;
 import com.lipl.youthconnect.youth_connect.pojo.Doc;
+import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
+import com.lipl.youthconnect.youth_connect.util.Application;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.DocUtil;
@@ -32,6 +36,7 @@ import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.adapter.QADataAdapter;
 import com.lipl.youthconnect.youth_connect.adapter.ShowcaseDataAdapterExp;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -122,20 +127,27 @@ public class ShowcaseFragment extends Fragment {
 
         mListItems = new LinkedList<Doc>();
         listView = (ListView) view.findViewById(R.id.showcaseEventRecycleList);
+        setNoRecordsTextView(view, mListItems);
         adapter = new ShowcaseDataAdapterExp(mListItems, getActivity());
         listView.setAdapter(adapter);
 
         final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             List<Doc> docList = new ArrayList<Doc>();
-            //ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
+//            ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
+//ProgressDialog progressDialog = null;
 
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                /*if (isCancelled() == false && isVisible() == true
-                        && getActivity() != null && activityIndicator != null) {
-                    activityIndicator.show();
-                }*/
+                if(view != null) {
+                    ProgressBar pBar = (ProgressBar) view.findViewById(R.id.pBar);
+                    pBar.setVisibility(View.VISIBLE);
+                }
+//                if (isCancelled() == false && isVisible() == true
+//                        && getActivity() != null && activityIndicator != null) {
+//                    activityIndicator.show();
+//                }
+                //progressDialog = ProgressDialog.show(getActivity(), "Title", "Message");
             }
 
             @Override
@@ -156,11 +168,15 @@ public class ShowcaseFragment extends Fragment {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+                super.onPostExecute(aVoid);//progressDialog.dismiss();
                 /*if (isCancelled() == false && isVisible() == true
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.dismiss();
                 }*/
+                if(view != null) {
+                    ProgressBar pBar = (ProgressBar) view.findViewById(R.id.pBar);
+                    pBar.setVisibility(View.GONE);
+                }
                 try {
                     if (docList != null && docList.size() > 0) {
                         if (mListItems == null) {
@@ -168,6 +184,7 @@ public class ShowcaseFragment extends Fragment {
                         }
                         mListItems.clear();
                         mListItems.addAll(docList);
+                        setNoRecordsTextView(view, mListItems);
                         adapter = new ShowcaseDataAdapterExp(mListItems, getActivity());
                         listView.setAdapter(adapter);
                         adapter.notifyDataSetChanged();
@@ -186,6 +203,15 @@ public class ShowcaseFragment extends Fragment {
         }, 2000);
     }
 
+    private void setNoRecordsTextView(View view, List<Doc> listWhichIsSetToList){
+        TextView tvNoRecordFoundText = (TextView) view.findViewById(R.id.tvNoRecordFoundText);
+        if(listWhichIsSetToList != null && listWhichIsSetToList.size() > 0) {
+            tvNoRecordFoundText.setVisibility(View.GONE);
+        } else {
+            tvNoRecordFoundText.setVisibility(View.VISIBLE);
+        }
+    }
+
     private List<Doc> getDocList() throws CouchbaseLiteException, IOException {
 
         if(getActivity() == null){
@@ -199,12 +225,8 @@ public class ShowcaseFragment extends Fragment {
                 com.couchbase.lite.Document document = DatabaseUtil.getDocumentFromDocumentId(DatabaseUtil.getDatabaseInstance(getActivity(),
                         Constants.YOUTH_CONNECT_DATABASE), id);
                 Doc doc = DocUtil.getDocFromDocument(document);
-                int user_type_id = getActivity().getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 0).getInt(Constants.SP_USER_TYPE, 0);
-                if(user_type_id == 1) {
-                    // for admin show all pending questions which are not answer
-                    if (doc != null && doc.getIs_published() == 1) {
-                        docList.add(doc);
-                    }
+                if (doc != null && doc.getIs_published() == 1) {
+                    docList.add(doc);
                 }
             }
         }
@@ -305,6 +327,8 @@ public class ShowcaseFragment extends Fragment {
     public void onDestroy() {
         System.gc();
         super.onDestroy();
+//        RefWatcher refWatcher = Application.getRefWatcher(getActivity());
+//        refWatcher.watch(this);
     }
 
     @Override

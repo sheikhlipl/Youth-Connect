@@ -1,5 +1,6 @@
 package com.lipl.youthconnect.youth_connect.activity;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -40,11 +41,13 @@ import com.lipl.youthconnect.youth_connect.adapter.QADataAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.QuestionAndAnswer;
 import com.lipl.youthconnect.youth_connect.pojo.User;
 import com.lipl.youthconnect.youth_connect.util.ActivityIndicator;
+import com.lipl.youthconnect.youth_connect.util.Application;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.PasswordValidator;
 import com.lipl.youthconnect.youth_connect.util.QAUtil;
 import com.lipl.youthconnect.youth_connect.util.Util;
+import com.squareup.leakcanary.RefWatcher;
 
 import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONObject;
@@ -152,7 +155,7 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
         final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
             //ActivityIndicator activityIndicator = new ActivityIndicator(getActivity());
-
+            //ProgressDialog progressDialog;
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -160,6 +163,11 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.show();
                 }*/
+                //progressDialog = ProgressDialog.show(QAForumActivity.this, "Title", "Message");
+                if(isFinishing() == false) {
+                    ProgressBar pBar = (ProgressBar) findViewById(R.id.pBar);
+                    pBar.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -185,6 +193,13 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
                         && getActivity() != null && activityIndicator != null) {
                     activityIndicator.dismiss();
                 }*/
+//                if(progressDialog != null) {
+//                    progressDialog.dismiss();
+//                }
+                if(isFinishing() == false) {
+                    ProgressBar pBar = (ProgressBar) findViewById(R.id.pBar);
+                    pBar.setVisibility(View.GONE);
+                }
                 try {
                     if (questionAndAnswerList != null && questionAndAnswerList.size() > 0) {
                         if (mListItems == null) {
@@ -192,6 +207,7 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
                         }
                         mListItems.clear();
                         mListItems.addAll(questionAndAnswerList);
+                        setNoRecordsTextView(mListItems);
                         adapter = new QADataAdapter(mListItems, QAForumActivity.this, true, false);
                         listView.setAdapter(adapter);
                         adapter.notifyDataSetChanged();
@@ -207,7 +223,16 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
             public void run() {
                 asyncTask.execute();
             }
-        }, 2000);
+        }, 200);
+    }
+
+    private void setNoRecordsTextView(List<QuestionAndAnswer> listWhichIsSetToList){
+        TextView tvNoRecordFoundText = (TextView) findViewById(R.id.tvNoRecordFoundText);
+        if(listWhichIsSetToList != null && listWhichIsSetToList.size() > 0) {
+            tvNoRecordFoundText.setVisibility(View.GONE);
+        } else {
+            tvNoRecordFoundText.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -345,5 +370,7 @@ public class QAForumActivity extends ActionBarActivity implements View.OnClickLi
     protected void onDestroy() {
         System.gc();
         super.onDestroy();
+//        RefWatcher refWatcher = Application.getRefWatcher(QAForumActivity.this);
+//        refWatcher.watch(this);
     }
 }

@@ -196,7 +196,7 @@ public class AskQuestionActivity extends ActionBarActivity implements View.OnCli
                                     dialog.dismiss();
 
                                     Intent intent = new Intent(AskQuestionActivity.this, QAPendingActivity.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(intent);
 
                                     finish();

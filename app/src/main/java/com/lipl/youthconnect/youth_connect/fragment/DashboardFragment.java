@@ -35,12 +35,14 @@ import com.lipl.youthconnect.youth_connect.activity.FileActivity;
 import com.lipl.youthconnect.youth_connect.activity.MainActivity;
 import com.lipl.youthconnect.youth_connect.activity.QAAnsweredActivity;
 import com.lipl.youthconnect.youth_connect.activity.QAPendingActivity;
+import com.lipl.youthconnect.youth_connect.util.Application;
 import com.lipl.youthconnect.youth_connect.util.Constants;
 import com.lipl.youthconnect.youth_connect.util.DatabaseUtil;
 import com.lipl.youthconnect.youth_connect.util.DummyContent;
 import com.lipl.youthconnect.youth_connect.util.YouthConnectSingleTone;
 import com.lipl.youthconnect.youth_connect.adapter.PagerAdapter;
 import com.lipl.youthconnect.youth_connect.pojo.Dashboard;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 
@@ -718,6 +720,8 @@ public class DashboardFragment extends Fragment implements
     public void onDestroyView() {
         System.gc();
         super.onDestroyView();
+//        RefWatcher refWatcher = Application.getRefWatcher(getActivity());
+//        refWatcher.watch(this);
     }
 
     @Override

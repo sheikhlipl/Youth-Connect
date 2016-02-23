@@ -326,7 +326,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                         DatabaseUtil.deleteDoc(DatabaseUtil.getDatabaseInstance(FileDetailsActivity.this,
                                 Constants.YOUTH_CONNECT_DATABASE), doc_id);
                         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
-                        builder.setTitle("Doc Publish");
+                        builder.setTitle("Doc remove");
                         builder.setMessage("Done.");
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
@@ -342,6 +342,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                                     Log.e(TAG, "sendDocumnetToNodalOfficers()", exception);
                                 }
                                 dialog.dismiss();
+                                finish();
                             }
                         });
                         builder.show();
@@ -402,7 +403,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                     String doc_id = document.getDoc_id();
                     try {
                         DocUtil.updateDocForPublishStatus(DatabaseUtil.getDatabaseInstance(FileDetailsActivity.this,
-                                Constants.YOUTH_CONNECT_DATABASE), doc_id, 1);
+                                Constants.YOUTH_CONNECT_DATABASE), doc_id, 0);
                         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle);
                         builder.setTitle("Doc UnPublish");
                         builder.setMessage("Done.");
@@ -422,6 +423,7 @@ public class FileDetailsActivity extends ActionBarActivity implements View.OnCli
                                 dialog.dismiss();
                             }
                         });
+                        builder.show();
                     } catch(CouchbaseLiteException exception){
                         Log.e(TAG, "OnClick()", exception);
                     } catch(IOException exception){

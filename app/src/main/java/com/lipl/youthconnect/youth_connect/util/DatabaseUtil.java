@@ -121,7 +121,7 @@ public class DatabaseUtil {
 
     private static URL createSyncURL(boolean isEncrypted){
         URL syncURL = null;
-        String host = "http://192.168.1.107";
+        String host = "http://45.114.50.54";
         String port = "4984";
         String dbName = Constants.YOUTH_CONNECT_DATABASE;
         try {

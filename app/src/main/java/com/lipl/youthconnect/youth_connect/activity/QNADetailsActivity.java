@@ -396,7 +396,6 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
                                         Log.e(TAG, "onClick()", exception);
                                     }
                                     dialog.dismiss();
-                                    finish();
                                 }
                             });
                             builder12.show();
@@ -464,7 +463,7 @@ public class QNADetailsActivity extends ActionBarActivity implements View.OnClic
                                                 Log.e(TAG, "onClick()", exception);
                                             }
                                             Intent intent = new Intent(QNADetailsActivity.this, QAAnsweredActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                             startActivity(intent);
                                             dialog.dismiss();
                                             finish();

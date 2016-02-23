@@ -169,7 +169,7 @@ public class QAUtil {
             CouchbaseLiteException, IOException, Exception{
         List<QuestionAndAnswer> questionAndAnswerList = new ArrayList<QuestionAndAnswer>();
 
-        
+
         int currently_logged_in_user_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
                 .getInt(Constants.SP_USER_ID, 0);
         int user_type_id = context.getSharedPreferences(Constants.SHAREDPREFERENCE_KEY, 1)
